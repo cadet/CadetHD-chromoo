@@ -1,0 +1,20 @@
+simulation: cadet.h5
+objectives: 
+    - csv: chromatogram.csv
+      score: sse
+      path: output.solution.solution_unit_003_comp_000
+      match_solution_times: true
+parameters:
+    - name: axial
+      path: 'input.model.unit_002.col_dispersion'
+      length: 1
+      min_value: 1.0e-9
+      max_value: 1.0e-4
+    - name: radial
+      path: 'input.model.unit_002.col_dispersion_radial'
+      length: 1
+      min_value: 1.0e-9
+      max_value: 1.0e-4
+algorithm: 
+    name: nsga3
+    populationSize: int
