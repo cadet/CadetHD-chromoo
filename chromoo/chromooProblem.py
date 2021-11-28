@@ -64,17 +64,18 @@ class ChromooProblem(Problem):
         # FIXME: Make generic file reading
         # FIXME: allow sse2 etc
         
-        timesteps_in_file = True
-        if self.objectives[0].get('timesteps'):
-            timesteps_in_file = False
+        objectives_contain_times = True
+        if self.objectives[0].get('times'):
+            objectives_contain_times = False
 
         for obj in self.objectives:
-            y = deep_get(newsim.root, obj.get('path'))
+            y = deep_get(newsim.root, obj.path)
             # y0 = bin_to_arr(obj.get('filename'), '<d')
-            if timesteps_in_file:
-                _, y0 = readChromatogram(obj.get('filename'))
+            # TODO: Allow reading multiple columns
+            if objectives_contain_times:
+                _, y0 = readChromatogram(obj.filename)
             else:
-                y0 = readArray(obj.get('filename'))
+                y0 = readArray(obj.filename)
 
             sses.append(sse(y0, y))
 

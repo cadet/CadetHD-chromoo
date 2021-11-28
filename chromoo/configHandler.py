@@ -73,11 +73,13 @@ class ConfigHandler:
     def construct_simulation(self):
         self.simulation =  loadh5(self.filename)
 
-        if self.objectives[0].get('timesteps'):
-            t0 = readArray(self.objectives[0].get('timesteps'))
+        # NOTE: Only the first objective is checked for timesteps
+        if self.objectives[0].get('times'):
+            t0 = readArray(self.objectives[0].times)
+            self.objectives_contain_times = False
         else:
-            t0,_ = readChromatogram(self.objectives[0].get('filename'))
+            t0,_ = readChromatogram(self.objectives[0].filename)
+            self.objectives_contain_times = True
 
         self.simulation.root.input.solver.sections.section_times = [min(t0), max(t0)]
         self.simulation.root.input.solver.user_solution_times = t0
-
