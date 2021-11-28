@@ -1,20 +1,26 @@
-simulation: cadet.h5
-objectives: 
-    - csv: chromatogram.csv
-      score: sse
-      path: output.solution.solution_unit_003_comp_000
-      match_solution_times: true
+filename: 10k-mono.mono1d.h5
+nproc: 4
 parameters:
     - name: axial
-      path: 'input.model.unit_002.col_dispersion'
       length: 1
+      path: input.model.unit_002.col_dispersion
       min_value: 1.0e-9
       max_value: 1.0e-4
-    - name: radial
-      path: 'input.model.unit_002.col_dispersion_radial'
-      length: 1
-      min_value: 1.0e-9
-      max_value: 1.0e-4
+objectives: 
+    - name: outlet
+      filename: chromatogram-corrected.csv
+      # times: timesteps.txt
+      score: sse
+      path: output.solution.unit_003.solution_outlet_comp_000
+      match_solution_times: true
 algorithm: 
     name: nsga3
-    populationSize: int
+    pop_size: 10
+termination:
+  # x_tol: 1e-8
+  # cv_tol: 1e-6
+  f_tol: 1e-9
+  nth_gen: 2
+  n_last: 10
+  n_max_gen: 1000
+  n_max_evals: 100000
