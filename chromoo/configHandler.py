@@ -66,9 +66,18 @@ class ConfigHandler:
         self.filename=  self.get('filename', vartype=str())
         self.nproc=  self.get('nproc', vartype=int, default=4)
 
+        # NOTE: Can be arbitrarily long
+        # TODO: Find a way to check each objective/parameter for default keys and values
         self.objectives = [ Dict(x) for x in self.get('objectives', None, list()) ] 
         self.parameters = [ Dict(x) for x in self.get('parameters', None, list()) ]
-        self.algorithm = Dict(self.get('algorithm', None, dict()))
+
+        # If i'm passing a dict to a class, might be better to take the full dict, and then adjust the important subfields. Otherwise, I can just manually constrain the subfields for better sanity.
+        # self.algorithm = Dict(self.get('algorithm', None, dict()))
+        self.algorithm = Dict()
+
+        self.algorithm.name = self.get('algorithm.name', 'nsga3', str(), ['nsga3'])
+        self.algorithm.pop_size= self.get('algorithm.pop_size', 10, vartype=int)
+        self.algorithm.n_offsprings = self.get('algorithm.n_offsprings', self.algorithm.pop_size, vartype=int)
 
         self.termination = Dict()
         self.termination.x_tol = self.get('termination.x_tol', 1e-12, float)
