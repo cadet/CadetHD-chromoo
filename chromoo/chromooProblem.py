@@ -7,7 +7,7 @@ import copy
 import string
 import random
 
-from chromoo.utils import keystring_todict, update_nested, deep_get, bin_to_arr, sse, readChromatogram, readArray
+from chromoo.utils import keystring_todict, deep_get, bin_to_arr, sse, readChromatogram, readArray
 
 class ChromooProblem(Problem):
     def __init__(self, sim, parameters, objectives, nproc=4):

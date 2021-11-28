@@ -15,6 +15,8 @@ from pathlib import Path
 
 from chromoo.utils import loadh5, readArray, readChromatogram
 
+from addict import Dict
+
 class ConfigHandler:
 
     def __init__(self):
@@ -22,7 +24,7 @@ class ConfigHandler:
         self.yaml=YAML(typ='safe')
 
     def read(self, fname):
-        self.config = self.yaml.load(Path(fname))
+        self.config = Dict(self.yaml.load(Path(fname)))
         self.load()
         self.construct_simulation()
 
@@ -64,9 +66,9 @@ class ConfigHandler:
         self.filename=  self.get('filename', vartype=str())
         self.nproc=  self.get('nproc', vartype=int, default=4)
 
-        self.objectives = self.get('objectives', None, list())
-        self.parameters = self.get('parameters', None, list())
-        self.algorithm = self.get('algorithm', None, dict())
+        self.objectives = [ Dict(x) for x in self.get('objectives', None, list()) ] 
+        self.parameters = [ Dict(x) for x in self.get('parameters', None, list()) ]
+        self.algorithm = Dict(self.get('algorithm', None, dict()))
 
     def construct_simulation(self):
         self.simulation =  loadh5(self.filename)

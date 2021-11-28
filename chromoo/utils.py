@@ -20,29 +20,6 @@ def loadh5(filename):
 
     return sim
 
-def update_nested(refdict:dict, newdict:dict):
-    """
-    Update a dictionary in a nested manner.
-    (Don't just overwrite top level key/values as is default behavior)
-    """
-    # FIXME:
-    refdict = reconstruct(refdict)
-
-    for key, value in newdict.items():
-        if key in refdict.keys():
-            if isinstance(value, dict):
-                print(f"Nesting into {key}")
-                update_nested(refdict[key], newdict[key])
-            else:
-                print(f"Assigning {key} {value}")
-                refdict[key] = value
-        else:
-            print(f"Creating {key}")
-            refdict.update({key: value})
-    
-    # print(refdict)
-    return Dict(refdict)
-
 def keystring_todict(key, value):
     """
         given a dot separated keystring and a value, convert them into a dict
@@ -54,52 +31,9 @@ def keystring_todict(key, value):
 
     return value
 
-    
-def reconstruct(dic:dict):
-    """
-    Convert from addict dict filled with numpy types to
-    dict filled with python native types
-    """
-    # cleandict = {}
-    dic = dict(dic)
-    for key in dic.keys():
-        if isinstance(dic[key], Dict):
-            value = reconstruct(dic[key])
-            # cleandict.update({key: value})
-            dic.update({key: value})
-        else:
-            value = np2native(dic[key])
-            # cleandict.update({key: value})
-            dic.update({key: value})
-    # return cleandict
-    return dic
-
-
-def np2native(obj):
-    """
-    Convert from numpy types to python native types
-    """
-    ENCODING = 'ascii'
-    if isinstance(obj, bytes):
-        return obj.decode(ENCODING)
-    if isinstance(obj, np.bytes_):
-        return obj.tobytes().decode(ENCODING)
-    elif isinstance(obj,np.ndarray):
-        if any(isinstance(x, bytes) for x in obj):
-            return [ x.decode(ENCODING) for x in obj ]
-        elif any(isinstance(x, np.bytes_) for x in obj):
-            return [ x.tobytes().decode(ENCODING) for x in obj ]
-        else:
-            return obj.tolist()
-    elif isinstance(obj, np.generic):
-        return obj.tolist()
-    else:
-        return obj
-
 def sse(y0, y):
     sse_value = sum([(n1 - n2)**2 for n1, n2 in zip(y, y0)])
     return sse_value
-
 
 def deep_get(input_dict, keys, default=None, vartype=None, choices=[]):
     """
