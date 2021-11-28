@@ -46,7 +46,7 @@ class ChromooProblem(Problem):
         prev_len = 0
         for p in self.parameters:
             cur_len = p.get('length')
-            cur_dict = keystring_todict(p.get('path'), x[prev_len : prev_len + cur_len][0])
+            cur_dict = keystring_todict(p.get('path'), x[prev_len : prev_len + cur_len])
             newsim.root.update(cur_dict)
             prev_len += p.get('length')
 

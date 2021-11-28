@@ -42,7 +42,7 @@ def main():
     prev_len = 0
     for p in config.parameters:
         cur_len = p.length
-        cur_dict = keystring_todict(p.get('path'), res.X[prev_len : prev_len + cur_len][0])
+        cur_dict = keystring_todict(p.get('path'), res.X[prev_len : prev_len + cur_len])
         sim.root.update(cur_dict)
         prev_len += p.length
 
