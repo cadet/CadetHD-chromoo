@@ -11,7 +11,10 @@ class AlgorithmFactory:
 
             pop_size = algorithm_config.get('pop_size', 100)
             numRefDirs = pop_size
-            ref_dirs = get_reference_directions("energy", 1, numRefDirs, seed=1)
+            ref_dirs = get_reference_directions("energy", 1, numRefDirs, seed=204)
 
-            return NSGA3(pop_size=pop_size, ref_dirs=ref_dirs)
+            self.algo = NSGA3(pop_size=pop_size, ref_dirs=ref_dirs)
+
+    def get_algorithm(self):
+        return self.algo
             
