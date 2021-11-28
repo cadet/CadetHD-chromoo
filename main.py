@@ -3,6 +3,7 @@ from chromoo import ChromooProblem, AlgorithmFactory, ConfigHandler
 from pymoo.optimize import minimize
 import argparse
 
+from pymoo.util.termination.default import MultiObjectiveDefaultTermination
 
 from chromoo.utils import keystring_todict, readChromatogram, deep_get
 from matplotlib import pyplot as plt
@@ -19,11 +20,22 @@ def main():
     algo = AlgorithmFactory(config.algorithm).get_algorithm()
     prob = ChromooProblem(config.simulation, config.parameters, config.objectives, nproc=config.nproc)
 
+    term = MultiObjectiveDefaultTermination(
+        x_tol       = config.termination.x_tol,
+        cv_tol      = config.termination.cv_tol,
+        f_tol       = config.termination.f_tol,
+        nth_gen     = config.termination.nth_gen,
+        n_last      = config.termination.n_last,
+        n_max_gen   = config.termination.n_max_gen,
+        n_max_evals = config.termination.n_max_evals
+    )
+
+
     res = minimize(
             prob, 
             algo,
+            term,
             seed=122,
-            termination=('n_gen', 10), 
             verbose=True
     )
 

@@ -70,6 +70,15 @@ class ConfigHandler:
         self.parameters = [ Dict(x) for x in self.get('parameters', None, list()) ]
         self.algorithm = Dict(self.get('algorithm', None, dict()))
 
+        self.termination = Dict()
+        self.termination.x_tol = self.get('termination.x_tol', 1e-12, float)
+        self.termination.cv_tol = self.get('termination.cv_tol', 1e-6, float)
+        self.termination.f_tol = self.get('termination.f_tol', 1e-10, float)
+        self.termination.nth_gen = self.get('termination.nth_gen', 2, int)
+        self.termination.n_last = self.get('termination.n_last', 5, int)
+        self.termination.n_max_gen = self.get('termination.n_max_gen', 100, int)
+        self.termination.n_max_evals = self.get('termination.n_max_evals', 1000, int)
+
     def construct_simulation(self):
         self.simulation =  loadh5(self.filename)
 
