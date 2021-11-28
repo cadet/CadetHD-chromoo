@@ -12,20 +12,32 @@ from chromoo.utils import keystring_todict, deep_get, bin_to_arr, sse, readChrom
 class ChromooProblem(Problem):
     def __init__(self, sim, parameters, objectives, nproc=4):
         
+        xls = []
+        xus = []
+
+        # NOTE: Scalars are autoconverted to lists and chained
+        for p in parameters:
+            if isinstance(p.min_value, float):
+                p.min_value = [p.min_value] * p.length
+            if isinstance(p.max_value, float):
+                p.max_value = [p.max_value] * p.length
+
+            xls = list(chain(xls, p.min_value))
+            xus = list(chain(xus, p.max_value))
+
         super().__init__(
             n_var = sum(p.get('length') for p in parameters), 
             n_obj = len(objectives), 
             n_constr=0, 
-            xl=[p.get('min_value') for p in parameters],
-            xu=[p.get('max_value') for p in parameters] )  
-            # xl=chain(p.get('min_value') for p in parameters),
-            # xu=chain(p.get('max_value') for p in parameters) )   
+            # xl=[p.get('min_value') for p in parameters],
+            # xu=[p.get('max_value') for p in parameters] )  
+            xl=xls,
+            xu=xus )
 
         self.sim = sim
         self.parameters = parameters
         self.objectives = objectives
         self.nproc = nproc
-
 
     def _evaluate(self, x, out, *args, **kwargs):
 
