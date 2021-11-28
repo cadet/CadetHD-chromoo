@@ -10,7 +10,7 @@ import random
 from chromoo.utils import keystring_todict, update_nested, deep_get, bin_to_arr, sse, readChromatogram, readArray
 
 class ChromooProblem(Problem):
-    def __init__(self, sim, parameters, objectives):
+    def __init__(self, sim, parameters, objectives, nproc=4):
         
         super().__init__(
             n_var = sum(p.get('length') for p in parameters), 
@@ -24,11 +24,12 @@ class ChromooProblem(Problem):
         self.sim = sim
         self.parameters = parameters
         self.objectives = objectives
+        self.nproc = nproc
 
 
     def _evaluate(self, x, out, *args, **kwargs):
 
-        with Pool(4) as pool:
+        with Pool(self.nproc) as pool:
             out["F"] = pool.map(self.evaluate_sim, x)
 
     def evaluate_sim(self, x):
@@ -63,9 +64,9 @@ class ChromooProblem(Problem):
         # FIXME: Make generic file reading
         # FIXME: allow sse2 etc
         
-        timesteps_in_file = False
+        timesteps_in_file = True
         if self.objectives[0].get('timesteps'):
-            timesteps_in_file = True
+            timesteps_in_file = False
 
         for obj in self.objectives:
             y = deep_get(newsim.root, obj.get('path'))

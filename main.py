@@ -12,7 +12,7 @@ def main():
     config.read(args['file'][0])
 
     algo = AlgorithmFactory(config.algorithm).get_algorithm()
-    prob = ChromooProblem(config.simulation, config.parameters, config.objectives)
+    prob = ChromooProblem(config.simulation, config.parameters, config.objectives, nproc=config.nproc)
 
     res = minimize(
             prob, 

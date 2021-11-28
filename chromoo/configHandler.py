@@ -62,7 +62,7 @@ class ConfigHandler:
         Centralizes the config value and type checking
         """
         self.filename=  self.get('filename', vartype=str())
-        self.timesteps=  self.get('timesteps', vartype=str())
+        self.nproc=  self.get('nproc', vartype=int, default=4)
 
         self.objectives = self.get('objectives', None, list())
         self.parameters = self.get('parameters', None, list())
