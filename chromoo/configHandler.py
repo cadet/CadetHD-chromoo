@@ -38,7 +38,7 @@ class ConfigHandler:
         """
         value = reduce(lambda d, key: d.get(key, None) if isinstance(d, dict) else None, keys.split("."), self.config)
 
-        if value == None:
+        if value is None:
             if default != None:
                 # self.logger.warn(keys, 'not specified! Defaulting to', str(default) or 'None (empty string)')
                 print(keys, 'not specified! Defaulting to', str(default) or 'None (empty string)')
@@ -46,15 +46,11 @@ class ConfigHandler:
 
         if vartype:
             if not isinstance(value, vartype):
-                # self.logger.die(keys, 'has invalid type!', str(type(value)), 'instead of', str(vartype))
-                print(keys, 'has invalid type!', str(type(value)), 'instead of', str(vartype))
-                raise(RuntimeError('Invalid vartype'))
+                raise(RuntimeError(f"Invalid vartype! Expected instance of {vartype} in {keys}."))
 
         if choices:
             if value not in choices:
-                # self.logger.die(keys, 'has invalid value! Must be one of ', str(choices))
-                print(keys, 'has invalid value! Must be one of ', str(choices))
-                raise(RuntimeError('Invalid choice'))
+                raise(RuntimeError(f"Invalid value! Expected one of {choices} in {keys}."))
 
         return value
 

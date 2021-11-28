@@ -14,6 +14,8 @@ class AlgorithmFactory:
             ref_dirs = get_reference_directions("energy", 1, numRefDirs, seed=204)
 
             self.algo = NSGA3(pop_size=pop_size, ref_dirs=ref_dirs)
+        else:
+            raise(RuntimeError("Invalid algorithm!"))
 
     def get_algorithm(self):
         return self.algo
