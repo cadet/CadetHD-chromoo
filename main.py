@@ -66,18 +66,18 @@ def main():
         raise RuntimeError
     sim.load()
 
+    # with plt.style.context(['science']):
     for obj in config.objectives:
-        with plt.style.context(['science']):
-            fig, ax = plt.subplots()
+        fig, ax = plt.subplots()
 
-            ## FIXME
-            t0, c0 = readChromatogram("chromatogram-corrected.csv")
+        ## FIXME
+        t0, c0 = readChromatogram("chromatogram-corrected.csv")
 
-            t1 = sim.root.output.solution.solution_times
-            c1 = deep_get(sim.root, obj.path)
-            ax.plot(t0,c0, lw=1, ls='solid', label='reference')
-            ax.plot(t1,c1, lw=1, ls='dashed', label='result')
-            fig.savefig(f"chromoo_{obj.name}_result.pdf")
+        t1 = sim.root.output.solution.solution_times
+        c1 = deep_get(sim.root, obj.path)
+        ax.plot(t0,c0, lw=1, ls='solid', label='reference')
+        ax.plot(t1,c1, lw=1, ls='dashed', label='result')
+        fig.savefig(f"chromoo_{obj.name}_result.pdf")
 
 if __name__ == "__main__":
     main()
