@@ -5,6 +5,8 @@ import argparse
 
 from pymoo.util.termination.default import MultiObjectiveDefaultTermination
 
+from pathlib import Path
+
 from chromoo.utils import keystring_todict, readChromatogram, deep_get
 from matplotlib import pyplot as plt
 
@@ -13,6 +15,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("file", nargs=1, help="yaml config file")
     args = vars(ap.parse_args())
+
+    Path("temp").mkdir(exist_ok=True)
 
     config = ConfigHandler()
     config.read(args['file'][0])
@@ -78,6 +82,11 @@ def main():
         ax.plot(t0,c0, lw=1, ls='solid', label='reference')
         ax.plot(t1,c1, lw=1, ls='dashed', label='result')
         fig.savefig(f"chromoo_{obj.name}_result.pdf")
+
+    
+    if not config.store_temp:
+        import shutil
+        shutil.rmtree('temp')
 
 if __name__ == "__main__":
     main()

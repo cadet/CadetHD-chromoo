@@ -50,7 +50,7 @@ class ChromooProblem(Problem):
             - calculate and return scores
         """
         newsim = copy.deepcopy(self.sim)
-        newsim.filename = 'temp' + ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase + string.digits, k=6)) + '.h5'
+        newsim.filename = 'temp/temp' + ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase + string.digits, k=6)) + '.h5'
 
         # For every parameter, generate a dictionary based on the path, and
         # update the simulation in a nested way

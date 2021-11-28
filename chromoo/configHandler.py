@@ -61,6 +61,7 @@ class ConfigHandler:
         """
         self.filename=  self.get('filename', vartype=str())
         self.nproc=  self.get('nproc', vartype=int, default=4)
+        self.store_temp =  self.get('store_temp', vartype=bool, default=False)
 
         # NOTE: Can be arbitrarily long
         # TODO: Find a way to check each objective/parameter for default keys and values
