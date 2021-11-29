@@ -9,7 +9,7 @@ import pkg_resources
 
 name = 'chromoo'
 
-__version__ = pkg_resources.get_distribution("pymesh").version
+# __version__ = pkg_resources.get_distribution("chromoo").version
 __author__ = 'Jayghosh Rao'
 __credits__ = 'FZJ/IBG-1/ModSim'
 
