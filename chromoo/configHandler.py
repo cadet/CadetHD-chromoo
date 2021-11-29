@@ -75,6 +75,7 @@ class ConfigHandler:
         self.algorithm.name = self.get('algorithm.name', 'nsga3', str(), ['nsga3'])
         self.algorithm.pop_size= self.get('algorithm.pop_size', 10, vartype=int)
         self.algorithm.n_offsprings = self.get('algorithm.n_offsprings', self.algorithm.pop_size, vartype=int)
+        self.algorithm.n_obj= len(self.objectives)
 
         self.termination = Dict()
         self.termination.x_tol = self.get('termination.x_tol', 1e-12, float)
