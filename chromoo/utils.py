@@ -2,6 +2,8 @@ from cadet import Cadet
 from functools import reduce
 from addict import Dict
 
+from matplotlib import pyplot as plt
+
 import numpy as np
 
 import struct
@@ -135,3 +137,21 @@ def create_h5_template(filename):
     sim.filename = template_filename
     sim.save()
     return template_filename
+
+def plotter(sim, objectives):
+    for obj in objectives:
+        fig, ax = plt.subplots()
+
+        ## FIXME
+        if obj.times:
+            c0 = readArray(obj.filename)
+            t0 = readArray(obj.times)
+        else:
+            t0, c0 = readChromatogram(obj.filename)
+
+        t1 = sim.root.output.solution.solution_times
+        c1 = deep_get(sim.root, obj.path)
+
+        ax.plot(t0,c0, lw=1, ls='solid', label='reference')
+        ax.plot(t1,c1, lw=1, ls='dashed', label='result')
+        fig.savefig(f"chromoo_{obj.name}_result.pdf")
