@@ -38,7 +38,7 @@ def main():
             verbose=True
     )
 
-    print(f"Took {res.exec_time} seconds to terminate.")
+    print(f"Took {res.exec_time:.2f} seconds to terminate.")
     print(f"Fitted Dispersion: {res.X}")
     print(f"SSE: {res.F}")
 
