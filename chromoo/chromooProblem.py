@@ -9,6 +9,8 @@ import random
 
 from chromoo.utils import keystring_todict, deep_get, sse, readChromatogram, readArray
 
+import numpy as np
+
 class ChromooProblem(Problem):
     def __init__(self, sim, parameters, objectives, nproc=4):
         
@@ -82,8 +84,7 @@ class ChromooProblem(Problem):
 
         for obj in self.objectives:
             y = deep_get(newsim.root, obj.path)
-            # y0 = bin_to_arr(obj.get('filename'), '<d')
-            # TODO: Allow reading multiple columns
+            y = np.array(y).flatten()
             if objectives_contain_times:
                 _, y0 = readChromatogram(obj.filename)
             else:
