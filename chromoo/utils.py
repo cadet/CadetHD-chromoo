@@ -12,6 +12,9 @@ from subprocess import run
 from addict import Dict
 
 def loadh5(filename):
+    """
+        Load a cadet simulation file
+    """
 
     cadetpath = run(['which', 'cadet-cli'], capture_output=True, text=True ).stdout.strip()
     Cadet.cadet_path = cadetpath
@@ -34,8 +37,10 @@ def keystring_todict(key, value):
     return value
 
 def sse(y0, y):
-    sse_value = sum([(n1 - n2)**2 for n1, n2 in zip(y, y0)])
-    return sse_value
+    """
+        calculate the SSE given 2 vectors
+    """
+    return sum([(n1 - n2)**2 for n1, n2 in zip(y, y0)])
 
 def deep_get(input_dict, keys, default=None, vartype=None, choices=[]):
     """
@@ -69,6 +74,10 @@ def deep_get(input_dict, keys, default=None, vartype=None, choices=[]):
 
 
 def readChromatogram(data_path):
+    """
+        Read chromatogram files in csv, or space-delimited format
+        Return two vectors: time, concentration
+    """
     time= []
     conc= []
     delimiter = ' '
@@ -86,59 +95,19 @@ def readChromatogram(data_path):
     return time, conc
 
 def readArray(data_path):
+    """
+        Read a text file with one value per line into a list
+    """
     values =[]
     with open(data_path, newline='') as csvfile:
         for line in csvfile:
             values.append(float(line.strip()))
     return values
 
-
-def dataformatsize(dataformat):
-    vartype = dataformat[1]
-    datasize = 0
-    if vartype == 'd':
-        datasize = 8
-    elif vartype == 'f':
-        datasize = 4
-    elif vartype == 'i':
-        datasize = 4
-    return datasize
-
-def bin_to_arr(filename, dataformat, skip=0, skiprows=0, nrows=0, ncols=0):
-    datasize = dataformatsize(dataformat)
-
-    with(open(filename, 'rb')) as input:
-        input.seek(skip * nrows * ncols * datasize + skiprows * ncols * datasize, 0)
-        myiter = struct.iter_unpack(dataformat, input.read())
-
-        arr = []
-        for i in myiter:
-            arr.append(i[0])
-
-        return arr
-
-def create_h5_template(filename):
-    """
-    should:
-        - load file
-        - modify section times to match the ends of the csv data
-        - modify simulation times to match
-    """
-
-    sim = loadh5(filename)
-
-    t0, _ = readChromatogram("chromatogram-corrected.csv")
-
-    ## NOTE: Adjust h5 times to use CSV times
-    sim.root.input.solver.sections.section_times = [min(t0), max(t0)]
-    sim.root.input.solver.user_solution_times = t0
-
-    template_filename = f"{filename}_template.h5"
-    sim.filename = template_filename
-    sim.save()
-    return template_filename
-
 def plotter(sim, objectives):
+    """
+        Given a simulation dict, and objectives, plot the final values and targets
+    """
     for obj in objectives:
         fig, ax = plt.subplots()
 
