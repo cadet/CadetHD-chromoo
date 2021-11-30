@@ -13,15 +13,19 @@ from functools import reduce
 
 from pathlib import Path
 
+from chromoo.log import Logger
 from chromoo.utils import loadh5, readArray, readChromatogram
 
 from addict import Dict
+
 
 class ConfigHandler:
 
     def __init__(self):
         self.config = {}
         self.yaml=YAML(typ='safe')
+        self.logger = Logger()
+        self.logger.info("Creating config.")
 
     def read(self, fname):
         """
@@ -41,16 +45,16 @@ class ConfigHandler:
 
         if value is None:
             if default != None:
-                print(keys, 'not specified! Defaulting to', str(default) or 'None (empty string)')
+                self.logger.warn(keys, 'not specified! Defaulting to', str(default) or 'None (empty string)')
                 value = default
 
         if vartype:
             if not isinstance(value, vartype):
-                raise(RuntimeError(f"Invalid vartype! Expected instance of {vartype} in {keys}."))
+                self.logger.die(keys, 'has invalid type!', str(type(value)), 'instead of', str(vartype))
 
         if choices:
             if value not in choices:
-                raise(RuntimeError(f"Invalid value! Expected one of {choices} in {keys}."))
+                self.logger.die(keys, 'has invalid value! Must be one of ', str(choices))
 
         return value
 

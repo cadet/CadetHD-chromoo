@@ -1,9 +1,10 @@
+from chromoo import __version__
 from chromoo import ChromooProblem, AlgorithmFactory, ConfigHandler
 from chromoo.utils import loadh5, plotter
+from chromoo.log import Logger
 
 from pymoo.optimize import minimize
 from pymoo.util.termination.default import MultiObjectiveDefaultTermination
-
 
 import argparse
 
@@ -11,6 +12,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("file", nargs=1, help="yaml config file")
     args = vars(ap.parse_args())
+
+    logger = Logger()
+    logger.info("Starting chromoo")
+    logger.note('chromoo version', __version__)
 
     config = ConfigHandler()
     config.read(args['file'][0])
@@ -38,9 +43,9 @@ def main():
             verbose=True
     )
 
-    print(f"Took {res.exec_time:.2f} seconds to terminate.")
-    print(f"Fitted Dispersion: {res.X}")
-    print(f"SSE: {res.F}")
+    logger.info(f"Took {res.exec_time:.2f} seconds to terminate.")
+    logger.info(f"Fitted Parameters: {res.X}")
+    logger.info(f"SSE: {res.F}")
 
     prob.evaluate_sim(res.X, name='final.h5')
     sim = loadh5('final.h5')
@@ -49,6 +54,8 @@ def main():
     if not config.store_temp:
         import shutil
         shutil.rmtree(prob.tempdir)
+
+    logger.info("Done :)")
 
 if __name__ == "__main__":
     main()
