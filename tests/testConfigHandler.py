@@ -15,6 +15,9 @@ class TestConfigHandler(unittest.TestCase):
         super().__init__(methodName)
 
     def test_init(self):
+        """
+            Test class initialization
+        """
         config = ConfigHandler()
         self.assertDictEqual(config.config, {})
 
@@ -45,50 +48,67 @@ class TestConfigHandler(unittest.TestCase):
         config.config = {'key1': { 'key2': 'value' }}
         self.assertEqual('value', config.get('key1.key2', vartype=str()))
 
-    # def test_load(self):
-    #     config = ConfigHandler()
-    #
-    #     config.config = {
-    #         'simulation': 'cadet.h5',
-    #         'objectives': [
-    #             {
-    #                 'csv': 'chromatogram.csv',
-    #                 'score': 'sse',
-    #                 'path': 'output.solution.solution_unit_003_comp_000',
-    #                 'match_solution_times': True
-    #             }
-    #         ],
-    #         'parameters': [
-    #             {
-    #                 'name': 'axial',
-    #                 'path': 'input.model.unit_002.col_dispersion',
-    #                 'length': 1,
-    #                 'min_value': 1.0e-9,
-    #                 'max_value': 1.0e-4
-    #             },
-    #             {
-    #                 'name': 'radial',
-    #                 'path': 'input.model.unit_002.col_dispersion_radial',
-    #                 'length': 1,
-    #                 'min_value': 1.0e-9,
-    #                 'max_value': 1.0e-4
-    #             }
-    #         ],
-    #         'algorithm': {
-    #             'name': 'nsga3',
-    #             'pop_size': 100
-    #         }
-    #     }
-    #
-    #     config.load()
-    #     self.assertEqual(
-    #         {
-    #             'name': 'nsga3',
-    #             'pop_size': 100
-    #         },
-    #         config.algorithm
-    #     )
-            
+        config.config = {'key1': { 'key2': [ 'value1', 'value2'] }}
+        self.assertEqual(['value1', 'value2'], config.get('key1.key2', vartype=list))
+
+        config.config = {'key1': { 'key2': [ 'value1', 'value2'] }}
+        self.assertEqual('value2', config.get('key1.key2', vartype=list)[1])
+
+    def test_load(self):
+        config = ConfigHandler()
+
+        config.config = {
+            'filename': 'cadet.h5',
+            'objectives': [
+                {
+                    'name': 'outlet',
+                    'filename': 'chromatogram.csv',
+                    'score': 'sse',
+                    'path': 'output.solution.solution_outlet_unit_003_comp_000',
+                    'match_solution_times': True
+                }
+            ],
+            'parameters': [
+                {
+                    'name': 'axial',
+                    'path': 'input.model.unit_002.col_dispersion',
+                    'length': 1,
+                    'min_value': 1.0e-9,
+                    'max_value': 1.0e-4
+                },
+                {
+                    'name': 'radial',
+                    'path': 'input.model.unit_002.col_dispersion_radial',
+                    'length': 1,
+                    'min_value': 1.0e-9,
+                    'max_value': 1.0e-4
+                }
+            ],
+            'algorithm': {
+                'name': 'nsga3',
+                'pop_size': 100
+            }
+        }
+
+        config.load()
+        self.assertEqual( 'cadet.h5', config.filename)
+        self.assertEqual( 4, config.nproc)
+
+        self.assertEqual( 'nsga3', config.algorithm.name)
+        self.assertEqual( 100 , config.algorithm.pop_size)
+        self.assertEqual( 100, config.algorithm.n_offsprings)
+
+        self.assertEqual( 'axial', config.parameters[0].name)
+        self.assertEqual( 'input.model.unit_002.col_dispersion', config.parameters[0].path)
+        self.assertEqual( 1, config.parameters[0].length)
+        self.assertEqual( 1.0e-9, config.parameters[0].min_value)
+        self.assertEqual( 1.0e-4, config.parameters[0].max_value)
+
+        self.assertEqual( 'outlet', config.objectives[0].name)
+        self.assertEqual( 'output.solution.solution_outlet_unit_003_comp_000', config.objectives[0].path)
+        self.assertEqual( 'sse', config.objectives[0].score)
+        self.assertEqual( 'chromatogram.csv', config.objectives[0].filename)
+
 
 if __name__ == '__main__':
     unittest.main()

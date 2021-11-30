@@ -1,14 +1,12 @@
 from chromoo import ChromooProblem, AlgorithmFactory, ConfigHandler
+from chromoo.utils import keystring_todict, plotter
 
 from pymoo.optimize import minimize
-import argparse
-
 from pymoo.util.termination.default import MultiObjectiveDefaultTermination
 
 from pathlib import Path
 
-from chromoo.utils import keystring_todict, plotter
-
+import argparse
 
 def main():
     ap = argparse.ArgumentParser()
@@ -19,6 +17,8 @@ def main():
 
     config = ConfigHandler()
     config.read(args['file'][0])
+    config.load()
+    config.construct_simulation()
 
     algo = AlgorithmFactory(config.algorithm).get_algorithm()
     prob = ChromooProblem(config.simulation, config.parameters, config.objectives, nproc=config.nproc)
@@ -33,7 +33,6 @@ def main():
         n_max_evals = config.termination.n_max_evals
     )
 
-
     res = minimize(
             prob, 
             algo,
@@ -45,7 +44,6 @@ def main():
     print(f"Took {res.exec_time} seconds to terminate.")
     print(f"Fitted Dispersion: {res.X}")
     print(f"SSE: {res.F}")
-
 
     sim = config.simulation
     sim.filename = 'final.h5'
@@ -77,4 +75,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

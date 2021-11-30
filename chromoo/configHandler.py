@@ -24,9 +24,10 @@ class ConfigHandler:
         self.yaml=YAML(typ='safe')
 
     def read(self, fname):
+        """
+            Read the config yaml file, save into config dict
+        """
         self.config = Dict(self.yaml.load(Path(fname)))
-        self.load()
-        self.construct_simulation()
 
     def get(self, keys, default=None, vartype=None, choices=[]):
         """
@@ -40,7 +41,6 @@ class ConfigHandler:
 
         if value is None:
             if default != None:
-                # self.logger.warn(keys, 'not specified! Defaulting to', str(default) or 'None (empty string)')
                 print(keys, 'not specified! Defaulting to', str(default) or 'None (empty string)')
                 value = default
 
@@ -56,7 +56,7 @@ class ConfigHandler:
 
     def load(self):
         """
-        Assign values from the loaded dict to the object's attributes
+        Assign values from the config dict to the object's attributes
         Centralizes the config value and type checking
         """
         self.filename=  self.get('filename', vartype=str())
@@ -65,10 +65,19 @@ class ConfigHandler:
 
         # NOTE: Can be arbitrarily long
         # TODO: Find a way to check each objective/parameter for default keys and values
-        self.objectives = [ Dict(x) for x in self.get('objectives', None, list()) ] 
-        self.parameters = [ Dict(x) for x in self.get('parameters', None, list()) ]
+        try:
+            self.objectives = [ Dict(x) for x in self.get('objectives', None, list()) ] 
+        except (TypeError):
+            raise(RuntimeError('Please provide objectives.'))
+            
+        try:
+            self.parameters = [ Dict(x) for x in self.get('parameters', None, list()) ]
+        except (TypeError):
+            raise(RuntimeError('Please provide parameters.'))
 
-        # If i'm passing a dict to a class, might be better to take the full dict, and then adjust the important subfields. Otherwise, I can just manually constrain the subfields for better sanity.
+        # If i'm passing a dict to a class, might be better to take the full
+        # dict, and then adjust the important subfields. Otherwise, I can just manually
+        # constrain the subfields for better sanity.
         # self.algorithm = Dict(self.get('algorithm', None, dict()))
         self.algorithm = Dict()
 
