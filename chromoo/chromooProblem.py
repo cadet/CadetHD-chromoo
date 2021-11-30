@@ -1,7 +1,7 @@
 from pymoo.core.problem import Problem
 from itertools import chain
 # from functools import partial
-from multiprocessing import Pool
+import multiprocessing as mp
 
 import copy
 import string
@@ -33,8 +33,6 @@ class ChromooProblem(Problem):
             n_var = sum(p.get('length') for p in parameters), 
             n_obj = len(objectives), 
             n_constr=0, 
-            # xl=[p.get('min_value') for p in parameters],
-            # xu=[p.get('max_value') for p in parameters] )  
             xl=xls,
             xu=xus )
 
@@ -48,7 +46,7 @@ class ChromooProblem(Problem):
 
     def _evaluate(self, x, out, *args, **kwargs):
 
-        with Pool(self.nproc) as pool:
+        with mp.Pool(self.nproc) as pool:
             out["F"] = pool.map(self.evaluate_sim, x)
 
     def evaluate_sim(self, x):
@@ -90,3 +88,14 @@ class ChromooProblem(Problem):
             sses.append(sse(y0, y))
 
         return sses
+
+    def update_sim_parameters(self, sim, x):
+        # For every parameter, generate a dictionary based on the path, and
+        # update the simulation in a nested way
+        # TODO: Probably a neater way to do this
+        prev_len = 0
+        for p in self.parameters:
+            cur_len = p.get('length')
+            cur_dict = keystring_todict(p.get('path'), x[prev_len : prev_len + cur_len])
+            sim.root.update(cur_dict)
+            prev_len += p.get('length')
