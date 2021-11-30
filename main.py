@@ -1,5 +1,5 @@
 from chromoo import ChromooProblem, AlgorithmFactory, ConfigHandler
-from chromoo.utils import keystring_todict, plotter
+from chromoo.utils import loadh5, plotter
 
 from pymoo.optimize import minimize
 from pymoo.util.termination.default import MultiObjectiveDefaultTermination
@@ -11,7 +11,6 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("file", nargs=1, help="yaml config file")
     args = vars(ap.parse_args())
-
 
     config = ConfigHandler()
     config.read(args['file'][0])
@@ -43,28 +42,8 @@ def main():
     print(f"Fitted Dispersion: {res.X}")
     print(f"SSE: {res.F}")
 
-    sim = config.simulation
-    sim.filename = 'final.h5'
-
-    # For every parameter, generate a dictionary based on the path, and
-    # update the simulation in a nested way
-    # TODO: Probably a neater way to do this
-    # FIXME: This is copied from chromaproblem
-    prev_len = 0
-    for p in config.parameters:
-        cur_len = p.length
-        cur_dict = keystring_todict(p.get('path'), res.X[prev_len : prev_len + cur_len])
-        sim.root.update(cur_dict)
-        prev_len += p.length
-
-    sim.save()
-
-    runout = sim.run()
-    if runout.returncode != 0:
-        print(runout)
-        raise RuntimeError
-    sim.load()
-
+    prob.evaluate_sim(res.X, name='final.h5')
+    sim = loadh5('final.h5')
     plotter(sim, config.objectives) 
 
     if not config.store_temp:

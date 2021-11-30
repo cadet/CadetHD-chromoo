@@ -49,13 +49,17 @@ class ChromooProblem(Problem):
         with mp.Pool(self.nproc) as pool:
             out["F"] = pool.map(self.evaluate_sim, x)
 
-    def evaluate_sim(self, x):
+    def evaluate_sim(self, x, name=None):
         """
             - run one simulation
             - calculate and return scores
         """
         newsim = copy.deepcopy(self.sim)
-        newsim.filename = self.tempdir.joinpath('temp' + ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase + string.digits, k=6)) + '.h5')
+
+        if name:
+            newsim.filename = name
+        else:
+            newsim.filename = self.tempdir.joinpath('temp' + ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase + string.digits, k=6)) + '.h5')
 
         self.update_sim_parameters(newsim, x)
 
