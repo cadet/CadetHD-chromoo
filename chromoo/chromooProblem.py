@@ -11,6 +11,7 @@ from chromoo.utils import keystring_todict, deep_get, sse, readChromatogram, rea
 
 import numpy as np
 from pathlib import Path
+import subprocess
 
 class ChromooProblem(Problem):
     def __init__(self, sim, parameters, objectives, nproc=4, tempdir='temp'):
@@ -58,29 +59,21 @@ class ChromooProblem(Problem):
         newsim = copy.deepcopy(self.sim)
         newsim.filename = self.tempdir.joinpath('temp' + ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase + string.digits, k=6)) + '.h5')
 
-        # For every parameter, generate a dictionary based on the path, and
-        # update the simulation in a nested way
-        # TODO: Probably a neater way to do this
-        prev_len = 0
-        for p in self.parameters:
-            cur_len = p.get('length')
-            cur_dict = keystring_todict(p.get('path'), x[prev_len : prev_len + cur_len])
-            newsim.root.update(cur_dict)
-            prev_len += p.get('length')
+        self.update_sim_parameters(newsim, x)
 
         newsim.save()
 
-        runout = newsim.run()
-        if runout.returncode != 0:
-            print(runout)
-            raise RuntimeError
+        try:
+            newsim.run(check=True)
+        except subprocess.CalledProcessError as error:
+            print(f"{newsim.filename} failed: {error.stderr.decode('utf-8')}")
+            raise(RuntimeError("Simulation Failure"))
+
         newsim.load()
 
         sses = []
 
         # FIXME: Make generic scores
-        # FIXME: Make generic file reading
-        # FIXME: allow sse2 etc
         
         objectives_contain_times = True
         if self.objectives[0].get('times'):
