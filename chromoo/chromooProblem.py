@@ -10,9 +10,10 @@ import random
 from chromoo.utils import keystring_todict, deep_get, sse, readChromatogram, readArray
 
 import numpy as np
+from pathlib import Path
 
 class ChromooProblem(Problem):
-    def __init__(self, sim, parameters, objectives, nproc=4):
+    def __init__(self, sim, parameters, objectives, nproc=4, tempdir='temp'):
         
         xls = []
         xus = []
@@ -41,6 +42,9 @@ class ChromooProblem(Problem):
         self.objectives = objectives
         self.nproc = nproc
 
+        self.tempdir=Path(tempdir)
+        self.tempdir.mkdir(exist_ok=True)
+
     def _evaluate(self, x, out, *args, **kwargs):
 
         with Pool(self.nproc) as pool:
@@ -52,7 +56,7 @@ class ChromooProblem(Problem):
             - calculate and return scores
         """
         newsim = copy.deepcopy(self.sim)
-        newsim.filename = 'temp/temp' + ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase + string.digits, k=6)) + '.h5'
+        newsim.filename = self.tempdir.joinpath('temp' + ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase + string.digits, k=6)) + '.h5')
 
         # For every parameter, generate a dictionary based on the path, and
         # update the simulation in a nested way

@@ -4,7 +4,6 @@ from chromoo.utils import keystring_todict, plotter
 from pymoo.optimize import minimize
 from pymoo.util.termination.default import MultiObjectiveDefaultTermination
 
-from pathlib import Path
 
 import argparse
 
@@ -13,7 +12,6 @@ def main():
     ap.add_argument("file", nargs=1, help="yaml config file")
     args = vars(ap.parse_args())
 
-    Path("temp").mkdir(exist_ok=True)
 
     config = ConfigHandler()
     config.read(args['file'][0])
@@ -71,7 +69,7 @@ def main():
 
     if not config.store_temp:
         import shutil
-        shutil.rmtree('temp')
+        shutil.rmtree(prob.tempdir)
 
 if __name__ == "__main__":
     main()
