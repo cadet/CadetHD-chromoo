@@ -123,4 +123,6 @@ def plotter(sim, objectives):
 
         ax.plot(t0,c0, lw=1, ls='solid', label='reference')
         ax.plot(t1,c1, lw=1, ls='dashed', label='result')
+
+        ax.set(title=obj.name)
         fig.savefig(f"chromoo_{obj.name}_result.pdf")
