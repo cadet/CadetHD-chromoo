@@ -85,7 +85,7 @@ class ConfigHandler:
         # self.algorithm = Dict(self.get('algorithm', None, dict()))
         self.algorithm = Dict()
 
-        self.algorithm.name = self.get('algorithm.name', 'nsga3', str(), ['nsga3'])
+        self.algorithm.name = self.get('algorithm.name', 'unsga3', str(), ['unsga3', 'nsga3'])
         self.algorithm.pop_size= self.get('algorithm.pop_size', 10, vartype=int)
         self.algorithm.n_offsprings = self.get('algorithm.n_offsprings', self.algorithm.pop_size, vartype=int)
         self.algorithm.n_obj= len(self.objectives)
