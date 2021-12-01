@@ -7,8 +7,13 @@ import logging
 class TestConfigHandler(unittest.TestCase):
     def __init__(self, methodName='runTest'):
 
-        LOG_FORMAT = '%s(levelname): %(message)s'
-        logging.basicConfig(filename = 'testConfigHandler.log', level=logging.DEBUG, format=LOG_FORMAT)
+        LOG_FORMAT = '[%(asctime)s] %(levelname)s: %(message)s'
+        logging.basicConfig(
+            filename = 'testConfigHandler.log', 
+            level=logging.DEBUG, 
+            format=LOG_FORMAT,
+            filemode='w'
+        )
         self.logger = logging.getLogger()
         self.logger.info('Instantiating TestConfigHandler')
 
@@ -18,10 +23,16 @@ class TestConfigHandler(unittest.TestCase):
         """
             Test class initialization
         """
+        self.logger.info("Running test_init()")
         config = ConfigHandler()
         self.assertDictEqual(config.config, {})
 
+    # TODO: Run read tests for all vartypes
     def test_read(self):
+        """
+            Test the yaml reader of the config file
+        """
+        self.logger.info("Running test_read()")
         filename = 'test_config_file.yaml'
         with open(filename, 'w') as fp:
             fp.write('key: value')
