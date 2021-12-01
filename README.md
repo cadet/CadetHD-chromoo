@@ -2,7 +2,7 @@
 
 Chromatography optimization with cadet and pymoo. I built this because CADET-Match didn't offer optimization with certain parameters and objectives. For example, optimizing SOLUTION_BULK is not possible currently. Input of vector parameters is also currently not possible.
 
-While I haven't yet fully looked through the source code of CADET-Match, I would like to take inspiration from it while building chromoo. Eventually, when I get a better understanding of pymoo, cadet-match and the problem, I believe it should be possible to merge the code into CADET-Match.
+While I haven't yet fully looked through the source code of CADET-Match, I would like to take inspiration from it while building chromoo. Eventually, when I get a better understanding of pymoo, CADET-Match and the problem, I believe it should be possible to merge the code into CADET-Match.
 
 # Installation
 
@@ -46,16 +46,30 @@ termination:
   n_max_evals: 100000
 ```
 
-Some notes:
+# Notes
 - It runs multiple cadet simulations from a pool size of `nproc` for every evaluation of a population.
 - parameters and objectives are **lists**
 - Objective targets can be provided as an (times,values) csv file in `objectives.filename` or with the times separately specified in `objectives.times`
     - chromatograms already contain times, so it's easier to just provide the filename
     - solution_bulk data obtained from 3D sims are multidimensional, and we would like to try fitting the whole thing as a flat vector first
 - The `solution_times` section of the provided cadet simulation will be changed to match those of `objectives[0]` exactly.
+- Recommended population sizes for n-dimensional problems is 100*n
 
 # TODO
+- [DONE] Implement logging
 - [TASK] Write unit tests for all classes
-- [TASK] Implement logging
-- [TASK] Implement better scores
+- [TASK] Make sure tests delete temp files
+- [TASK] Implement better scores: Check out CADET-Match
 - [TASK] Implement match_solution_times config setting
+- [TASK] Move to numpy arrays
+- [TASK] Allow elements of vectors as parameters: flowrate in connections matrix.
+- [TASK] Implement gradient search after GA
+- [TASK] Check if I need to use MCMC to speed things up
+- [TASK] look at pareto front
+- [TASK] Improved display for single objective problems
+- [TASK] CMAES optimizer: single objective
+- [TASK] Corner plots, each var vs score, 
+    - Look at useless parameters
+- [TASK] Separate process for plotting
+- [CRIT] Don't fit porosity and velocity together
+- [TASK] Use geometric mean for combining multiple objectives in to single objective
