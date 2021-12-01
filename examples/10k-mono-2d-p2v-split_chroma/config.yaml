@@ -1,0 +1,50 @@
+filename: 10k-mono.mono2d.h5
+nproc: 4
+parameters:
+    - name: axial
+      length: 1
+      path: input.model.unit_001.col_dispersion
+      min_value: 1.0e-9
+      max_value: 1.0e-4
+    - name: radial
+      length: 5
+      path: input.model.unit_001.col_dispersion_radial
+      min_value: [1.0e-9, 1.0e-9, 1.0e-9, 1.0e-9, 1.0e-9]
+      max_value: [1.0e-4, 1.0e-4, 1.0e-4, 1.0e-4, 1.0e-4]
+objectives: 
+    - name: port0
+      filename: equidistant-5-corrected/shell_0_corrected.csv
+      score: sse
+      path: output.solution.unit_001.solution_outlet_port_000_comp_000
+      match_solution_times: true
+    - name: port1
+      filename: equidistant-5-corrected/shell_1_corrected.csv
+      score: sse
+      path: output.solution.unit_001.solution_outlet_port_001_comp_000
+      match_solution_times: true
+    - name: port2
+      filename: equidistant-5-corrected/shell_2_corrected.csv
+      score: sse
+      path: output.solution.unit_001.solution_outlet_port_002_comp_000
+      match_solution_times: true
+    - name: port3
+      filename: equidistant-5-corrected/shell_3_corrected.csv
+      score: sse
+      path: output.solution.unit_001.solution_outlet_port_003_comp_000
+      match_solution_times: true
+    - name: port4
+      filename: equidistant-5-corrected/shell_4_corrected.csv
+      score: sse
+      path: output.solution.unit_001.solution_outlet_port_004_comp_000
+      match_solution_times: true
+algorithm: 
+  name: nsga3
+  pop_size: 10
+termination:
+  # x_tol: 1e-8
+  # cv_tol: 1e-6
+  f_tol: 1e-9
+  nth_gen: 2
+  n_last: 10
+  n_max_gen: 10
+  n_max_evals: 100000

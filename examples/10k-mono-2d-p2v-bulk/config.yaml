@@ -1,0 +1,31 @@
+filename: 10k-mono.mono2d.h5
+nproc: 4
+parameters:
+    - name: axial
+      length: 1
+      path: input.model.unit_001.col_dispersion
+      min_value: 1.0e-9
+      max_value: 1.0e-5
+    - name: radial
+      length: 5
+      path: input.model.unit_001.col_dispersion_radial
+      min_value: [1.0e-9, 1.0e-9, 1.0e-9, 1.0e-9, 1.0e-9]
+      max_value: [1.0e-5, 1.0e-5, 1.0e-5, 1.0e-5, 1.0e-5]
+objectives: 
+    - name: bulk
+      filename: grm2d_full_nrec164_ncol10_nrad5.txt
+      times: timesteps.txt
+      score: sse
+      path: output.solution.unit_001.solution_bulk
+      match_solution_times: true
+algorithm: 
+  name: nsga3
+  pop_size: 10
+termination:
+  # x_tol: 1e-8
+  # cv_tol: 1e-6
+  f_tol: 1e-9
+  nth_gen: 2
+  n_last: 10
+  n_max_gen: 10
+  n_max_evals: 100000

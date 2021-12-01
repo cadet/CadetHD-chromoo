@@ -1,0 +1,23 @@
+filename: 10k-mono.mono2d.h5
+nproc: 4
+parameters:
+    - name: axial
+      length: 1
+      path: input.model.unit_002.col_dispersion
+      min_value: 1.0e-9
+      max_value: 1.0e-4
+    - name: radial
+      length: 1
+      path: input.model.unit_002.col_dispersion_radial
+      min_value: 1.0e-9
+      max_value: 1.0e-4
+objectives: 
+    - filename: chromatogram.y
+      name: outlet
+      times: timesteps.txt
+      score: sse
+      path: output.solution.unit_003.solution_outlet_comp_000
+      match_solution_times: true
+algorithm: 
+    name: nsga3
+    pop_size: 10
