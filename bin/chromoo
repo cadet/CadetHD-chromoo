@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 from chromoo import __version__
 from chromoo import ChromooProblem, AlgorithmFactory, ConfigHandler
 from chromoo.utils import loadh5, plotter
