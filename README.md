@@ -57,6 +57,10 @@ termination:
 
 # TODO
 - [DONE] Implement logging
+- [CRIT] Store outputs of every generation
+- [CRIT] Corner plots, each var vs score, 
+    - Make sure parameters aren't ineffective
+- [TASK] Look into parameter transforms
 - [TASK] Write unit tests for all classes
 - [TASK] Make sure tests delete temp files
 - [TASK] Implement better scores: Check out CADET-Match
@@ -68,8 +72,11 @@ termination:
 - [TASK] look at pareto front
 - [TASK] Improved display for single objective problems
 - [TASK] CMAES optimizer: single objective
-- [TASK] Corner plots, each var vs score, 
-    - Look at useless parameters
 - [TASK] Separate process for plotting
 - [CRIT] Don't fit porosity and velocity together
 - [TASK] Use geometric mean for combining multiple objectives in to single objective
+- [TASK] Random seeds
+- [TASK] Ask about sobolGenerations
+- [TASK] Implement checkpointing: pickle data
+- [TASK] Adjust Verbose Display according to algorithm used
+- [TASK] Implment an own Parameter and Objective class to handle vector parameter indices easily
