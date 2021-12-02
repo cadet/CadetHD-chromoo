@@ -9,6 +9,8 @@ import random
 
 from chromoo.utils import keystring_todict, deep_get, sse, readChromatogram, readArray
 
+from chromoo.cache import Cache
+
 import numpy as np
 from pathlib import Path
 import subprocess
@@ -44,10 +46,19 @@ class ChromooProblem(Problem):
         self.tempdir=Path(tempdir)
         self.tempdir.mkdir(exist_ok=True)
 
+        self.cache = Cache(parameters, objectives)
+
     def _evaluate(self, x, out, *args, **kwargs):
 
         with mp.Pool(self.nproc) as pool:
             out["F"] = pool.map(self.evaluate_sim, x)
+
+        self.cache.add(x, out["F"])
+        self.cache.scatter_all(
+            title=f"gen_all",
+            xscale='log',
+            yscale='log',
+        )
 
     def evaluate_sim(self, x, name=None):
         """
@@ -103,3 +114,4 @@ class ChromooProblem(Problem):
             cur_dict = keystring_todict(p.get('path'), x[prev_len : prev_len + cur_len])
             sim.root.update(cur_dict)
             prev_len += p.get('length')
+
