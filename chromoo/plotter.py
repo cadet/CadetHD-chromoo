@@ -10,7 +10,7 @@ class Plotter():
     yscale='linear'
     ) -> None:
 
-        plt.style.use('science')
+        # plt.style.use('science')
         self.fig, self.ax = plt.subplots()
         self.ax.set(xscale=xscale)
         self.ax.set(yscale=yscale)
