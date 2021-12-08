@@ -1,6 +1,6 @@
 from pymoo.core.problem import Problem
 from itertools import chain
-# from functools import partial
+from functools import partial
 import multiprocessing as mp
 
 import copy
@@ -15,8 +15,10 @@ import numpy as np
 from pathlib import Path
 import subprocess
 
+import os
+
 class ChromooProblem(Problem):
-    def __init__(self, sim, parameters, objectives, nproc=4, tempdir='temp'):
+    def __init__(self, sim, parameters, objectives, nproc=4, tempdir='temp', store_temp=False):
         
         xls = []
         xus = []
@@ -42,6 +44,7 @@ class ChromooProblem(Problem):
         self.parameters = parameters
         self.objectives = objectives
         self.nproc = nproc
+        self.store_temp = store_temp
 
         self.tempdir=Path(tempdir)
         self.tempdir.mkdir(exist_ok=True)
@@ -51,7 +54,9 @@ class ChromooProblem(Problem):
     def _evaluate(self, x, out, *args, **kwargs):
 
         with mp.Pool(self.nproc) as pool:
-            out["F"] = pool.map(self.evaluate_sim, x)
+            # out["F"] = pool.map(self.evaluate_sim, x)
+            # out["F"] = pool.starmap(self.evaluate_sim, zip(x, repeat(None), repeat(self.store_temp))
+            out["F"] = pool.map(partial(self.evaluate_sim, store=self.store_temp), x)
 
         self.cache.add(x, out["F"])
         self.cache.scatter_all(
@@ -60,7 +65,7 @@ class ChromooProblem(Problem):
             yscale='log',
         )
 
-    def evaluate_sim(self, x, name=None):
+    def evaluate_sim(self, x, name=None, store=False):
         """
             - run one simulation
             - calculate and return scores
@@ -101,6 +106,9 @@ class ChromooProblem(Problem):
                 y0 = readArray(obj.filename)
 
             sses.append(sse(y0, y))
+
+        if not store:
+            os.remove(newsim.filename)
 
         return sses
 

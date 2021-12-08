@@ -25,7 +25,7 @@ def main():
     config.construct_simulation()
 
     algo = AlgorithmFactory(config.algorithm).get_algorithm()
-    prob = ChromooProblem(config.simulation, config.parameters, config.objectives, nproc=config.nproc)
+    prob = ChromooProblem(config.simulation, config.parameters, config.objectives, nproc=config.nproc, store_temp=config.store_temp)
 
     term = MultiObjectiveDefaultTermination(
         x_tol       = config.termination.x_tol,
@@ -49,7 +49,7 @@ def main():
     logger.info(f"Fitted Parameters: {res.X}")
     logger.info(f"SSE: {res.F}")
 
-    prob.evaluate_sim(res.X, name='final.h5')
+    prob.evaluate_sim(res.X, name='final.h5', store=True)
     sim = loadh5('final.h5')
     plotter(sim, config.objectives) 
 
