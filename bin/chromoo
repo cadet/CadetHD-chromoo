@@ -5,6 +5,9 @@ from chromoo import ChromooProblem, AlgorithmFactory, ConfigHandler, ChromooCall
 from chromoo.utils import loadh5, plotter
 from chromoo.log import Logger
 
+from chromoo.cache import Cache
+from chromoo.simulation import run_sim
+
 from pymoo.optimize import minimize
 from pymoo.util.termination.default import MultiObjectiveDefaultTermination
 
@@ -24,6 +27,8 @@ def main():
     config.load()
     config.construct_simulation()
 
+    cache = Cache(config.parameters, config.objectives, config.simulation)
+
     algo = AlgorithmFactory(config.algorithm).get_algorithm()
     prob = ChromooProblem(config.simulation, config.parameters, config.objectives, nproc=config.nproc, store_temp=config.store_temp)
 
@@ -37,12 +42,13 @@ def main():
         n_max_evals = config.termination.n_max_evals
     )
 
+
     res = minimize(
             prob, 
             algo,
             term,
             seed=122,
-            callback=ChromooCallback(),
+            callback=ChromooCallback(cache),
             verbose=True
     )
 
@@ -57,12 +63,12 @@ def main():
     # For single objective systems we get one fixed point
     # For multiobjective systems, we get a set of solutions, a pareto front.
     if len(config.objectives) == 1: 
-        prob.evaluate_sim(res.X, name='final.h5', store=True)
+        run_sim(res.X, config.simulation, config.parameters, name='final.h5', store=True)
         sim = loadh5('final.h5')
         plotter(sim, config.objectives) 
     else:
         for i,x in enumerate(res.X): #type: ignore
-            prob.evaluate_sim(x, name=f'final_{i:03d}.h5', store=True)
+            run_sim(x, config.simulation, config.parameters, name=f'final_{i:03d}.h5', store=True)
             sim = loadh5(f'final_{i:03d}.h5')
             plotter(sim, config.objectives) 
 

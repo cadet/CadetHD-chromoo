@@ -19,6 +19,8 @@ from .callback import ChromooCallback
 from .algorithmFactory import AlgorithmFactory
 from .cache import Cache
 
+
+from . import simulation
 from . import plotter
 from . import utils
 from . import log

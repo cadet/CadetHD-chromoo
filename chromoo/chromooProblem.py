@@ -3,19 +3,14 @@ from itertools import chain
 from functools import partial
 import multiprocessing as mp
 
-import copy
-import string
-import random
-
 from chromoo.utils import keystring_todict, deep_get, sse, readChromatogram, readArray
 
-from chromoo.cache import Cache
+# from chromoo.cache import Cache
 
-import numpy as np
 from pathlib import Path
-import subprocess
 
-import os
+from chromoo.simulation import run_and_eval
+
 
 class ChromooProblem(Problem):
     def __init__(self, sim, parameters, objectives, nproc=4, tempdir='temp', store_temp=False):
@@ -49,87 +44,16 @@ class ChromooProblem(Problem):
         self.tempdir=Path(tempdir)
         self.tempdir.mkdir(exist_ok=True)
 
-        self.cache = Cache(parameters, objectives)
+        # self.cache = Cache(parameters, objectives)
 
-    def _evaluate(self, x, out, *args, **kwargs):
+    def _evaluate(self, X, out, *args, **kwargs):
 
         with mp.Pool(self.nproc) as pool:
             # out["F"] = pool.map(self.evaluate_sim, x)
             # out["F"] = pool.starmap(self.evaluate_sim, zip(x, repeat(None), repeat(self.store_temp))
-            out["F"] = pool.map(partial(self.evaluate_sim, store=self.store_temp), x)
+            # out["F"] = pool.map(partial(self.evaluate_sim, store=self.store_temp), X)
+            out["F"] = pool.map( partial(run_and_eval, sim=self.sim, parameters=self.parameters, objectives=self.objectives, name=None, tempdir=self.tempdir, store=self.store_temp), X)
 
-        self.update_cache(x, out, *args, **kwargs)
 
 
-    def evaluate_sim(self, x, name=None, store=False):
-        """
-            - run one simulation
-            - calculate and return scores
-        """
-        newsim = copy.deepcopy(self.sim)
 
-        if name:
-            newsim.filename = name
-        else:
-            newsim.filename = self.tempdir.joinpath('temp' + ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase + string.digits, k=6)) + '.h5')
-
-        self.update_sim_parameters(newsim, x)
-
-        newsim.save()
-
-        try:
-            newsim.run(check=True)
-        except subprocess.CalledProcessError as error:
-            print(f"{newsim.filename} failed: {error.stderr.decode('utf-8')}")
-            raise(RuntimeError("Simulation Failure"))
-
-        newsim.load()
-
-        sses = []
-
-        # FIXME: Make generic scores
-        
-        objectives_contain_times = True
-        if self.objectives[0].get('times'):
-            objectives_contain_times = False
-
-        for obj in self.objectives:
-            y = deep_get(newsim.root, obj.path)
-            y = np.array(y).flatten()
-            if objectives_contain_times:
-                _, y0 = readChromatogram(obj.filename)
-            else:
-                y0 = readArray(obj.filename)
-
-            sses.append(sse(y0, y))
-
-        if not store:
-            os.remove(newsim.filename)
-
-        return sses
-
-    def update_sim_parameters(self, sim, x):
-        # For every parameter, generate a dictionary based on the path, and
-        # update the simulation in a nested way
-        # TODO: Probably a neater way to do this
-        prev_len = 0
-        for p in self.parameters:
-            cur_len = p.get('length')
-            cur_dict = keystring_todict(p.get('path'), x[prev_len : prev_len + cur_len])
-            sim.root.update(cur_dict)
-            prev_len += p.get('length')
-
-    def update_cache(self, x, out, *args, **kwargs):
-        self.cache.add(x, out["F"])
-        self.cache.scatter_all(
-            title=f"gen_all",
-            xscale='log',
-            yscale='log',
-        )
-
-        self.cache.best_scores = kwargs.get('algorithm').callback.data["best_scores"]
-        self.cache.plot_best_scores()
-        self.cache.last_best_individual = kwargs.get('algorithm').callback.data["last_best_individual"]
-
-        if self.cache.last_best_individual:
-            self.evaluate_sim(self.cache.last_best_individual, "last_best.h5", store=True)
