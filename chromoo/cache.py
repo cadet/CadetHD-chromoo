@@ -1,7 +1,7 @@
 from operator import itemgetter
-from itertools import chain
 
 from chromoo.plotter import Plotter
+import numpy as np
 
 class Cache:
     """
@@ -9,9 +9,7 @@ class Cache:
     """
     def __init__(self, parameters, objectives, simulation, filename='cache.csv') -> None:
 
-        # Database is a list of tuples([n_par], [n_obj])
-        # TODO: might be better to have it as an np.ndarray to have reshapability, sliceability, and operability
-        self.database = []          # n_generation x n_individual of ([n_par], [n_obj])
+        self.database = []          # n_generation x n_individual x [n_par + n_obj]
         self.best_scores = []
         self.last_best_individual = []
 
@@ -24,7 +22,7 @@ class Cache:
         self.simulation = simulation
 
     def add(self, population:list, scores:list) -> None:
-        self.database.append(list(zip(population, scores)))
+        self.database.append(np.column_stack((population, scores)))
 
     def best_gen(self, igen:int):
         return min(self.database[igen], key=itemgetter(1))
@@ -45,11 +43,12 @@ class Cache:
     ) -> None:
         """ Write a scatterplot for the i'th generation """
 
+        arr = np.array(self.database)
+
         for i_obj in range(self.n_obj):
             for i_par in range(self.n_par):
-
-                x = list(map(lambda x: x[0][i_par], self.database[igen]))
-                y = list(map(lambda y: y[1][i_obj], self.database[igen]))
+                x = arr[igen,:,i_par]
+                y = arr[igen,:,self.n_par + i_obj]
 
                 plot = Plotter(
                     title=title,
@@ -69,16 +68,12 @@ class Cache:
     ) -> None:
         """ Write a scatterplot for all generations """
 
+        arr = np.array(self.database)
+
         for i_obj in range(self.n_obj):
             for i_par in range(self.n_par):
-                x = []
-                y = []
-                for generation in self.database:
-                    x = chain(x, map(lambda x: x[0][i_par], generation))
-                    y = chain(y, map(lambda y: y[1][i_obj], generation))
-
-                x = list(x)
-                y = list(y)
+                x = arr[:,:,i_par]
+                y = arr[:,:,self.n_par + i_obj]
 
                 plot = Plotter(
                     title=title,

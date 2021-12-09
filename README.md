@@ -66,10 +66,10 @@ termination:
 - [DONE] Check if I need to use MCMC to speed things up: No. It's used in CADET-Match for the error estimator
 - [DONE] Look at pymoo.Callback
 - [DONE] There's probably a neater way to reconcile using `cache`  and `ChromooCallback`
+- [ONGO] Move to numpy arrays
 - [TASK] Look into parameter transforms: 0->1 at inlet
 - [TASK] Run plots in subprocess, look at how to create multiple plots safely (HD subplotting?)
 - [TASK] Implement match_solution_times config setting
-- [TASK] Move to numpy arrays
 - [TASK] Allow elements of vectors as parameters: flowrate in connections matrix.
 - [TASK] Implement gradient search after GA
 - [TASK] look at pareto front
