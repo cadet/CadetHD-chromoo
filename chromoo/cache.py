@@ -13,6 +13,7 @@ class Cache:
         # TODO: might be better to have it as an np.ndarray to have reshapability, sliceability, and operability
         self.database = []          # n_generation x n_individual of ([n_par], [n_obj])
         self.best_scores = []
+        self.last_best_individual = []
 
         self.parameters = parameters
         self.objectives = objectives

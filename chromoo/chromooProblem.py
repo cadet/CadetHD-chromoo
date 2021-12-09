@@ -58,15 +58,7 @@ class ChromooProblem(Problem):
             # out["F"] = pool.starmap(self.evaluate_sim, zip(x, repeat(None), repeat(self.store_temp))
             out["F"] = pool.map(partial(self.evaluate_sim, store=self.store_temp), x)
 
-        self.cache.add(x, out["F"])
-        self.cache.scatter_all(
-            title=f"gen_all",
-            xscale='log',
-            yscale='log',
-        )
-
-        self.cache.best_scores = kwargs.get('algorithm').callback.data["best_scores"]
-        self.cache.plot_best_scores()
+        self.update_cache(x, out, *args, **kwargs)
 
 
     def evaluate_sim(self, x, name=None, store=False):
@@ -127,3 +119,17 @@ class ChromooProblem(Problem):
             sim.root.update(cur_dict)
             prev_len += p.get('length')
 
+    def update_cache(self, x, out, *args, **kwargs):
+        self.cache.add(x, out["F"])
+        self.cache.scatter_all(
+            title=f"gen_all",
+            xscale='log',
+            yscale='log',
+        )
+
+        self.cache.best_scores = kwargs.get('algorithm').callback.data["best_scores"]
+        self.cache.plot_best_scores()
+        self.cache.last_best_individual = kwargs.get('algorithm').callback.data["last_best_individual"]
+
+        if self.cache.last_best_individual:
+            self.evaluate_sim(self.cache.last_best_individual, "last_best.h5", store=True)
