@@ -8,7 +8,11 @@ class Cache:
         Should store problem data
     """
     def __init__(self, parameters, objectives, filename='cache.csv') -> None:
+
+        # Database is a list of tuples([n_par], [n_obj])
+        # TODO: might be better to have it as an np.ndarray to have reshapability, sliceability, and operability
         self.database = []          # n_generation x n_individual of ([n_par], [n_obj])
+
         self.parameters = parameters
         self.objectives = objectives
         self.n_par = sum( p.length for p in parameters )
