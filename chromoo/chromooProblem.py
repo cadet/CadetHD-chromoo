@@ -65,6 +65,10 @@ class ChromooProblem(Problem):
             yscale='log',
         )
 
+        self.cache.best_scores = kwargs.get('algorithm').callback.data["best_scores"]
+        self.cache.plot_best_scores()
+
+
     def evaluate_sim(self, x, name=None, store=False):
         """
             - run one simulation

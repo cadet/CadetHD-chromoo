@@ -12,6 +12,7 @@ class Cache:
         # Database is a list of tuples([n_par], [n_obj])
         # TODO: might be better to have it as an np.ndarray to have reshapability, sliceability, and operability
         self.database = []          # n_generation x n_individual of ([n_par], [n_obj])
+        self.best_scores = []
 
         self.parameters = parameters
         self.objectives = objectives
@@ -86,3 +87,14 @@ class Cache:
 
                 plot.scatter(x,y)
                 plot.save(f"ALL_{i_par}_{i_obj}.pdf")
+
+    def plot_best_scores(self):
+        plot = Plotter(
+            title='Best Scores', 
+            xlabel='generations',
+            ylabel='Score',
+            yscale='log'
+        )
+
+        plot.plot(range(1,len(self.best_scores)+1), self.best_scores)
+        plot.save(f"best_scores.pdf")
