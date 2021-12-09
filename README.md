@@ -63,7 +63,7 @@ termination:
 - [DONE] each var vs score, 
     - Make sure parameters aren't ineffective
 - [CRIT] Store the best simulations of the last generation
-- [TASK] Look into parameter transforms
+- [TASK] Look into parameter transforms: 0->1 at inlet
 - [TASK] Run plots in subprocess, look at how to create multiple plots safely (HD subplotting?)
 - [TASK] Implement match_solution_times config setting
 - [TASK] Move to numpy arrays
@@ -82,3 +82,6 @@ termination:
 - [TASK] Implement better scores: Check out CADET-Match
 - [TASK] Make sure tests delete temp files
 - [TASK] Write unit tests for all classes
+- [TASK] Look at save_history = True
+- [DONE] Look at pymoo.Callback
+- [TASK] There's probably a neater way to reconcile using `cache`  and `ChromooCallback`
