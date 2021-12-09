@@ -19,5 +19,12 @@ objectives:
       path: output.solution.unit_003.solution_outlet_comp_000
       match_solution_times: true
 algorithm: 
-    name: nsga3
-    pop_size: 10
+  name: unsga3
+  pop_size: 10
+termination:
+  x_tol: 1e-10
+  f_tol: 1e-9
+  nth_gen: 2
+  n_last: 10
+  n_max_gen: 10
+  n_max_evals: 100000
