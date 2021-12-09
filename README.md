@@ -54,29 +54,31 @@ termination:
     - solution_bulk data obtained from 3D sims are multidimensional, and we would like to try fitting the whole thing as a flat vector first
 - The `solution_times` section of the provided cadet simulation will be changed to match those of `objectives[0]` exactly.
 - Recommended population sizes for n-dimensional problems is 100*n
+- [CRIT] Don't fit porosity and velocity together. You can fit porosity and flowrate instead
 
 # TODO
 - [DONE] Implement logging
-- [CRIT] Store outputs of every generation
-- [CRIT] Corner plots, each var vs score, 
+- [DONE] Store outputs of every generation
+- [CRIT] Corner plots, 
+- [DONE] each var vs score, 
     - Make sure parameters aren't ineffective
+- [CRIT] Store the best simulations of the last generation
 - [TASK] Look into parameter transforms
-- [TASK] Write unit tests for all classes
-- [TASK] Make sure tests delete temp files
-- [TASK] Implement better scores: Check out CADET-Match
+- [TASK] Run plots in subprocess, look at how to create multiple plots safely (HD subplotting?)
 - [TASK] Implement match_solution_times config setting
 - [TASK] Move to numpy arrays
 - [TASK] Allow elements of vectors as parameters: flowrate in connections matrix.
 - [TASK] Implement gradient search after GA
-- [TASK] Check if I need to use MCMC to speed things up
+- [DONE] Check if I need to use MCMC to speed things up: No. It's used in CADET-Match for the error estimator
 - [TASK] look at pareto front
-- [TASK] Improved display for single objective problems
 - [TASK] CMAES optimizer: single objective
-- [TASK] Separate process for plotting
-- [CRIT] Don't fit porosity and velocity together
 - [TASK] Use geometric mean for combining multiple objectives in to single objective
-- [TASK] Random seeds
 - [TASK] Ask about sobolGenerations
 - [TASK] Implement checkpointing: pickle data
 - [TASK] Adjust Verbose Display according to algorithm used
 - [TASK] Implment an own Parameter and Objective class to handle vector parameter indices easily
+- [WAIT] Look into hopsy for sampling the existing space properly: Ask Johannes, it seems like it's for constrained optimization
+- [TASK] Random seeds
+- [TASK] Implement better scores: Check out CADET-Match
+- [TASK] Make sure tests delete temp files
+- [TASK] Write unit tests for all classes

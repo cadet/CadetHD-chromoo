@@ -1,4 +1,6 @@
 *.egg-info/
 **/*.pdf
 *.h5
-
+*.csv
+*.yaml
+*solution*
