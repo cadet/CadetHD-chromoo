@@ -9,7 +9,7 @@ pagestyle: empty
 
 # ChroMOO
 
-Chromatography with PyMOO.
+Chromatography with PyMOO. This document, like the code, is a work in progress.
 
 ```{.mermaid format=pdf}
 classDiagram
@@ -25,6 +25,21 @@ classDiagram
         +objectives
         +nproc: int
         +init(sim, parameters, objectives, nproc)
+        +_evaluate()
+    }
+    class Simulation{
+        +run_sim()
+        +evaluate_sim()
+        +run_and_eval()
+    }
+    class Cache{
+        +database[]
+        +plot_stuff()
+    }
+    class Callback{
+        +cache
+        +update_cache()
+        +save_last_best()
     }
     class UNSGA3{
     }
@@ -35,7 +50,10 @@ classDiagram
         +necessary_attribs 
         +get()
     }
+
     Problem <|-- ChromooProblem
+    ChromooProblem --> Simulation : uses
     AlgorithmFactory --> UNSGA3 : returns
     AlgorithmFactory --> NSGA3 : returns
+    Callback --> Cache : has
 ```

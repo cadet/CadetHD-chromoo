@@ -62,14 +62,16 @@ termination:
 - [CRIT] Corner plots, 
 - [DONE] each var vs score, 
     - Make sure parameters aren't ineffective
-- [CRIT] Store the best simulations of the last generation
+- [DONE] Store the best simulations of the last generation
+- [DONE] Check if I need to use MCMC to speed things up: No. It's used in CADET-Match for the error estimator
+- [DONE] Look at pymoo.Callback
+- [DONE] There's probably a neater way to reconcile using `cache`  and `ChromooCallback`
 - [TASK] Look into parameter transforms: 0->1 at inlet
 - [TASK] Run plots in subprocess, look at how to create multiple plots safely (HD subplotting?)
 - [TASK] Implement match_solution_times config setting
 - [TASK] Move to numpy arrays
 - [TASK] Allow elements of vectors as parameters: flowrate in connections matrix.
 - [TASK] Implement gradient search after GA
-- [DONE] Check if I need to use MCMC to speed things up: No. It's used in CADET-Match for the error estimator
 - [TASK] look at pareto front
 - [TASK] CMAES optimizer: single objective
 - [TASK] Use geometric mean for combining multiple objectives in to single objective
@@ -77,11 +79,9 @@ termination:
 - [TASK] Implement checkpointing: pickle data
 - [TASK] Adjust Verbose Display according to algorithm used
 - [TASK] Implment an own Parameter and Objective class to handle vector parameter indices easily
-- [WAIT] Look into hopsy for sampling the existing space properly: Ask Johannes, it seems like it's for constrained optimization
+- [TASK] Look into hopsy for sampling the existing space properly: Ask Johannes, it seems like it's for constrained optimization
 - [TASK] Random seeds
 - [TASK] Implement better scores: Check out CADET-Match
 - [TASK] Make sure tests delete temp files
 - [TASK] Write unit tests for all classes
 - [TASK] Look at save_history = True
-- [DONE] Look at pymoo.Callback
-- [TASK] There's probably a neater way to reconcile using `cache`  and `ChromooCallback`
