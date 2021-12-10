@@ -10,13 +10,15 @@ class ChromooCallback(Callback):
         self.data["last_best_individual"] = []
 
     def notify(self, algorithm):
+        # NOTE: Only captures the first of many best solutions for MOOs
+        f_opt0 = algorithm.opt[0].F
+        x_opt0 = algorithm.opt[0].X
+
         F = algorithm.pop.get("F")
         X = algorithm.pop.get("X")
-        last_best_score = F.min()
-        last_best_score_index = F.argmin()
-        last_best_individual = X[last_best_score_index]
-        self.data["best_scores"].append(last_best_score)
-        self.data["last_best_individual"] = last_best_individual
+
+        self.data["best_scores"].append(f_opt0)
+        self.data["last_best_individual"] = x_opt0
         self.update_cache(X, F)
         self.save_last_best()
 
