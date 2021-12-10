@@ -1,6 +1,6 @@
 from operator import itemgetter
 
-from chromoo.plotter import Plotter
+from chromoo.plotter import Plotter, Subplotter
 import numpy as np
 
 class Cache:
@@ -70,21 +70,23 @@ class Cache:
 
         arr = np.array(self.database)
 
+        plot = Subplotter(
+            nrows=self.n_obj,
+            ncols=self.n_par,
+            title=title,
+            xscale=xscale,
+            yscale=yscale
+        )
+
         for i_obj in range(self.n_obj):
             for i_par in range(self.n_par):
                 x = arr[:,:,i_par]
                 y = arr[:,:,self.n_par + i_obj]
 
-                plot = Plotter(
-                    title=title,
-                    xlabel= f"{i_par}",
-                    ylabel= f"{i_obj}",
-                    xscale=xscale,
-                    yscale=yscale
-                )
+                plot.scatter(x,y, i_obj,i_par, xlabel=f"{i_par}", ylabel=f"{i_obj}")
 
-                plot.scatter(x,y)
-                plot.save(f"ALL_{i_par}_{i_obj}.pdf")
+        plot.save(f"ALL.pdf")
+        plot.close()
 
     def plot_best_scores(self):
         plot = Plotter(
