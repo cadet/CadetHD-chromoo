@@ -66,9 +66,13 @@ termination:
 - [DONE] Check if I need to use MCMC to speed things up: No. It's used in CADET-Match for the error estimator
 - [DONE] Look at pymoo.Callback
 - [DONE] There's probably a neater way to reconcile using `cache`  and `ChromooCallback`
+- [DONE] Look into hopsy for sampling the existing space properly: Ask Johannes, it seems like it's for constrained optimization
+    - Not a great experience
+    - No MOO support
+- [DONE] Use subplots
 - [ONGO] Move to numpy arrays
 - [TASK] Look into parameter transforms: 0->1 at inlet
-- [TASK] Run plots in subprocess, look at how to create multiple plots safely (HD subplotting?)
+- [TASK] Run plots in subprocess, look at how to create multiple plots safely 
 - [TASK] Implement match_solution_times config setting
 - [TASK] Allow elements of vectors as parameters: flowrate in connections matrix.
 - [TASK] Implement gradient search after GA
@@ -79,7 +83,6 @@ termination:
 - [TASK] Implement checkpointing: pickle data
 - [TASK] Adjust Verbose Display according to algorithm used
 - [TASK] Implment an own Parameter and Objective class to handle vector parameter indices easily
-- [TASK] Look into hopsy for sampling the existing space properly: Ask Johannes, it seems like it's for constrained optimization
 - [TASK] Random seeds
 - [TASK] Implement better scores: Check out CADET-Match
 - [TASK] Make sure tests delete temp files
