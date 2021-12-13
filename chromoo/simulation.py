@@ -34,7 +34,8 @@ def run_sim(x, sim, parameters, name=None, tempdir=Path('temp'), store=False):
     try:
         newsim.run(check=True)
     except subprocess.CalledProcessError as error:
-        print(f"{newsim.filename} failed: {error.stderr.decode('utf-8')}")
+        print(f"{newsim.filename} failed: {error.stderr.decode('utf-8').strip()}")
+        print(f"Parameters: {x}\n")
         raise(RuntimeError("Simulation Failure"))
 
     newsim.load()
