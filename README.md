@@ -74,7 +74,8 @@ termination:
 - [DONE] Allow modifying a scalar at a position inside a vector
 - [DONE] Allow elements of vectors as parameters: flowrate in connections matrix.
 - [DONE] Implment an own Parameter and Objective class to handle vector parameter indices easily
-- [TASK] Allow YAML input along with h5
+- [DONE] Fix plot axis labels to include parameter/objective names and indices
+- [DONE] Allow YAML input along with h5
 - [TASK] Sometimes simulations fail for no reason. Check out timeouts in CADET-Match
 - [TASK] Look into parameter transforms: 0->1 at inlet
 - [TASK] Run plots in subprocess, look at how to create multiple plots safely 

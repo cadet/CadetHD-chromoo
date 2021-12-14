@@ -9,6 +9,28 @@ import numpy as np
 import os
 
 from cadet import Cadet
+from addict import Dict
+
+from ruamel.yaml import YAML
+
+def load_file(fname):
+    yaml=YAML(typ='safe')
+    yaml.default_flow_style=False
+    ext = Path(fname).suffix
+
+    if ext == ".h5":
+        simulation = loadh5(fname)
+    elif ext == ".yaml" or ext == ".yml" :
+        simulation = Cadet()
+        cadetpath = subprocess.run(['which', 'cadet-cli'], capture_output=True, text=True ).stdout.strip()
+        Cadet.cadet_path = cadetpath
+        simulation.filename = fname.replace(ext, '.h5')
+        simulation.root = Dict(yaml.load(Path(fname)))
+    else:
+        raise(RuntimeError('Invalid simulation file!'))
+
+    return simulation
+
 
 def loadh5(filename):
     """

@@ -15,7 +15,7 @@ from pathlib import Path
 
 from chromoo.log import Logger
 from chromoo.utils import readArray, readChromatogram
-from chromoo.simulation import loadh5
+from chromoo.simulation import load_file
 
 from addict import Dict
 from chromoo.parameter import Parameter
@@ -99,7 +99,7 @@ class ConfigHandler:
         self.termination.n_max_evals = self.get('termination.n_max_evals', 1000, int)
 
     def construct_simulation(self):
-        self.simulation =  loadh5(self.filename)
+        self.simulation =  load_file(self.filename)
 
         # NOTE: Only the first objective is checked for timesteps
         # FIXME:
