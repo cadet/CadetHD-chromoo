@@ -1,4 +1,4 @@
-filename: 10k-mono.mono1d.h5
+filename: 10k-mono.mono1d.yaml
 nproc: 4
 store_temp: false
 parameters:

@@ -1,4 +1,4 @@
-filename: 10k-mono.mono2d.h5
+filename: 10k-mono.mono2d.yaml
 nproc: 4
 parameters:
     - name: axial
