@@ -19,6 +19,17 @@ class Cache:
         self.n_obj = len(objectives)
         self.filename = filename
 
+        self.p_names = []
+        self.o_names = []
+
+        for p in parameters:
+            for i in range(p.length):
+                self.p_names.append(f"{p.name}[{i}]")
+
+        for o in objectives:
+            self.o_names.append(f"{o.name}")
+            
+
         self.simulation = simulation
 
     def add(self, population:list, scores:list) -> None:
@@ -59,7 +70,7 @@ class Cache:
                 )
 
                 plot.scatter(x,y)
-                plot.save(f"gen{igen}_{i_par}_{i_obj}.png")
+                plot.save(f"gen{igen}_{self.p_names[i_par]}_{self.o_names[i_obj]}.png")
 
     def scatter_all(self,
         title=None,
@@ -78,12 +89,14 @@ class Cache:
             yscale=yscale
         )
 
+        self.parameters
+
         for i_obj in range(self.n_obj):
             for i_par in range(self.n_par):
                 x = arr[:,:,i_par]
                 y = arr[:,:,self.n_par + i_obj]
 
-                plot.scatter(x,y, i_obj,i_par, xlabel=f"{i_par}", ylabel=f"{i_obj}")
+                plot.scatter(x,y, i_obj,i_par, xlabel=self.p_names[i_par], ylabel=self.o_names[i_obj])
 
         plot.save(f"ALL.png")
         plot.close()
