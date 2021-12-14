@@ -2,7 +2,9 @@ filename: 10k-mono.mono1d.h5
 nproc: 4
 parameters:
     - name: axial
+      type: scalar
       length: 1
+      index: 0
       path: input.model.unit_002.col_dispersion
       min_value: 1.0e-9
       max_value: 1.0e-4
@@ -14,11 +16,11 @@ objectives:
       path: output.solution.unit_003.solution_outlet_comp_000
       match_solution_times: true
 algorithm: 
-    name: nsga3
-    pop_size: 10
+  name: unsga3
+  pop_size: 10
 termination:
-  # x_tol: 1e-8
-  # cv_tol: 1e-6
+  x_tol: 1e-8
+  cv_tol: 1e-6
   f_tol: 1e-9
   nth_gen: 2
   n_last: 10
