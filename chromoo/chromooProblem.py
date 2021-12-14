@@ -3,12 +3,8 @@ from itertools import chain
 from functools import partial
 import multiprocessing as mp
 
-from chromoo.utils import keystring_todict, deep_get, sse, readChromatogram, readArray
-
 from pathlib import Path
-
 from chromoo.simulation import run_and_eval
-
 
 class ChromooProblem(Problem):
     def __init__(self, sim, parameters, objectives, nproc=4, tempdir='temp', store_temp=False):

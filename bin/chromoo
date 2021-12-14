@@ -52,10 +52,6 @@ def main():
             verbose=True
     )
 
-    # val = res.algorithm.callback.data["best"]
-    # plt.plot(np.arange(len(val)), val)
-    # plt.show()
-
     logger.info(f"Took {res.exec_time:.2f} seconds to terminate.")
     logger.info(f"Fitted Parameters: {res.X}")
     logger.info(f"SSE: {res.F}")

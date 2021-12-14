@@ -37,9 +37,6 @@ class Subplotter():
     self, 
     nrows = 1,
     ncols = 1,
-    title=None,
-    xlabel=None,
-    ylabel=None,
     xscale='linear', 
     yscale='linear'
     ) -> None:

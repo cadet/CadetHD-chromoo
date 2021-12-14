@@ -1,5 +1,4 @@
-from dataclasses import dataclass, field
-from typing import List, Literal, Any
+from dataclasses import dataclass
 
 @dataclass(init=True, order=True, repr=True, frozen=True)
 class Objective:

@@ -7,7 +7,6 @@ from rich.console import Console
 from rich.theme import Theme
 
 import datetime
-import os
 
 class Logger:
     log_out_all = []

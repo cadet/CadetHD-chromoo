@@ -1,7 +1,5 @@
-from dataclasses import dataclass, field
-from typing import List, Literal, Any
-
-from chromoo.utils import deep_get
+from dataclasses import dataclass
+from typing import Literal, Any
 
 @dataclass(init=True, order=True, repr=True, frozen=True)
 class Parameter():

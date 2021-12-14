@@ -1,15 +1,7 @@
 from cadet import Cadet
 from functools import reduce
-from addict import Dict
-
 from matplotlib import pyplot as plt
-
-import numpy as np
-
-import struct
 from subprocess import run
-
-from addict import Dict
 
 def loadh5(filename):
     """
