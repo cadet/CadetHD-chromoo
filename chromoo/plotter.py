@@ -26,7 +26,7 @@ class Plotter():
         self.ax.scatter(x, y, label=label, linestyle=ls, linewidth=lw, marker=marker)
 
     def save(self, filename) -> None:
-        self.fig.savefig(filename)
+        self.fig.savefig(filename, dpi=300)
 
     def show(self) -> None:
         plt.show()
@@ -69,7 +69,7 @@ class Subplotter():
         ax.set(ylabel=ylabel)
 
     def save(self, filename) -> None:
-        self.fig.savefig(filename)
+        self.fig.savefig(filename, dpi=300)
 
     def show(self) -> None:
         plt.show()

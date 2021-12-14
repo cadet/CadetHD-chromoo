@@ -59,7 +59,7 @@ class Cache:
                 )
 
                 plot.scatter(x,y)
-                plot.save(f"gen{igen}_{i_par}_{i_obj}.pdf")
+                plot.save(f"gen{igen}_{i_par}_{i_obj}.png")
 
     def scatter_all(self,
         title=None,
@@ -85,7 +85,7 @@ class Cache:
 
                 plot.scatter(x,y, i_obj,i_par, xlabel=f"{i_par}", ylabel=f"{i_obj}")
 
-        plot.save(f"ALL.pdf")
+        plot.save(f"ALL.png")
         plot.close()
 
     def plot_best_scores(self):
@@ -97,4 +97,4 @@ class Cache:
         )
 
         plot.plot(range(1,len(self.best_scores)+1), self.best_scores)
-        plot.save(f"best_scores.pdf")
+        plot.save(f"best_scores.png")
