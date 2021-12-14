@@ -71,20 +71,25 @@ termination:
     - No MOO support
 - [DONE] Use subplots
 - [ONGO] Move to numpy arrays
+- [DONE] Allow modifying a scalar at a position inside a vector
+- [DONE] Allow elements of vectors as parameters: flowrate in connections matrix.
+- [DONE] Implment an own Parameter and Objective class to handle vector parameter indices easily
+- [TASK] Allow YAML input along with h5
+- [TASK] Sometimes simulations fail for no reason. Check out timeouts in CADET-Match
 - [TASK] Look into parameter transforms: 0->1 at inlet
 - [TASK] Run plots in subprocess, look at how to create multiple plots safely 
 - [TASK] Implement match_solution_times config setting
-- [TASK] Allow elements of vectors as parameters: flowrate in connections matrix.
 - [TASK] Implement gradient search after GA
 - [TASK] look at pareto front
 - [TASK] CMAES optimizer: single objective
 - [TASK] Use geometric mean for combining multiple objectives in to single objective
-- [TASK] Ask about sobolGenerations
+- [TASK] Implement sobolGenerations
 - [TASK] Implement checkpointing: pickle data
 - [TASK] Adjust Verbose Display according to algorithm used
-- [TASK] Implment an own Parameter and Objective class to handle vector parameter indices easily
 - [TASK] Random seeds
 - [TASK] Implement better scores: Check out CADET-Match
 - [TASK] Make sure tests delete temp files
 - [TASK] Write unit tests for all classes
 - [TASK] Look at save_history = True
+- [CRIT] For the split-chromatogram problem, we know that the axial dispersion in once radial shell won't affect the chromatogram in another, so it does have a constraint. Is there a way to constrain the parameters that way? Or does it just mean we solve the system serially? 
+- [TASK] Unified interface/method for deep getting and setting from/to a Dict or dict
