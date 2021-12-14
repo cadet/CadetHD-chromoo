@@ -8,6 +8,22 @@ from chromoo.utils import keystring_todict, deep_get, sse, readChromatogram, rea
 import numpy as np
 import os
 
+from cadet import Cadet
+
+def loadh5(filename):
+    """
+        Load a cadet simulation file
+    """
+
+    cadetpath = subprocess.run(['which', 'cadet-cli'], capture_output=True, text=True ).stdout.strip()
+    Cadet.cadet_path = cadetpath
+
+    sim = Cadet()
+    sim.filename = filename
+    sim.load()
+
+    return sim
+
 def run_and_eval(x, sim, parameters, objectives, name=None, tempdir=Path('temp'), store=False ) -> list :
     sim = run_sim(x, sim, parameters, name=name, tempdir=tempdir, store=store)
     sses = evaluate_sim(sim, objectives)

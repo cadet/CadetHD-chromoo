@@ -1,21 +1,6 @@
-from cadet import Cadet
 from functools import reduce
 from matplotlib import pyplot as plt
-from subprocess import run
 
-def loadh5(filename):
-    """
-        Load a cadet simulation file
-    """
-
-    cadetpath = run(['which', 'cadet-cli'], capture_output=True, text=True ).stdout.strip()
-    Cadet.cadet_path = cadetpath
-
-    sim = Cadet()
-    sim.filename = filename
-    sim.load()
-
-    return sim
 
 def keystring_todict(key, value):
     """

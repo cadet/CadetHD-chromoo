@@ -14,7 +14,8 @@ from functools import reduce
 from pathlib import Path
 
 from chromoo.log import Logger
-from chromoo.utils import loadh5, readArray, readChromatogram
+from chromoo.utils import readArray, readChromatogram
+from chromoo.simulation import loadh5
 
 from addict import Dict
 from chromoo.parameter import Parameter
