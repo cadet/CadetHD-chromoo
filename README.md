@@ -55,6 +55,7 @@ termination:
 - The `solution_times` section of the provided cadet simulation will be changed to match those of `objectives[0]` exactly.
 - Recommended population sizes for n-dimensional problems is 100*n
 - [CRIT] Don't fit porosity and velocity together. You can fit porosity and flowrate instead
+- Provided examples, while valid, are *NOT* guaranteed to be correct. Though I will try to keep them correct. 
 
 # TODO
 - [DONE] Implement logging

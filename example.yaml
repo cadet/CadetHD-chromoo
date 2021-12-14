@@ -1,20 +1,20 @@
 filename: 10k-mono.mono1d.h5
 nproc: 4
 parameters:
-    - name: axial
-      type: scalar
-      length: 1
-      index: 0
-      path: input.model.unit_002.col_dispersion
-      min_value: 1.0e-9
-      max_value: 1.0e-4
+  - name: axial
+    type: scalar
+    length: 1
+    index: 0
+    path: input.model.unit_002.col_dispersion
+    min_value: 1.0e-9
+    max_value: 1.0e-4
 objectives: 
-    - name: outlet
-      filename: chromatogram-corrected.csv
-      # times: timesteps.txt
-      score: sse
-      path: output.solution.unit_003.solution_outlet_comp_000
-      match_solution_times: true
+  - name: outlet
+    filename: chromatogram-corrected.csv
+    # times: timesteps.txt
+    score: sse
+    path: output.solution.unit_003.solution_outlet_comp_000
+    match_solution_times: true
 algorithm: 
   name: unsga3
   pop_size: 10
