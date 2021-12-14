@@ -37,6 +37,7 @@ class Subplotter():
     self, 
     nrows = 1,
     ncols = 1,
+    title = None,
     xscale='linear', 
     yscale='linear'
     ) -> None:
@@ -48,6 +49,7 @@ class Subplotter():
         self.ncols = ncols
         self.fig = plt.figure(figsize=(16,9), constrained_layout=True)
         self.gs = gridspec.GridSpec(nrows, ncols, figure=self.fig)
+        self.fig.suptitle(title)
 
     def plot(self, x, y, irow, icol, xlabel=None, ylabel=None, ls='solid', lw=1, marker=None) -> None:
         ax = self.fig.add_subplot(self.gs[irow * self.nrows + icol])
