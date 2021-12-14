@@ -70,9 +70,21 @@ def update_sim_parameters(sim, x, parameters):
     # For every parameter, generate a dictionary based on the path, and
     # update the simulation in a nested way
     # TODO: Probably a neater way to do this
+
     prev_len = 0
     for p in parameters:
         cur_len = p.get('length')
-        cur_dict = keystring_todict(p.get('path'), x[prev_len : prev_len + cur_len])
+
+        if p.index != 0:
+            arr = sim.root
+            for key in p.path.split('.'):
+                arr = arr[key]
+            assert(p.length == 1)
+            value = x[prev_len : prev_len + cur_len]
+            arr[p.index] = value
+            cur_dict = keystring_todict(p.get('path'), arr)
+        else:
+            cur_dict = keystring_todict(p.get('path'), x[prev_len : prev_len + cur_len])
+
         sim.root.update(cur_dict)
         prev_len += p.get('length')
