@@ -49,9 +49,10 @@ def evaluate_sim(newsim, objectives):
     sses = []
 
     # FIXME: Make generic scores
+    # FIXME: only objectives[0] is checked
     
     objectives_contain_times = True
-    if objectives[0].get('times'):
+    if objectives[0].times:
         objectives_contain_times = False
 
     for obj in objectives:
@@ -73,18 +74,17 @@ def update_sim_parameters(sim, x, parameters):
 
     prev_len = 0
     for p in parameters:
-        cur_len = p.get('length')
+        cur_len = p.length
 
-        if p.index != 0:
+        if p.type == 'element' :
             arr = sim.root
             for key in p.path.split('.'):
                 arr = arr[key]
-            assert(p.length == 1)
             value = x[prev_len : prev_len + cur_len]
             arr[p.index] = value
-            cur_dict = keystring_todict(p.get('path'), arr)
+            cur_dict = keystring_todict(p.path, arr)
         else:
-            cur_dict = keystring_todict(p.get('path'), x[prev_len : prev_len + cur_len])
+            cur_dict = keystring_todict(p.path, x[prev_len : prev_len + cur_len])
 
         sim.root.update(cur_dict)
-        prev_len += p.get('length')
+        prev_len += p.length

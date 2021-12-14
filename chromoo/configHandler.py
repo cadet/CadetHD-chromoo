@@ -17,6 +17,8 @@ from chromoo.log import Logger
 from chromoo.utils import loadh5, readArray, readChromatogram
 
 from addict import Dict
+from chromoo.parameter import Parameter
+from chromoo.objective import Objective
 
 
 class ConfigHandler:
@@ -67,17 +69,13 @@ class ConfigHandler:
         self.nproc=  self.get('nproc', vartype=int, default=4)
         self.store_temp =  self.get('store_temp', vartype=bool, default=False)
 
-        # NOTE: Can be arbitrarily long
-        # TODO: Find a way to check each objective/parameter for default keys and values
-        try:
-            self.objectives = [ Dict(x) for x in self.get('objectives', None, list()) ] 
-        except (TypeError):
-            raise(RuntimeError('Please provide objectives.'))
-            
-        try:
-            self.parameters = [ Dict(x) for x in self.get('parameters', None, list()) ]
-        except (TypeError):
-            raise(RuntimeError('Please provide parameters.'))
+        self.parameters = []
+        for param in self.get('parameters', vartype=list) or []:
+            self.parameters.append(Parameter(**param))
+
+        self.objectives = []
+        for param in self.get('objectives', vartype=list) or []:
+            self.objectives.append(Objective(**param))
 
         # If i'm passing a dict to a class, might be better to take the full
         # dict, and then adjust the important subfields. Otherwise, I can just manually
@@ -103,7 +101,8 @@ class ConfigHandler:
         self.simulation =  loadh5(self.filename)
 
         # NOTE: Only the first objective is checked for timesteps
-        if self.objectives[0].get('times'):
+        # FIXME:
+        if self.objectives[0].times:
             t0 = readArray(self.objectives[0].times)
             self.objectives_contain_times = False
         else:

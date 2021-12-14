@@ -5,8 +5,6 @@ import multiprocessing as mp
 
 from chromoo.utils import keystring_todict, deep_get, sse, readChromatogram, readArray
 
-# from chromoo.cache import Cache
-
 from pathlib import Path
 
 from chromoo.simulation import run_and_eval
@@ -18,18 +16,13 @@ class ChromooProblem(Problem):
         xls = []
         xus = []
 
-        # NOTE: Scalars are autoconverted to lists and chained
+        # chaining min and max values
         for p in parameters:
-            if isinstance(p.min_value, float):
-                p.min_value = [p.min_value] * p.length
-            if isinstance(p.max_value, float):
-                p.max_value = [p.max_value] * p.length
-
             xls = list(chain(xls, p.min_value))
             xus = list(chain(xus, p.max_value))
 
         super().__init__(
-            n_var = sum(p.get('length') for p in parameters), 
+            n_var = sum(p.length for p in parameters), 
             n_obj = len(objectives), 
             n_constr=0, 
             xl=xls,
@@ -44,8 +37,6 @@ class ChromooProblem(Problem):
         self.tempdir=Path(tempdir)
         self.tempdir.mkdir(exist_ok=True)
 
-        # self.cache = Cache(parameters, objectives)
-
     def _evaluate(self, X, out, *args, **kwargs):
 
         with mp.Pool(self.nproc) as pool:
@@ -53,7 +44,4 @@ class ChromooProblem(Problem):
             # out["F"] = pool.starmap(self.evaluate_sim, zip(x, repeat(None), repeat(self.store_temp))
             # out["F"] = pool.map(partial(self.evaluate_sim, store=self.store_temp), X)
             out["F"] = pool.map( partial(run_and_eval, sim=self.sim, parameters=self.parameters, objectives=self.objectives, name=None, tempdir=self.tempdir, store=self.store_temp), X)
-
-
-
 
