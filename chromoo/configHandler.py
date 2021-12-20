@@ -36,7 +36,7 @@ class ConfigHandler:
         """
         self.config = Dict(self.yaml.load(Path(fname)))
 
-    def get(self, keys, default=None, vartype=None, choices=[]):
+    def get(self, keys, default=None, vartype=None, choices=[], wrapper=None):
         """
         Simpler syntax to get deep values from a dictionary
         > config.get('key1.key2.key3', defaultValue)
@@ -58,6 +58,9 @@ class ConfigHandler:
         if choices:
             if value not in choices:
                 self.logger.die(keys, 'has invalid value! Must be one of ', str(choices))
+
+        if wrapper:
+            value = wrapper(value)
 
         return value
 
