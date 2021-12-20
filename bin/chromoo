@@ -9,9 +9,9 @@ from chromoo.simulation import loadh5
 from chromoo.cache import Cache
 from chromoo.simulation import run_sim
 
-from pymoo.optimize import minimize
 from pymoo.util.termination.default import MultiObjectiveDefaultTermination
 
+import numpy as np
 import argparse
 
 def main():
@@ -43,15 +43,13 @@ def main():
         n_max_evals = config.termination.n_max_evals
     )
 
+    algo.setup(prob, term, callback=ChromooCallback(cache), seed=1, verbose=True)
 
-    res = minimize(
-            prob, 
-            algo,
-            term,
-            seed=122,
-            callback=ChromooCallback(cache),
-            verbose=True
-    )
+    while algo.has_next():
+        algo.next()
+        np.save("checkpoint", algo)
+
+    res = algo.result()
 
     logger.info(f"Took {res.exec_time:.2f} seconds to terminate.")
     logger.info(f"Fitted Parameters: {res.X}")
