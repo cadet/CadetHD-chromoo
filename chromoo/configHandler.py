@@ -118,3 +118,8 @@ class ConfigHandler:
 
         self.simulation.root.input.solver.sections.section_times = [min(t0), max(t0)]
         self.simulation.root.input.solver.user_solution_times = t0
+
+        if self.nproc > 1: 
+            self.simulation.root.input.solver.nthreads = 1
+        else: 
+            self.simulation.root.input.solver.nthreads = -1
