@@ -30,7 +30,6 @@ def main():
 
     cache = Cache(config.parameters, config.objectives, config.simulation)
 
-    algo = AlgorithmFactory(config.algorithm).get_algorithm()
     prob = ChromooProblem(config.simulation, config.parameters, config.objectives, nproc=config.nproc, store_temp=config.store_temp)
 
     term = MultiObjectiveDefaultTermination(
@@ -43,7 +42,13 @@ def main():
         n_max_evals = config.termination.n_max_evals
     )
 
-    algo.setup(prob, term, callback=ChromooCallback(cache), seed=1, verbose=True)
+    if config.load_checkpoint.is_file(): 
+        algo, = np.load(config.load_checkpoint, allow_pickle=True).flatten()
+        if config.force_checkpoint_continue: 
+            algo.has_terminated = False
+    else:
+        algo = AlgorithmFactory(config.algorithm).get_algorithm()
+        algo.setup(prob, term, callback=ChromooCallback(cache), seed=1, verbose=True)
 
     while algo.has_next():
         algo.next()

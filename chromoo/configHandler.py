@@ -73,6 +73,9 @@ class ConfigHandler:
         self.nproc=  self.get('nproc', vartype=int, default=4)
         self.store_temp =  self.get('store_temp', vartype=bool, default=False)
 
+        self.load_checkpoint = self.get('load_checkpoint', vartype=str, default='.', wrapper=Path)
+        self.force_checkpoint_continue = self.get('force_checkpoint_continue', vartype=bool, default=False)
+
         self.parameters = []
         for param in self.get('parameters', vartype=list) or []:
             self.parameters.append(Parameter(**param))
