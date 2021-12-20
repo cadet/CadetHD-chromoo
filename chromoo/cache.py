@@ -71,6 +71,7 @@ class Cache:
 
                 plot.scatter(x,y)
                 plot.save(f"gen{igen}_{self.p_names[i_par]}_{self.o_names[i_obj]}.png")
+                plot.close()
 
     def scatter_all(self,
         title=None,
@@ -111,3 +112,4 @@ class Cache:
 
         plot.plot(range(1,len(self.best_scores)+1), self.best_scores)
         plot.save(f"best_scores.png")
+        plot.close()

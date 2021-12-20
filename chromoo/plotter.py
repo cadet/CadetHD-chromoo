@@ -31,6 +31,9 @@ class Plotter():
     def show(self) -> None:
         plt.show()
 
+    def close(self):
+        plt.close(self.fig)
+
 
 class Subplotter():
     def __init__(
