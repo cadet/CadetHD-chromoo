@@ -16,8 +16,10 @@ Chromoo requires a YAML config file. I use ruamel.yaml, which allows using YAML 
 
 A template of the config follows:
 
-```
+```yaml
 filename: 10k-mono.mono1d.h5
+load_checkpoint: checkpoint.npy
+force_checkpoint_continue: false
 nproc: 4
 store_temp: false
 parameters:
@@ -56,6 +58,11 @@ termination:
 - Recommended population sizes for n-dimensional problems is 100*n
 - [CRIT] Don't fit porosity and velocity together. You can fit porosity and flowrate instead
 - Provided examples, while valid, are *NOT* guaranteed to be correct. Though I will try to keep them correct. 
+- Checkpoints are saved at every generation by default. Checkpoints help avoid the pain of libpthread (or other) crashes from having to completely restart the fitting.
+- Use `force_checkpoint_continue` to force the algorithm to continue from a terminated checkpoint. Helpful if you made the termination criteria stricter.
+
+# Known Issues
+- [CRIT] Got simulation failure due to `error 4 in libpthread` (see dmesg when it happens) on IBT012. Simulation runs manually.
 
 # TODO
 - [DONE] Implement logging
@@ -77,15 +84,20 @@ termination:
 - [DONE] Implment an own Parameter and Objective class to handle vector parameter indices easily
 - [DONE] Fix plot axis labels to include parameter/objective names and indices
 - [DONE] Allow YAML input along with h5
-- [TASK] Sometimes simulations fail for no reason. Check out timeouts in CADET-Match
+- [DONE] Implement checkpointing!
+- [TASK] Last best should be a pareto front
+- [TASK] Implement Objective vs Objective 2D plots
+- [TASK] Write csv of all simulated points to be able to generate plots at will
+- [TASK] Output results into a subdirectory to avoid polluting root
+- [TASK] Implement sobolGenerations
 - [TASK] Look into parameter transforms: 0->1 at inlet
+- [TASK] Sometimes simulations fail for no reason. Check out timeouts in CADET-Match
 - [TASK] Run plots in subprocess, look at how to create multiple plots safely 
 - [TASK] Implement match_solution_times config setting
 - [TASK] Implement gradient search after GA
 - [TASK] look at pareto front
 - [TASK] CMAES optimizer: single objective
 - [TASK] Use geometric mean for combining multiple objectives in to single objective
-- [TASK] Implement sobolGenerations
 - [TASK] Implement checkpointing: pickle data
 - [TASK] Adjust Verbose Display according to algorithm used
 - [TASK] Random seeds
