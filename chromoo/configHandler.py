@@ -69,8 +69,8 @@ class ConfigHandler:
         Assign values from the config dict to the object's attributes
         Centralizes the config value and type checking
         """
-        self.filename=  self.get('filename', vartype=str())
-        self.nproc=  self.get('nproc', vartype=int, default=4)
+        self.filename   =  self.get('filename', vartype=str())
+        self.nproc      =  self.get('nproc', vartype=int, default =4)
         self.store_temp =  self.get('store_temp', vartype=bool, default=False)
 
         self.load_checkpoint = self.get('load_checkpoint', vartype=str, default='.', wrapper=Path)
