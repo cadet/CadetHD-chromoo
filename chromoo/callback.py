@@ -1,6 +1,8 @@
 from pymoo.core.callback import Callback
 from chromoo.simulation import run_sim
 
+from math import sqrt
+
 class ChromooCallback(Callback):
 
     def __init__(self, cache) -> None:
@@ -15,7 +17,7 @@ class ChromooCallback(Callback):
         F = algorithm.pop.get("F")
         X = algorithm.pop.get("X")
 
-        best_score_magnitude = sum(map(lambda x: x**2, algorithm.opt[0].F))
+        best_score_magnitude = sqrt(sum(map(lambda x: x**2, algorithm.opt[0].F)))
 
         self.cache.best_scores.append(f_opt0)
         self.cache.best_score_magnitude_pareto0.append(best_score_magnitude)
