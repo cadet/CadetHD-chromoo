@@ -48,6 +48,7 @@ def main():
         if config.force_checkpoint_continue: 
             algo.has_terminated = False
     else:
+        logger.info(f"Starting optimization from scratch!")
         algo = AlgorithmFactory(config.algorithm).get_algorithm()
         algo.setup(prob, term, callback=ChromooCallback(cache), seed=1, verbose=True)
 
