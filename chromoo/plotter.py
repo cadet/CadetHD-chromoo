@@ -1,5 +1,8 @@
 from matplotlib import pyplot as plt
 from matplotlib import gridspec 
+import matplotlib
+
+matplotlib.use('Agg')
 
 class Plotter():
     def __init__(
