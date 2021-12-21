@@ -6,8 +6,6 @@ class ChromooCallback(Callback):
     def __init__(self, cache) -> None:
         super().__init__()
         self.cache = cache
-        self.data["best_scores"] = []
-        self.data["last_best_individual"] = []
 
     def notify(self, algorithm):
         # NOTE: Only captures the first of many best solutions for MOOs
@@ -17,8 +15,12 @@ class ChromooCallback(Callback):
         F = algorithm.pop.get("F")
         X = algorithm.pop.get("X")
 
-        self.data["best_scores"].append(f_opt0)
-        self.data["last_best_individual"] = x_opt0
+        best_score_magnitude = sum(map(lambda x: x**2, algorithm.opt[0].F))
+
+        self.cache.best_scores.append(f_opt0)
+        self.cache.best_score_magnitude_pareto0.append(best_score_magnitude)
+        self.cache.last_best_individual = x_opt0
+
         self.update_cache(X, F)
         self.save_last_best()
 
@@ -30,9 +32,8 @@ class ChromooCallback(Callback):
             yscale='log',
         )
 
-        self.cache.best_scores = self.data["best_scores"]
         self.cache.plot_best_scores()
-        self.cache.last_best_individual = self.data["last_best_individual"]
+        self.cache.plot_best_score_magnitude()
 
     def save_last_best(self):
-        run_sim(self.data["last_best_individual"], self.cache.simulation, self.cache.parameters, "last_best.h5", store=True)
+        run_sim(self.cache.last_best_individual, self.cache.simulation, self.cache.parameters, "last_best.h5", store=True)

@@ -11,6 +11,7 @@ class Cache:
 
         self.database = []          # n_generation x n_individual x [n_par + n_obj]
         self.best_scores = []
+        self.best_score_magnitude_pareto0 = []
         self.last_best_individual = []
 
         self.parameters = parameters
@@ -112,4 +113,16 @@ class Cache:
 
         plot.plot(range(1,len(self.best_scores)+1), self.best_scores)
         plot.save(f"best_scores.png")
+        plot.close()
+
+    def plot_best_score_magnitude(self):
+        plot = Plotter(
+            title='Best Score Magnitude Pareto0', 
+            xlabel='generations',
+            ylabel='Score',
+            yscale='log'
+        )
+
+        plot.plot(range(1,len(self.best_scores)+1), self.best_score_magnitude_pareto0)
+        plot.save(f"best_scores_magnitude.png")
         plot.close()
