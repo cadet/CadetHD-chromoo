@@ -91,8 +91,6 @@ class Cache:
             yscale=yscale
         )
 
-        self.parameters
-
         for i_obj in range(self.n_obj):
             for i_par in range(self.n_par):
                 x = arr[:,:,i_par]
