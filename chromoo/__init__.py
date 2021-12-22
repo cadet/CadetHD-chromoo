@@ -5,10 +5,13 @@ ChroMOO
     PyMOO for chromatography
 """
 
+import pkg_resources
+
 name = 'chromoo'
 
 # __version__ = pkg_resources.get_distribution("chromoo").version
 __version__ = '0.1'
+__git_version__ = pkg_resources.get_distribution("chromoo").version
 __author__ = 'Jayghosh Rao'
 __credits__ = 'FZJ/IBG-1/ModSim'
 
