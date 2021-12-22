@@ -2,12 +2,21 @@ from pymoo.core.callback import Callback
 from chromoo.simulation import run_sim
 
 from math import sqrt
+import numpy as np
+
+import csv
+import os
 
 class ChromooCallback(Callback):
 
     def __init__(self, cache) -> None:
         super().__init__()
         self.cache = cache
+
+        try: 
+            os.remove('pareto.csv')
+        except FileNotFoundError:
+            pass
 
     def notify(self, algorithm):
         # NOTE: Only captures the first of many best solutions for MOOs
@@ -25,6 +34,11 @@ class ChromooCallback(Callback):
 
         self.update_cache(X, F)
         self.save_last_best()
+
+        with open('pareto.csv', 'w') as fp:
+            writer = csv.writer(fp)
+            writer.writerow(self.cache.p_names + self.cache.o_names)
+            writer.writerows(map(lambda opt: np.append(opt.X, opt.F) ,algorithm.opt))
 
     def update_cache(self, X, F):
         self.cache.add(X,F)
