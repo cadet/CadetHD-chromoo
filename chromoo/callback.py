@@ -26,8 +26,10 @@ class ChromooCallback(Callback):
         F = algorithm.pop.get("F")
         X = algorithm.pop.get("X")
 
-        best_score_magnitude = sqrt(sum(map(lambda x: x**2, algorithm.opt[0].F)))
+        # best_score_magnitude = sqrt(sum(map(lambda x: x**2, algorithm.opt[0].F)))
 
+        obj_magnitudes = self.magnitude(algorithm.opt)
+        best_score_magnitude = obj_magnitudes[0]
         self.cache.best_scores.append(f_opt0)
         self.cache.best_score_magnitude_pareto0.append(best_score_magnitude)
         self.cache.last_best_individual = x_opt0
@@ -53,3 +55,7 @@ class ChromooCallback(Callback):
 
     def save_last_best(self):
         run_sim(self.cache.last_best_individual, self.cache.simulation, self.cache.parameters, "last_best.h5", store=True)
+
+    def magnitude(self, algo_opt):
+        """ return magnitudes of a list of vectors """
+        return [ sqrt(sum(map(lambda x: x**2, opt.F))) for opt in algo_opt ]
