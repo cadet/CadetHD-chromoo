@@ -60,6 +60,7 @@ termination:
 - Provided examples, while valid, are *NOT* guaranteed to be correct. Though I will try to keep them correct. 
 - Checkpoints are saved at every generation by default. Checkpoints help avoid the pain of libpthread (or other) crashes from having to completely restart the fitting.
 - Use `force_checkpoint_continue` to force the algorithm to continue from a terminated checkpoint. Helpful if you made the termination criteria stricter.
+- Be careful when resuming from a checkpoint. Any changes to problem parameters might not be reflected because the algorithm/problem is fully restored from the checkpoint
 
 # Known Issues
 - [CRIT] Got simulation failure due to `error 4 in libpthread` (see dmesg when it happens) on IBT012. Simulation runs manually.
@@ -85,6 +86,8 @@ termination:
 - [DONE] Fix plot axis labels to include parameter/objective names and indices
 - [DONE] Allow YAML input along with h5
 - [DONE] Implement checkpointing!
+- [CRIT] Post generation processing takes a lot of time, fix it
+- [TASK] Timestamp at start
 - [TASK] Last best should be a pareto front
 - [TASK] Implement Objective vs Objective 2D plots
 - [TASK] Write csv of all simulated points to be able to generate plots at will
@@ -105,5 +108,7 @@ termination:
 - [TASK] Make sure tests delete temp files
 - [TASK] Write unit tests for all classes
 - [TASK] Look at save_history = True
+- [TASK] Write a configHandler method to output a dummy config.
 - [CRIT] For the split-chromatogram problem, we know that the axial dispersion in once radial shell won't affect the chromatogram in another, so it does have a constraint. Is there a way to constrain the parameters that way? Or does it just mean we solve the system serially? 
 - [TASK] Unified interface/method for deep getting and setting from/to a Dict or dict
+- [TASK] Fix typings for configHandler attributes
