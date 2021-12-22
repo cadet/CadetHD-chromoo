@@ -1,5 +1,8 @@
 filename: 10k-mono.mono1d.h5
+load_checkpoint: checkpoint.npy
+force_checkpoint_continue: false
 nproc: 4
+store_temp: false
 parameters:
   - name: axial
     type: scalar
