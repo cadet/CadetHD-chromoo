@@ -14,13 +14,18 @@ from pymoo.util.termination.default import MultiObjectiveDefaultTermination
 import numpy as np
 import argparse
 
+from datetime import datetime as dt
+
 def main():
+
     ap = argparse.ArgumentParser()
     ap.add_argument("file", nargs=1, help="yaml config file")
     args = vars(ap.parse_args())
 
+    TIMESTAMP = dt.now().strftime("%Y-%m-%d %H:%M:%S")
+
     logger = Logger()
-    logger.info("Starting chromoo")
+    logger.info(f"Starting chromoo at {TIMESTAMP}")
     logger.note('chromoo version', __version__)
 
     config = ConfigHandler()
