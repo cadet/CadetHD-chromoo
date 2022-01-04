@@ -21,10 +21,12 @@ class ChromooCallback(Callback):
             pass
 
     def notify(self, algorithm):
+        """ Main callback method """
         self.algorithm = algorithm
         asyncio.run(self.subcallback())
 
     async def subcallback(self):
+        """ Async submethod to perform operations in individual threads """
         await asyncio.gather(
             asyncio.to_thread(self.plot_best_scores),
             asyncio.to_thread(self.plot_best_score_magnitude),
@@ -34,6 +36,7 @@ class ChromooCallback(Callback):
 
 
     def update_scatter_plot(self):
+        """ Update the objectives_vs_parameters scatter plot """
         F = self.algorithm.pop.get("F")
         X = self.algorithm.pop.get("X")
         self.cache.add(X,F)
@@ -44,11 +47,13 @@ class ChromooCallback(Callback):
         )
 
     def plot_best_scores(self):
+        """ Plot the first point on the Pareto front """
         f_opt0 = self.algorithm.opt[0].F
         self.cache.best_scores.append(f_opt0)
         self.cache.plot_best_scores()
 
     def plot_best_score_magnitude(self):
+        """ Plot the vector magnitude of all objectives of the first point on the Pareto front """
         opt = self.algorithm.opt
         obj_magnitudes = self.magnitude(opt)
         best_score_magnitude = obj_magnitudes[0]
@@ -61,6 +66,7 @@ class ChromooCallback(Callback):
         return [ sqrt(sum(map(lambda x: x**2, opt.F))) for opt in algo_opts ]
 
     def write_pareto(self):
+        """ Write the current Pareto solution to a csv file """
         with open('pareto.csv', 'w') as fp:
             writer = csv.writer(fp)
             writer.writerow(self.cache.p_names + self.cache.o_names)
