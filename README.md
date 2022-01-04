@@ -86,22 +86,25 @@ termination:
 - [DONE] Fix plot axis labels to include parameter/objective names and indices
 - [DONE] Allow YAML input along with h5
 - [DONE] Implement checkpointing!
-- [CRIT] Post generation processing takes a lot of time, fix it
-- [TASK] Timestamp at start
-- [TASK] Last best should be a pareto front
+- [DONE] Post generation processing takes a lot of time, fix it: Made it async
+    - [TASK] Might need to fully make it a subprocess call for better results
+- [CRIT] Hypervolume indicator as a convergence criterion
+- [DONE] Timestamp at start
+- Parallellize final_XXX simulations and plots. They take way too long with hundreds of solutions.
+- [DROP] Last best should be a pareto front
 - [TASK] Implement Objective vs Objective 2D plots
-- [TASK] Write csv of all simulated points to be able to generate plots at will
+- [DROP] Write csv of all simulated points to be able to generate plots at will
+    - [DONE] Write Pareto front to csv
 - [TASK] Output results into a subdirectory to avoid polluting root
 - [TASK] Implement sobolGenerations
-- [TASK] Look into parameter transforms: 0->1 at inlet
-- [TASK] Sometimes simulations fail for no reason. Check out timeouts in CADET-Match
+- [CRIT] Look into parameter transforms: 0->1 at inlet
+- [DROP] Sometimes simulations fail for no reason. Check out timeouts in CADET-Match
 - [TASK] Run plots in subprocess, look at how to create multiple plots safely 
 - [TASK] Implement match_solution_times config setting
 - [TASK] Implement gradient search after GA
-- [TASK] look at pareto front
 - [TASK] CMAES optimizer: single objective
 - [TASK] Use geometric mean for combining multiple objectives in to single objective
-- [TASK] Implement checkpointing: pickle data
+- [DONE] Implement checkpointing
 - [TASK] Adjust Verbose Display according to algorithm used
 - [TASK] Random seeds
 - [TASK] Implement better scores: Check out CADET-Match
