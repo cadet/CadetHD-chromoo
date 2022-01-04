@@ -58,6 +58,7 @@ class ChromooCallback(Callback):
         opt = self.algorithm.opt
         obj_magnitudes = self.magnitude(opt)
         best_score_magnitude = obj_magnitudes[0]
+        self.cache.best_scores_magnitudes = obj_magnitudes
         self.cache.best_score_magnitude_pareto0.append(best_score_magnitude)
         self.cache.plot_best_score_magnitude()
 

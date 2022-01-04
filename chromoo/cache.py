@@ -13,6 +13,7 @@ class Cache:
         self.best_scores = []
         self.best_score_magnitude_pareto0 = []
         self.last_best_individual = []
+        self.best_scores_magnitudes = []
 
         self.parameters = parameters
         self.objectives = objectives

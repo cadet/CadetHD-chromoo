@@ -13,6 +13,7 @@ from pymoo.util.termination.default import MultiObjectiveDefaultTermination
 
 import numpy as np
 import argparse
+import numpy as np
 
 from datetime import datetime as dt
 
@@ -67,17 +68,20 @@ def main():
     logger.info(f"Fitted Parameters: {res.X}")
     logger.info(f"SSE: {res.F}")
 
-    # For single objective systems we get one fixed point
-    # For multiobjective systems, we get a set of solutions, a pareto front.
     if len(config.objectives) == 1: 
+        # For single objective systems we get one fixed point
         run_sim(res.X, config.simulation, config.parameters, name='final.h5', store=True)
         sim = loadh5('final.h5')
         plotter(sim, config.objectives) 
     else:
-        for i,x in enumerate(res.X): #type: ignore
-            run_sim(x, config.simulation, config.parameters, name=f'final_{i:03d}.h5', store=True)
-            sim = loadh5(f'final_{i:03d}.h5')
-            plotter(sim, config.objectives) 
+        # For multiobjective systems, we get a set of solutions, a pareto front.
+        # We find the parameters that created the best vector magnitude for the
+        # scores, and save the simulation and plots.
+        best_index = np.argmin(cache.best_scores_magnitudes)
+
+        run_sim(res.X[best_index], config.simulation, config.parameters, name='final.h5', store=True)
+        sim = loadh5('final.h5')
+        plotter(sim, config.objectives)
 
     if not config.store_temp:
         import shutil
