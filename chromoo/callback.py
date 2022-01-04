@@ -26,7 +26,6 @@ class ChromooCallback(Callback):
 
     async def subcallback(self):
         await asyncio.gather(
-            asyncio.to_thread(self.save_last_best),
             asyncio.to_thread(self.plot_best_scores),
             asyncio.to_thread(self.plot_best_score_magnitude),
             asyncio.to_thread(self.update_scatter_plot),
@@ -43,11 +42,6 @@ class ChromooCallback(Callback):
             xscale='log',
             yscale='log',
         )
-
-    def save_last_best(self):
-        x_opt0 = self.algorithm.opt[0].X
-        self.cache.last_best_individual = x_opt0
-        run_sim(self.cache.last_best_individual, self.cache.simulation, self.cache.parameters, "last_best.h5", store=True)
 
     def plot_best_scores(self):
         f_opt0 = self.algorithm.opt[0].F
