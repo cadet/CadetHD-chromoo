@@ -18,6 +18,8 @@ class Cache:
         self.opt : Population  
 
         self.best: dict = {}
+        self.best_scores = []
+        self.best_combined_scores = []
 
         self.parameters = config.parameters
         self.objectives = config.objectives
@@ -126,5 +128,20 @@ class Cache:
                 'X': transforms[self.parameter_transform]['inverse'](self.opt[min_index].X, self.par_min_values, self.par_max_values),
                 'F': self.opt[min_index].F
             })
+            self.best_scores.append(self.opt[min_index].F)
+            self.best_combined_scores.append(gmeans[min_index])
+
+            plot = Plotter(
+                title='Best Geometric Mean of Scores',
+                xlabel='Generation',
+                ylabel='Mean score',
+                xscale='linear',
+                yscale='log'
+            )
+
+            plot.plot(range(1,len(self.best_combined_scores)+1), self.best_combined_scores)
+            plot.save('best_combined_solution.png')
+            plot.close()
+
         else: 
             raise RuntimeError("Invalid method to find best solution!")
