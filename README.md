@@ -22,6 +22,9 @@ load_checkpoint: checkpoint.npy
 force_checkpoint_continue: false
 nproc: 4
 store_temp: false
+transforms: 
+  parameters: lognorm
+  objectives: geometric
 parameters:
     - name: axial
       length: 1
@@ -61,6 +64,8 @@ termination:
 - Checkpoints are saved at every generation by default. Checkpoints help avoid the pain of libpthread (or other) crashes from having to completely restart the fitting.
 - Use `force_checkpoint_continue` to force the algorithm to continue from a terminated checkpoint. Helpful if you made the termination criteria stricter.
 - Be careful when resuming from a checkpoint. Any changes to problem parameters might not be reflected because the algorithm/problem is fully restored from the checkpoint
+- `transforms.parameters` (choices = [`lognorm`, `norm`, `none`]) applies to all inputs individually
+- `transforms.objectives` (choices = [`none`, `mean`, `geometric`]) will be made to convert multiple objectives into a single objective.
 
 # Known Issues
 - [CRIT] Got simulation failure due to `error 4 in libpthread` (see dmesg when it happens) on IBT012. Simulation runs manually.
