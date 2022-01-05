@@ -21,6 +21,8 @@ from addict import Dict
 from chromoo.parameter import Parameter
 from chromoo.objective import Objective
 
+from typing import Any
+
 from itertools import chain
 
 class ConfigHandler:
@@ -37,7 +39,7 @@ class ConfigHandler:
         """
         self.config = Dict(self.yaml.load(Path(fname)))
 
-    def get(self, keys, default=None, vartype=None, choices=[], wrapper=None):
+    def get(self, keys, default=None, vartype=None, choices=[], wrapper=None) -> Any:
         """
         Simpler syntax to get deep values from a dictionary
         > config.get('key1.key2.key3', defaultValue)
