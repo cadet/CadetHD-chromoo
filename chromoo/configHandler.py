@@ -21,6 +21,7 @@ from addict import Dict
 from chromoo.parameter import Parameter
 from chromoo.objective import Objective
 
+from itertools import chain
 
 class ConfigHandler:
 
@@ -80,9 +81,18 @@ class ConfigHandler:
         for param in self.get('parameters', vartype=list) or []:
             self.parameters.append(Parameter(**param))
 
+        self.par_min_values = []
+        self.par_max_values = []
+
+        # chaining min and max values
+        for p in self.parameters:
+            self.par_min_values = list(chain(self.par_min_values, p.min_value))
+            self.par_max_values = list(chain(self.par_max_values, p.max_value))
+
         self.objectives = []
         for param in self.get('objectives', vartype=list) or []:
             self.objectives.append(Objective(**param))
+
 
         # If i'm passing a dict to a class, might be better to take the full
         # dict, and then adjust the important subfields. Otherwise, I can just manually
@@ -94,6 +104,9 @@ class ConfigHandler:
         self.algorithm.pop_size= self.get('algorithm.pop_size', 10, vartype=int)
         self.algorithm.n_offsprings = self.get('algorithm.n_offsprings', self.algorithm.pop_size, vartype=int)
         self.algorithm.n_obj= len(self.objectives)
+
+        self.parameter_transform = self.get('transforms.parameters', 'none', str, ['none', 'lognorm', 'norm'])
+        # self.objective_transform = self.get('transforms.objectives', 'none', str, ['none', 'mean', 'geometric'])
 
         self.termination = Dict()
         self.termination.x_tol = self.get('termination.x_tol', 1e-12, float)
