@@ -1,24 +1,36 @@
 from pymoo.core.problem import Problem
 from itertools import chain
 from functools import partial
-import multiprocessing as mp
 
+import multiprocessing as mp
 from pathlib import Path
 from chromoo.simulation import run_and_eval
+from chromoo.transforms import transform_population
 
 class ChromooProblem(Problem):
-    def __init__(self, sim, parameters, objectives, nproc=4, tempdir='temp', store_temp=False):
+    def __init__(self, sim, parameters, objectives, nproc=4, tempdir='temp', store_temp=False, transform='none'):
         
-        xls = []
-        xus = []
+        self.min_values = []
+        self.max_values = []
 
         # chaining min and max values
         for p in parameters:
-            xls = list(chain(xls, p.min_value))
-            xus = list(chain(xus, p.max_value))
+            self.min_values = list(chain(self.min_values, p.min_value))
+            self.max_values = list(chain(self.max_values, p.max_value))
+
+        n_var = sum(p.length for p in parameters)
+
+        self.transform = transform
+
+        if self.transform != 'none':
+            xls = [0] * n_var
+            xus = [1] * n_var
+        else: 
+            xls = self.min_values
+            xus = self.max_values
 
         super().__init__(
-            n_var = sum(p.length for p in parameters), 
+            n_var = n_var,
             n_obj = len(objectives), 
             n_constr=0, 
             xl=xls,
@@ -36,8 +48,6 @@ class ChromooProblem(Problem):
     def _evaluate(self, X, out, *args, **kwargs):
 
         with mp.Pool(self.nproc) as pool:
-            # out["F"] = pool.map(self.evaluate_sim, x)
-            # out["F"] = pool.starmap(self.evaluate_sim, zip(x, repeat(None), repeat(self.store_temp))
-            # out["F"] = pool.map(partial(self.evaluate_sim, store=self.store_temp), X)
-            out["F"] = pool.map( partial(run_and_eval, sim=self.sim, parameters=self.parameters, objectives=self.objectives, name=None, tempdir=self.tempdir, store=self.store_temp), X)
+            denormalized_inputs = transform_population(X, self.min_values, self.max_values, self.transform, mode='inverse')
+            out["F"] = pool.map( partial(run_and_eval, sim=self.sim, parameters=self.parameters, objectives=self.objectives, name=None, tempdir=self.tempdir, store=self.store_temp), denormalized_inputs)
 
