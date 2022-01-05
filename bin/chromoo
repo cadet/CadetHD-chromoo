@@ -8,6 +8,7 @@ from chromoo.simulation import loadh5
 
 from chromoo.cache import Cache
 from chromoo.simulation import run_sim
+from chromoo.transforms import transform_population
 
 from pymoo.util.termination.default import MultiObjectiveDefaultTermination
 
@@ -34,7 +35,7 @@ def main():
     config.load()
     config.construct_simulation()
 
-    cache = Cache(config.parameters, config.objectives, config.simulation)
+    cache = Cache(config)
 
     prob = ChromooProblem(config.simulation, config.parameters, config.objectives, nproc=config.nproc, store_temp=config.store_temp, transform = config.parameter_transform)
 
@@ -65,7 +66,7 @@ def main():
     res = algo.result()
 
     logger.info(f"Took {res.exec_time:.2f} seconds to terminate.")
-    logger.info(f"Fitted Parameters: {res.X}")
+    logger.info(f"Fitted Parameters (Transformed): {res.X}")
     logger.info(f"SSE: {res.F}")
 
     if len(config.objectives) == 1: 
@@ -77,11 +78,9 @@ def main():
         # For multiobjective systems, we get a set of solutions, a pareto front.
         # We find the parameters that created the best vector magnitude for the
         # scores, and save the simulation and plots.
-        best_index = np.argmin(cache.best_scores_magnitudes)
+        # TODO: Fix after implementing combined objective scoring
+        pass
 
-        run_sim(res.X[best_index], config.simulation, config.parameters, name='final.h5', store=True)
-        sim = loadh5('final.h5')
-        plotter(sim, config.objectives)
 
     if not config.store_temp:
         import shutil

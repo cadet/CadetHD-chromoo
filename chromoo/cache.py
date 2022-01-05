@@ -1,53 +1,49 @@
-from operator import itemgetter
-
 from chromoo.plotter import Plotter, Subplotter
 import numpy as np
+from chromoo.transforms import transform_population, transforms
+from itertools import chain
+
+import csv
 
 class Cache:
     """
         Should store problem data
     """
-    def __init__(self, parameters, objectives, simulation, filename='cache.csv') -> None:
+    def __init__(self, config) -> None:
 
+        # Database of all populations for all generations and their results
         self.database = []          # n_generation x n_individual x [n_par + n_obj]
-        self.best_scores = []
-        self.best_score_magnitude_pareto0 = []
-        self.last_best_individual = []
-        self.best_scores_magnitudes = []
 
-        self.parameters = parameters
-        self.objectives = objectives
-        self.n_par = sum( p.length for p in parameters )
-        self.n_obj = len(objectives)
-        self.filename = filename
+        # algorithm.opt for the latest generation
+        self.opt = None
+
+        self.parameters = config.parameters
+        self.objectives = config.objectives
+
+        self.parameter_transform = config.parameter_transform
+        self.objective_transform = config.objective_transform
+
+        self.n_par = sum( p.length for p in config.parameters )
+        self.n_obj = len(config.objectives)
 
         self.p_names = []
         self.o_names = []
 
-        for p in parameters:
+        for p in self.parameters:
             for i in range(p.length):
                 self.p_names.append(f"{p.name}[{i}]")
 
-        for o in objectives:
+        for o in self.objectives:
             self.o_names.append(f"{o.name}")
             
+        self.par_min_values = config.par_min_values
+        self.par_max_values = config.par_max_values
 
-        self.simulation = simulation
+        self.simulation = config.simulation
 
-    def add(self, population:list, scores:list) -> None:
-        self.database.append(np.column_stack((population, scores)))
-
-    def best_gen(self, igen:int):
-        return min(self.database[igen], key=itemgetter(1))
-
-    def worst_gen(self, igen:int):
-        return max(self.database[igen], key=itemgetter(1))
-
-    def best_all(self):
-        return min(self.best_gen(i)[1][0] for i,_ in enumerate(self.database))
-
-    def best_all_slice(self, index:int):
-        return min(self.best_gen(i)[1][0] for i,_ in enumerate(self.database[0:index]))
+    def update_database(self, population:list, scores:list) -> None:
+        denormalized_population = transform_population(population, self.par_min_values, self.par_max_values, self.parameter_transform, mode='inverse')
+        self.database.append(np.column_stack((denormalized_population, scores)))
 
     def scatter_gen(self, igen:int, 
         title=None,
@@ -102,26 +98,18 @@ class Cache:
         plot.save(f"ALL.png")
         plot.close()
 
-    def plot_best_scores(self):
-        plot = Plotter(
-            title='Best Scores', 
-            xlabel='generations',
-            ylabel='Score',
-            yscale='log'
+    def write_pareto(self):
+        """ Write the current Pareto solution to a csv file """
+        # TODO: Use pandas or something
+        with open('pareto.csv', 'w') as fp:
+            writer = csv.writer(fp)
+            writer.writerow(self.p_names + self.o_names)
+            writer.writerows(map(lambda opt: np.append(transforms[self.parameter_transform]['inverse'](opt.X, self.par_min_values, self.par_max_values), opt.F) , self.opt))
+
+    def update_scatter_plot(self):
+        """ Update the objectives_vs_parameters scatter plots """
+        self.scatter_all(
+            title=f"gen_all",
+            xscale='log',
+            yscale='log',
         )
-
-        plot.plot(range(1,len(self.best_scores)+1), self.best_scores)
-        plot.save(f"best_scores.png")
-        plot.close()
-
-    def plot_best_score_magnitude(self):
-        plot = Plotter(
-            title='Best Score Magnitude Pareto0', 
-            xlabel='generations',
-            ylabel='Score',
-            yscale='log'
-        )
-
-        plot.plot(range(1,len(self.best_scores)+1), self.best_score_magnitude_pareto0)
-        plot.save(f"best_scores_magnitude.png")
-        plot.close()
