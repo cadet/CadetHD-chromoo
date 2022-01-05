@@ -106,6 +106,7 @@ class ConfigHandler:
         self.algorithm.pop_size= self.get('algorithm.pop_size', 10, vartype=int)
         self.algorithm.n_offsprings = self.get('algorithm.n_offsprings', self.algorithm.pop_size, vartype=int)
         self.algorithm.n_obj= len(self.objectives)
+        self.algorithm.init_sobol = self.get('algorithm.init_sobol', False, bool)
 
         self.parameter_transform = self.get('transforms.parameters', 'none', str, ['none', 'lognorm', 'norm'])
         # self.objective_transform = self.get('transforms.objectives', 'none', str, ['none', 'mean', 'geometric'])

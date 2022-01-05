@@ -12,6 +12,8 @@ from chromoo.transforms import transform_population
 
 from pymoo.util.termination.default import MultiObjectiveDefaultTermination
 
+from SALib.sample import sobol_sequence
+
 import numpy as np
 import argparse
 import numpy as np
@@ -48,6 +50,13 @@ def main():
         n_max_gen   = config.termination.n_max_gen,
         n_max_evals = config.termination.n_max_evals
     )
+
+    if config.algorithm.init_sobol: 
+        init_pop = sobol_sequence.sample(config.algorithm.pop_size, len(config.par_min_values))
+        if config.parameter_transform == 'none':
+            # If we don't normalize our inputs
+            init_pop = init_pop * (np.array(config.par_max_values) - np.array(config.par_min_values)) + np.array(config.par_min_values)
+        config.algorithm.init_pop = init_pop
 
     if config.load_checkpoint.is_file(): 
         logger.info(f"Resuming from checkpoint: {config.load_checkpoint}")

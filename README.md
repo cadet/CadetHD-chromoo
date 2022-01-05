@@ -95,13 +95,12 @@ termination:
     - [TASK] Might need to fully make it a subprocess call for better results
 - [CRIT] Hypervolume indicator as a convergence criterion
 - [DONE] Timestamp at start
-- Parallellize final_XXX simulations and plots. They take way too long with hundreds of solutions.
 - [DROP] Last best should be a pareto front
 - [TASK] Implement Objective vs Objective 2D plots
 - [DROP] Write csv of all simulated points to be able to generate plots at will
     - [DONE] Write Pareto front to csv
 - [TASK] Output results into a subdirectory to avoid polluting root
-- [TASK] Implement sobolGenerations
+- [DONE] Implement sobol initial population sampling
 - [CRIT] Look into parameter transforms: 0->1 at inlet
 - [DROP] Sometimes simulations fail for no reason. Check out timeouts in CADET-Match
 - [TASK] Run plots in subprocess, look at how to create multiple plots safely 
