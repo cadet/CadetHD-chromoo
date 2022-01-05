@@ -65,7 +65,7 @@ def main():
 
     res = algo.result()
 
-    logger.info(f"Took {res.exec_time:.2f} seconds to terminate.")
+    logger.info(f"Took {res.exec_time:.2f} seconds ({res.exec_time/3600:.2f} hours) to terminate with {len(cache.database)} generations.")
     logger.info(f"Fitted Parameters (Transformed): {res.X}")
     logger.info(f"SSE: {res.F}")
 
