@@ -1,7 +1,7 @@
 from chromoo.plotter import Plotter, Subplotter
 import numpy as np
 from chromoo.transforms import transform_population, transforms
-from itertools import chain
+from pymoo.core.population import Population
 
 import csv
 
@@ -15,7 +15,9 @@ class Cache:
         self.database = []          # n_generation x n_individual x [n_par + n_obj]
 
         # algorithm.opt for the latest generation
-        self.opt = None
+        self.opt : Population  
+
+        self.best: dict = {}
 
         self.parameters = config.parameters
         self.objectives = config.objectives
@@ -113,3 +115,16 @@ class Cache:
             xscale='log',
             yscale='log',
         )
+
+    def best_solution(self, method='geometric'):
+        """ Find the best solution in the pareto front """
+        if method == 'geometric':
+            gmeans = np.array(list(map(lambda opt: np.array(opt.F).prod()**(1.0/len(opt.F)), self.opt)))
+            min_index = np.argmin(gmeans)
+            # self.best = transforms[self.parameter_transform]['inverse'](self.opt[min_index].X, self.par_min_values, self.par_max_values)
+            self.best.update({
+                'X': transforms[self.parameter_transform]['inverse'](self.opt[min_index].X, self.par_min_values, self.par_max_values),
+                'F': self.opt[min_index].F
+            })
+        else: 
+            raise RuntimeError("Invalid method to find best solution!")

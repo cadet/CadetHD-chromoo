@@ -69,6 +69,8 @@ def main():
     logger.info(f"Fitted Parameters (Transformed): {res.X}")
     logger.info(f"SSE: {res.F}")
 
+    logger.info(f"Best solution: {cache.best}")
+
     if len(config.objectives) == 1: 
         # For single objective systems we get one fixed point
         run_sim(res.X, config.simulation, config.parameters, name='final.h5', store=True)

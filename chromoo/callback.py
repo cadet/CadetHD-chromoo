@@ -29,4 +29,5 @@ class ChromooCallback(Callback):
         ## TODO: asyncio subprocess
         self.cache.update_scatter_plot()
         self.cache.write_pareto()
+        self.cache.best_solution()
 
