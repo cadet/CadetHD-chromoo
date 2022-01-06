@@ -30,15 +30,15 @@ class Cache:
         self.n_par = sum( p.length for p in config.parameters )
         self.n_obj = len(config.objectives)
 
-        self.p_names = []
-        self.o_names = []
+        self.parameter_names = []
+        self.objective_names = []
 
         for p in self.parameters:
             for i in range(p.length):
-                self.p_names.append(f"{p.name}[{i}]")
+                self.parameter_names.append(f"{p.name}[{i}]")
 
         for o in self.objectives:
-            self.o_names.append(f"{o.name}")
+            self.objective_names.append(f"{o.name}")
             
         self.par_min_values = config.par_min_values
         self.par_max_values = config.par_max_values
@@ -72,7 +72,7 @@ class Cache:
                 )
 
                 plot.scatter(x,y)
-                plot.save(f"gen{igen}_{self.p_names[i_par]}_{self.o_names[i_obj]}.png")
+                plot.save(f"gen{igen}_{self.parameter_names[i_par]}_{self.objective_names[i_obj]}.png")
                 plot.close()
 
     def scatter_all(self,
@@ -97,7 +97,7 @@ class Cache:
                 x = arr[:,:,i_par]
                 y = arr[:,:,self.n_par + i_obj]
 
-                plot.scatter(x,y, i_obj,i_par, xlabel=self.p_names[i_par], ylabel=self.o_names[i_obj])
+                plot.scatter(x,y, i_obj,i_par, xlabel=self.parameter_names[i_par], ylabel=self.objective_names[i_obj])
 
         plot.save(f"ALL.png")
         plot.close()
@@ -107,7 +107,7 @@ class Cache:
         # TODO: Use pandas or something
         with open('pareto.csv', 'w') as fp:
             writer = csv.writer(fp)
-            writer.writerow(self.p_names + self.o_names)
+            writer.writerow(self.parameter_names + self.objective_names)
             writer.writerows(map(lambda opt: np.append(transforms[self.parameter_transform]['inverse'](opt.X, self.par_min_values, self.par_max_values), opt.F) , self.opt))
 
     def update_scatter_plot(self):
