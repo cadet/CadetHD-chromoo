@@ -15,11 +15,11 @@ class ChromooCallback(Callback):
     def notify(self, algorithm):
         """ Main callback method """
 
-        self.cache.update_database(algorithm.pop.get('X'), algorithm.pop.get('F'))
-        self.cache.opt = algorithm.opt
+        self.cache.update(algorithm)
         
         ## TODO: asyncio subprocess
         self.cache.update_scatter_plot()
         self.cache.write_pareto()
-        self.cache.best_solution()
+        self.cache.update_best_scores()
+        self.cache.plot_best_scores()
 

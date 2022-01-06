@@ -1,6 +1,6 @@
 from chromoo.plotter import Plotter, Subplotter
 import numpy as np
-from chromoo.transforms import transform_array, transforms
+from chromoo.transforms import transform_array, transforms, transform_population
 from pymoo.core.population import Population
 
 import csv
@@ -11,15 +11,14 @@ class Cache:
     """
     def __init__(self, config) -> None:
 
-        # Database of all populations for all generations and their results
-        self.database = []          # n_generation x n_individual x [n_par + n_obj]
+        self.pop_Xs = []
+        self.pop_Fs = []
 
-        # algorithm.opt for the latest generation
-        self.opt : Population  
+        self.opt_Xs = []
+        self.opt_Fs = []
 
-        self.best: dict = {}
-        self.best_scores = []
-        self.best_combined_scores = []
+        self.best_combined_per_gen = []
+        self.best_combined_ever = []
 
         self.parameters = config.parameters
         self.objectives = config.objectives
@@ -38,10 +37,18 @@ class Cache:
 
         self.simulation = config.simulation
 
-    def update_database(self, population:list, scores:list) -> None:
-        denormalized_population = transform_array(population, self.par_min_values, self.par_max_values, self.parameter_transform, mode='inverse')
-        self.database.append(np.column_stack((denormalized_population, scores)))
+    def update(self, algorithm):
+        """ Inverse transform the algorithm pop and opt and save them """
 
+        self.pop_Xs.append(transform_array(algorithm.pop.get('X'), self.par_min_values, self.par_max_values, self.parameter_transform, mode='inverse'))
+        self.opt_Xs.append(transform_array(algorithm.opt.get('X'), self.par_min_values, self.par_max_values, self.parameter_transform, mode='inverse'))
+
+        self.pop_Fs.append(algorithm.pop.get('F'))
+        self.opt_Fs.append(algorithm.opt.get('F'))
+
+        # self.pops.append(transform_population(algorithm.pop, self.par_min_values, self.par_max_values, self.parameter_transform, 'inverse'))
+        # self.opts.append(transform_population(algorithm.opt, self.par_min_values, self.par_max_values, self.parameter_transform, 'inverse'))
+    
     def scatter_gen(self, igen:int, 
         title=None,
         xscale='linear', 
@@ -49,12 +56,13 @@ class Cache:
     ) -> None:
         """ Write a scatterplot for the i'th generation """
 
-        arr = np.array(self.database)
+        arrx = np.array(self.pop_Xs)
+        arry = np.array(self.pop_Fs)
 
         for i_obj in range(self.n_obj):
             for i_par in range(self.n_par):
-                x = arr[igen,:,i_par]
-                y = arr[igen,:,self.n_par + i_obj]
+                x = arrx[igen,:,i_par]
+                y = arry[igen,:,i_obj]
 
                 plot = Plotter(
                     title=title,
@@ -75,8 +83,6 @@ class Cache:
     ) -> None:
         """ Write a scatterplot for all generations """
 
-        arr = np.array(self.database)
-
         plot = Subplotter(
             nrows=self.n_obj,
             ncols=self.n_par,
@@ -85,10 +91,13 @@ class Cache:
             yscale=yscale
         )
 
+        arrx = np.array(self.pop_Xs)
+        arry = np.array(self.pop_Fs)
+
         for i_obj in range(self.n_obj):
             for i_par in range(self.n_par):
-                x = arr[:,:,i_par]
-                y = arr[:,:,self.n_par + i_obj]
+                x = arrx[:,:,i_par]
+                y = arry[:,:,i_obj]
 
                 plot.scatter(x,y, i_obj,i_par, xlabel=self.parameter_names[i_par], ylabel=self.objective_names[i_obj])
 
@@ -101,7 +110,7 @@ class Cache:
         with open('pareto.csv', 'w') as fp:
             writer = csv.writer(fp)
             writer.writerow(self.parameter_names + self.objective_names)
-            writer.writerows(map(lambda opt: np.append(transforms[self.parameter_transform]['inverse'](opt.X, self.par_min_values, self.par_max_values), opt.F) , self.opt))
+            writer.writerows(map(lambda x,f: np.append(x,f) , self.opt_Xs, self.opt_Fs))
 
     def update_scatter_plot(self):
         """ Update the objectives_vs_parameters scatter plots """
@@ -111,30 +120,43 @@ class Cache:
             yscale='log',
         )
 
-    def best_solution(self, method='geometric'):
+    def find_best_score(self, method='geometric', generation_index=-1):
         """ Find the best solution in the pareto front """
         if method == 'geometric':
-            gmeans = np.array(list(map(lambda opt: np.array(opt.F).prod()**(1.0/len(opt.F)), self.opt)))
-            min_index = np.argmin(gmeans)
-            # self.best = transforms[self.parameter_transform]['inverse'](self.opt[min_index].X, self.par_min_values, self.par_max_values)
-            self.best.update({
-                'X': transforms[self.parameter_transform]['inverse'](self.opt[min_index].X, self.par_min_values, self.par_max_values),
-                'F': self.opt[min_index].F
-            })
-            self.best_scores.append(self.opt[min_index].F)
-            self.best_combined_scores.append(gmeans[min_index])
-
-            plot = Plotter(
-                title='Best Geometric Mean of Scores',
-                xlabel='Generation',
-                ylabel='Mean score',
-                xscale='linear',
-                yscale='log'
-            )
-
-            plot.plot(range(1,len(self.best_combined_scores)+1), self.best_combined_scores)
-            plot.save('best_combined_solution.png')
-            plot.close()
-
+            means = np.fromiter(map(lambda f: np.array(f).prod()**(1.0/len(f)) , self.opt_Fs[generation_index]), float)
+            min_index = np.argmin(means)
         else: 
             raise RuntimeError("Invalid method to find best solution!")
+
+        return min_index, means
+
+    def update_best_scores(self):
+        index,means = self.find_best_score(generation_index=-1)
+
+        self.best_combined_per_gen.append(means[index])
+        self.best_combined_ever.append(np.min(self.best_combined_per_gen))
+
+    def plot_best_scores(self):
+        plot_best_generational = Plotter(
+            title='Best Geometric Mean Per Generation',
+            xlabel='Generation',
+            ylabel='Mean score',
+            xscale='linear',
+            yscale='log'
+        )
+
+        plot_best_generational.plot(range(1,len(self.best_combined_per_gen)+1), self.best_combined_per_gen)
+        plot_best_generational.save('best_combined_per_gen.png')
+        plot_best_generational.close()
+
+        plot_best_ever = Plotter(
+            title='Best Geometric Mean Ever',
+            xlabel='Generation',
+            ylabel='Mean score',
+            xscale='linear',
+            yscale='log'
+        )
+
+        plot_best_ever.plot(range(1,len(self.best_combined_ever)+1), self.best_combined_ever)
+        plot_best_ever.save('best_combined_ever.png')
+        plot_best_ever.close()
