@@ -1,5 +1,6 @@
 from pymoo.core.callback import Callback
 
+import asyncio
 
 class ChromooCallback(Callback):
 
@@ -9,14 +10,17 @@ class ChromooCallback(Callback):
 
         self.cache.initialize()
 
-
     def notify(self, algorithm):
         """ Main callback method """
 
         ## TODO: asyncio subprocess
         self.cache.update(algorithm)
-        self.cache.write()
 
-        self.cache.update_scatter_plot()
-        self.cache.plot_best_scores()
+        asyncio.run(self.subcallback())
 
+    async def subcallback(self):
+        await asyncio.gather(
+            asyncio.to_thread(self.cache.write),
+            asyncio.to_thread(self.cache.update_scatter_plot),
+            asyncio.to_thread(self.cache.plot_best_scores)
+        )
