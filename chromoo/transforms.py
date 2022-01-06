@@ -1,5 +1,7 @@
 from numpy import log10
 import numpy as np
+from pymoo.core.individual import Individual
+from pymoo.core.population import Population
 
 def lognorm(array, mins, maxs):
     logs = log10(array)
@@ -58,4 +60,10 @@ def transform_array(arrays, mins, maxs, transform, mode='transform'):
     mode = 'inverse' or 'transform' allows bidirectional mapping
     """
     return list(map(lambda x: transforms[transform][mode](x, mins, maxs), arrays))
+
+def transform_population(population:Population, mins, maxs, transform, mode='transform'):
+    """
+    mode = 'inverse' or 'transform' allows bidirectional mapping
+    """
+    return np.fromiter(map(lambda p: Individual(X=transforms[transform][mode](p.X, mins, maxs), F=p.F), population), Individual)
 
