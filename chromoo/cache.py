@@ -1,9 +1,9 @@
 from chromoo.plotter import Plotter, Subplotter
 import numpy as np
-from chromoo.transforms import transform_array, transforms, transform_population
-from pymoo.core.population import Population
+from chromoo.transforms import transform_array
 
 import csv
+import os
 
 class Cache:
     """
@@ -46,8 +46,23 @@ class Cache:
         self.pop_Fs.append(algorithm.pop.get('F'))
         self.opt_Fs.append(algorithm.opt.get('F'))
 
+        self.update_best_scores()
+
         # self.pops.append(transform_population(algorithm.pop, self.par_min_values, self.par_max_values, self.parameter_transform, 'inverse'))
         # self.opts.append(transform_population(algorithm.opt, self.par_min_values, self.par_max_values, self.parameter_transform, 'inverse'))
+    #
+    
+    def initialize(self):
+        try: 
+            os.remove('opts.csv')
+        except FileNotFoundError:
+            pass
+
+        try: 
+            os.remove('best_combined_per_gen.csv')
+        except FileNotFoundError:
+            pass
+
     
     def scatter_gen(self, igen:int, 
         title=None,
@@ -104,13 +119,23 @@ class Cache:
         plot.save(f"ALL.png")
         plot.close()
 
-    def write_pareto(self):
-        """ Write the current Pareto solution to a csv file """
+    def write_opts(self):
+        """ Write the last generation's opts solution to a csv file """
         # TODO: Use pandas or something
-        with open('pareto.csv', 'w') as fp:
+        with open('opts.csv', 'w') as fp:
             writer = csv.writer(fp)
             writer.writerow(self.parameter_names + self.objective_names)
-            writer.writerows(map(lambda x,f: np.append(x,f) , self.opt_Xs, self.opt_Fs))
+            writer.writerows(map(lambda x,f: np.append(x,f) , self.opt_Xs[-1], self.opt_Fs[-1]))
+
+    def write_best_combined_per_gen(self):
+        """ Write to CSV the best combined score per generation """
+        with open('best_combined_per_gen.csv', 'a') as fp:
+            writer = csv.writer(fp)
+            writer.writerow([self.best_combined_per_gen[-1]])
+
+    def write(self):
+        self.write_opts()
+        self.write_best_combined_per_gen()
 
     def update_scatter_plot(self):
         """ Update the objectives_vs_parameters scatter plots """
@@ -121,7 +146,7 @@ class Cache:
         )
 
     def find_best_score(self, method='geometric', generation_index=-1):
-        """ Find the best solution in the pareto front """
+        """ Find the best solution in the opts set """
         if method == 'geometric':
             means = np.fromiter(map(lambda f: np.array(f).prod()**(1.0/len(f)) , self.opt_Fs[generation_index]), float)
             min_index = np.argmin(means)
