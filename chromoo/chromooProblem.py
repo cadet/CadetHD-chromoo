@@ -5,7 +5,7 @@ from functools import partial
 import multiprocessing as mp
 from pathlib import Path
 from chromoo.simulation import run_and_eval
-from chromoo.transforms import transform_population
+from chromoo.transforms import transform_array
 
 class ChromooProblem(Problem):
     def __init__(self, sim, parameters, objectives, nproc=4, tempdir='temp', store_temp=False, transform='none'):
@@ -48,6 +48,6 @@ class ChromooProblem(Problem):
     def _evaluate(self, X, out, *args, **kwargs):
 
         with mp.Pool(self.nproc) as pool:
-            denormalized_inputs = transform_population(X, self.min_values, self.max_values, self.transform, mode='inverse')
+            denormalized_inputs = transform_array(X, self.min_values, self.max_values, self.transform, mode='inverse')
             out["F"] = pool.map( partial(run_and_eval, sim=self.sim, parameters=self.parameters, objectives=self.objectives, name=None, tempdir=self.tempdir, store=self.store_temp), denormalized_inputs)
 

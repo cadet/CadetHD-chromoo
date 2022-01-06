@@ -1,6 +1,6 @@
 from chromoo.plotter import Plotter, Subplotter
 import numpy as np
-from chromoo.transforms import transform_population, transforms
+from chromoo.transforms import transform_array, transforms
 from pymoo.core.population import Population
 
 import csv
@@ -39,7 +39,7 @@ class Cache:
         self.simulation = config.simulation
 
     def update_database(self, population:list, scores:list) -> None:
-        denormalized_population = transform_population(population, self.par_min_values, self.par_max_values, self.parameter_transform, mode='inverse')
+        denormalized_population = transform_array(population, self.par_min_values, self.par_max_values, self.parameter_transform, mode='inverse')
         self.database.append(np.column_stack((denormalized_population, scores)))
 
     def scatter_gen(self, igen:int, 

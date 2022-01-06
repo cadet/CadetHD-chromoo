@@ -1,4 +1,5 @@
 from numpy import log10
+import numpy as np
 
 def lognorm(array, mins, maxs):
     logs = log10(array)
@@ -37,12 +38,6 @@ def denormalize(array, mins, maxs):
 def identity(array, *args, **kwargs):
     return array
 
-def transform_population(arrays, mins, maxs, transform, mode='transform'):
-    """
-    mode = 'inverse' or 'transform' allows bidirectional mapping
-    """
-    return list(map(lambda x: transforms[transform][mode](x, mins, maxs), arrays))
-
 transforms = {
     'lognorm' : {
         'transform': lognorm,
@@ -57,3 +52,10 @@ transforms = {
         'inverse': identity
     }
 }
+
+def transform_array(arrays, mins, maxs, transform, mode='transform'):
+    """
+    mode = 'inverse' or 'transform' allows bidirectional mapping
+    """
+    return list(map(lambda x: transforms[transform][mode](x, mins, maxs), arrays))
+
