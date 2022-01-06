@@ -95,6 +95,16 @@ class ConfigHandler:
         for param in self.get('objectives', vartype=list) or []:
             self.objectives.append(Objective(**param))
 
+        self.parameter_names = []
+        self.objective_names = []
+
+        for p in self.parameters:
+            for i in range(p.length):
+                self.parameter_names.append(f"{p.name}[{i}]")
+
+        for o in self.objectives:
+            self.objective_names.append(f"{o.name}")
+
 
         # If i'm passing a dict to a class, might be better to take the full
         # dict, and then adjust the important subfields. Otherwise, I can just manually

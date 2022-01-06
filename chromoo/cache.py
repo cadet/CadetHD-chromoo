@@ -30,16 +30,9 @@ class Cache:
         self.n_par = sum( p.length for p in config.parameters )
         self.n_obj = len(config.objectives)
 
-        self.parameter_names = []
-        self.objective_names = []
+        self.parameter_names = config.parameter_names 
+        self.objective_names = config.objective_names 
 
-        for p in self.parameters:
-            for i in range(p.length):
-                self.parameter_names.append(f"{p.name}[{i}]")
-
-        for o in self.objectives:
-            self.objective_names.append(f"{o.name}")
-            
         self.par_min_values = config.par_min_values
         self.par_max_values = config.par_max_values
 
