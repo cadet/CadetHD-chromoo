@@ -1,0 +1,31 @@
+#!/usr/bin/python3
+
+import pandas as pd
+from scipy import stats
+
+import argparse
+
+from chromoo import ConfigHandler
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('config', help='config file to parse and process.')
+    ap.add_argument('--csv', help='CSV file to process')
+    args = ap.parse_args()
+
+    config = ConfigHandler()
+    config.read(args.config)
+    config.load()
+    config.construct_simulation()
+
+    df = pd.read_csv(args.csv)
+    df['gmean'] = stats.gmean(df.iloc[:,config.n_par:config.n_par+config.n_obj], axis=1)
+    df = df.sort_values(by=['gmean'])
+    print(df.head())
+
+    # TODO: Run n best simulations and plot their results
+    # TODO: Allow specifying averaging method
+
+
+if __name__=="__main__":
+    main()
