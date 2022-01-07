@@ -1,16 +1,25 @@
 #!/usr/bin/python3
 
+import numpy as np
 import pandas as pd
 from scipy import stats
+import multiprocessing as mp
+from functools import partial
+
+from pathlib import Path
 
 import argparse
 
 from chromoo import ConfigHandler
+from chromoo.simulation import run_sim_iter
+from chromoo.utils import deep_get, readArray, readChromatogram
+from chromoo.plotter import Plotter
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('config', help='config file to parse and process.')
     ap.add_argument('--csv', help='CSV file to process')
+    ap.add_argument('-n', type=int, help='Number of best simulations to run')
     args = ap.parse_args()
 
     config = ConfigHandler()
@@ -21,11 +30,48 @@ def main():
     df = pd.read_csv(args.csv)
     df['gmean'] = stats.gmean(df.iloc[:,config.n_par:config.n_par+config.n_obj], axis=1)
     df = df.sort_values(by=['gmean'])
-    print(df.head())
+
+    best = df.iloc[0:args.n,0:config.n_par]
+    print(best)
 
     # TODO: Run n best simulations and plot their results
     # TODO: Allow specifying averaging method
+    
+    postdir = Path('post') 
+    postdir.mkdir(exist_ok=True)
+    
+    with mp.Pool(config.nproc) as pool:
+        out = pool.map( 
+            partial(run_sim_iter, 
+                sim=config.simulation, 
+                parameters=config.parameters, 
+                name=f'final', 
+                tempdir=postdir, 
+                store=True), 
+            enumerate(best.values))
 
+    objectives_contain_times = True
+    if config.objectives[0].times:
+        objectives_contain_times = False
+
+    for i,sim in enumerate(out):
+        plot = Plotter( title='title')
+        for obj in config.objectives:
+            simulated = deep_get(sim.root, obj.path)
+            simulated = np.array(simulated).flatten()
+
+            times = deep_get(sim.root, 'output.solution.solution_times')
+
+            if objectives_contain_times:
+                _, reference = readChromatogram(obj.filename)
+            else:
+                reference = readArray(obj.filename)
+
+            plot.plot(times, reference)
+            plot.plot(times, simulated, ls='dashed')
+
+        plot.save(f"{str(postdir)}/objectives_reference_final_{i:03d}", dpi=600)
+        plot.close()
 
 if __name__=="__main__":
     main()

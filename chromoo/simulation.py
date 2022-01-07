@@ -83,6 +83,38 @@ def run_sim(x, sim, parameters, name=None, tempdir=Path('temp'), store=False):
 
     return newsim
 
+def run_sim_iter(index_x, sim, parameters, name='sim', tempdir=Path('temp'), store=False):
+    """
+        - run one simulation
+        - calculate and return scores
+        - Made for pool.map to use index as part of the filename
+        TODO: Refactor with other run_sim
+    """
+    newsim = copy.deepcopy(sim)
+
+    index = index_x[0]
+    x = index_x[1]
+
+    newsim.filename = tempdir.joinpath(f"{name}_{index:03d}.h5")
+
+    update_sim_parameters(newsim, x, parameters)
+
+    newsim.save()
+
+    try:
+        newsim.run(check=True)
+    except subprocess.CalledProcessError as error:
+        print(f"{newsim.filename} failed: {error.stderr.decode('utf-8').strip()}")
+        print(f"Parameters: {x}\n")
+        raise(RuntimeError("Simulation Failure"))
+
+    newsim.load()
+
+    if not store:
+        os.remove(newsim.filename)
+
+    return newsim
+
 def evaluate_sim(newsim, objectives):
     sses = []
 
