@@ -106,6 +106,10 @@ class ConfigHandler:
             self.objective_names.append(f"{o.name}")
 
 
+        self.n_par = sum( p.length for p in self.parameters )
+        self.n_obj = len(self.objectives)
+
+
         # If i'm passing a dict to a class, might be better to take the full
         # dict, and then adjust the important subfields. Otherwise, I can just manually
         # constrain the subfields for better sanity.

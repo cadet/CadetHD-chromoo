@@ -26,8 +26,8 @@ class Cache:
         self.parameter_transform = config.parameter_transform
         # self.objective_transform = config.objective_transform
 
-        self.n_par = sum( p.length for p in config.parameters )
-        self.n_obj = len(config.objectives)
+        self.n_par = config.n_par
+        self.n_obj = config.n_obj
 
         self.parameter_names = config.parameter_names 
         self.objective_names = config.objective_names 
