@@ -13,12 +13,6 @@ def keystring_todict(key, value):
 
     return value
 
-def sse(y0, y):
-    """
-        calculate the SSE given 2 vectors
-    """
-    return sum([(n1 - n2)**2 for n1, n2 in zip(y, y0)])
-
 def deep_get(input_dict, keys, default=None, vartype=None, choices=[]):
     """
     Simpler syntax to get deep values from a dictionary

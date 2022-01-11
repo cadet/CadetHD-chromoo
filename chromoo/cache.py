@@ -37,6 +37,12 @@ class Cache:
 
         self.simulation = config.simulation
 
+        # NOTE: If using log based objective scores, don't plot in a log axis.
+        if any([ 'log' in x for x in [obj.score for obj in self.objectives ]]):
+            self.plotscale = 'linear'
+        else:
+            self.plotscale = 'log'
+
     def update(self, algorithm):
         """ Inverse transform the algorithm pop and opt and save them """
 
@@ -141,8 +147,8 @@ class Cache:
         """ Update the objectives_vs_parameters scatter plots """
         self.scatter_all(
             title=f"gen_all",
-            xscale='log',
-            yscale='log',
+            xscale= self.plotscale,
+            yscale= self.plotscale
         )
 
     def find_best_score(self, method='geometric', generation_index=-1):
@@ -167,7 +173,7 @@ class Cache:
             xlabel='Generation',
             ylabel='Mean score',
             xscale='linear',
-            yscale='log'
+            yscale=self.plotscale
         )
 
         plot_best_generational.plot(range(1,len(self.best_combined_per_gen)+1), self.best_combined_per_gen)
@@ -179,7 +185,7 @@ class Cache:
             xlabel='Generation',
             ylabel='Mean score',
             xscale='linear',
-            yscale='log'
+            yscale=self.plotscale
         )
 
         plot_best_ever.plot(range(1,len(self.best_combined_ever)+1), self.best_combined_ever)

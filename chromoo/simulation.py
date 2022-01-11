@@ -4,7 +4,8 @@ import string
 import subprocess
 from pathlib import Path
 
-from chromoo.utils import keystring_todict, deep_get, sse, readChromatogram, readArray
+from chromoo.utils import keystring_todict, deep_get, readChromatogram, readArray
+from chromoo.scores import scores_dict
 import numpy as np
 import os
 
@@ -48,8 +49,8 @@ def loadh5(filename):
 
 def run_and_eval(x, sim, parameters, objectives, name=None, tempdir=Path('temp'), store=False ) -> list :
     sim = run_sim(x, sim, parameters, name=name, tempdir=tempdir, store=store)
-    sses = evaluate_sim(sim, objectives)
-    return sses
+    scores = evaluate_sim(sim, objectives)
+    return scores
 
 
 
@@ -116,9 +117,8 @@ def run_sim_iter(index_x, sim, parameters, name='sim', tempdir=Path('temp'), sto
     return newsim
 
 def evaluate_sim(newsim, objectives):
-    sses = []
+    scores = []
 
-    # FIXME: Make generic scores
     # FIXME: only objectives[0] is checked
     
     objectives_contain_times = True
@@ -133,9 +133,9 @@ def evaluate_sim(newsim, objectives):
         else:
             y0 = readArray(obj.filename)
 
-        sses.append(sse(y0, y))
+        scores.append(scores_dict[obj.score](y0, y))
 
-    return sses
+    return scores
 
 def update_sim_parameters(sim, x, parameters):
     # For every parameter, generate a dictionary based on the path, and
