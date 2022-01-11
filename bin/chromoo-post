@@ -21,6 +21,7 @@ def main():
     ap.add_argument('--csv', help='CSV file to process')
     ap.add_argument('-n', default=5, type=int, help='Number of best simulations to run')
     ap.add_argument('-m', '--mean', choices=['geometric', 'arithmetic', 'rms'], default='geometric', help='Mode of averaging scores')
+    ap.add_argument('--hist', default=20, help='Number of bins in histogram plot')
     args = ap.parse_args()
 
 
@@ -48,12 +49,14 @@ def main():
     best = best.loc[:,columns]
     print(best)
 
-    # TODO: Run n best simulations and plot their results
-    # TODO: Allow specifying averaging method
-    
     postdir = Path('post') 
     postdir.mkdir(exist_ok=True)
-    
+
+    plot = Plotter(title=args.mean+' mean')
+    plot.hist(df[args.mean], args.hist)
+    plot.save(postdir / f'histogram_{args.mean}_mean', dpi=600)
+    plot.close()
+
     with mp.Pool(config.nproc) as pool:
         out = pool.map( 
             partial(run_sim_iter, 
@@ -86,6 +89,7 @@ def main():
 
         plot.save(f"{str(postdir)}/objectives_reference_final_{i:03d}", dpi=600)
         plot.close()
+
 
 if __name__=="__main__":
     main()
