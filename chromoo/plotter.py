@@ -28,6 +28,9 @@ class Plotter():
     def scatter(self, x, y, label=None, ls='solid', lw=1, marker=None) -> None:
         self.ax.scatter(x, y, label=label, linestyle=ls, linewidth=lw, marker=marker)
 
+    def hist(self, x, bins=10):
+        self.ax.hist(x, bins=bins)
+
     def save(self, filename, dpi=300) -> None:
         self.fig.savefig(filename, dpi=dpi)
 
@@ -72,6 +75,10 @@ class Subplotter():
         ax.set(yscale=self.yscale)
         ax.set(xlabel=xlabel)
         ax.set(ylabel=ylabel)
+
+    def hist(self, x, irow, icol, bins=10):
+        ax = self.fig.add_subplot(self.gs[irow * self.ncols + icol])
+        ax.hist(x, bins=bins)
 
     def save(self, filename, dpi=300) -> None:
         self.fig.savefig(filename, dpi=dpi)
