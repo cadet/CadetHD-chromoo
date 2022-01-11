@@ -19,8 +19,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('config', help='config file to parse and process.')
     ap.add_argument('--csv', help='CSV file to process')
-    ap.add_argument('-n', type=int, help='Number of best simulations to run')
+    ap.add_argument('-n', default=5, type=int, help='Number of best simulations to run')
+    ap.add_argument('-m', '--mean', choices=['geometric', 'arithmetic', 'rms'], default='geometric', help='Mode of averaging scores')
     args = ap.parse_args()
+
 
     config = ConfigHandler()
     config.read(args.config)
@@ -28,10 +30,22 @@ def main():
     config.construct_simulation()
 
     df = pd.read_csv(args.csv)
-    df['gmean'] = stats.gmean(df.iloc[:,config.n_par:config.n_par+config.n_obj], axis=1)
-    df = df.sort_values(by=['gmean'])
 
-    best = df.iloc[0:args.n,0:config.n_par]
+    if args.mean == 'geometric': 
+        df[args.mean] = stats.gmean(df.iloc[:,config.n_par:config.n_par+config.n_obj], axis=1)
+    elif args.mean == 'arithmetic':
+        df[args.mean] = df.iloc[:,config.n_par:config.n_par+config.n_obj].mean(axis=1)
+    elif args.mean == 'rms':
+        df[args.mean] = np.sqrt(np.square(df.iloc[:,config.n_par:config.n_par+config.n_obj]).mean(axis=1)) 
+
+    df = df.sort_values(by=[args.mean])
+
+    columns = list(df.columns[0:config.n_par])
+    columns.append(df.columns[-1])
+
+    # best = df.iloc[0:args.n,0:config.n_par]
+    best = df.iloc[0:args.n]
+    best = best.loc[:,columns]
     print(best)
 
     # TODO: Run n best simulations and plot their results
