@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Literal, Any
 
 @dataclass(init=True, order=True, repr=True, frozen=True)
@@ -8,7 +8,7 @@ class Parameter():
     min_value: Any
     max_value: Any
     type: Literal['scalar', 'vector', 'element'] = 'vector'
-    index: int = 0
+    index: list[int] = field(default_factory=lambda: [0])
     length: int = 1
 
     def __post_init__(self):
@@ -17,3 +17,5 @@ class Parameter():
         if isinstance(self.max_value, float):
             object.__setattr__(self, 'max_value', [self.max_value] * self.length)
         assert(self.type in ['scalar', 'vector', 'element'])
+        if self.type == 'element': 
+            assert(len(self.index) == self.length)

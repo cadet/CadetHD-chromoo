@@ -151,7 +151,8 @@ def update_sim_parameters(sim, x, parameters):
             for key in p.path.split('.'):
                 arr = arr[key]
             value = x[prev_len : prev_len + cur_len]
-            arr[p.index] = value
+            for idx_len,idx_arr in zip(range(cur_len), p.index):
+                arr[idx_arr] = value[idx_len]
             cur_dict = keystring_todict(p.path, arr)
         else:
             cur_dict = keystring_todict(p.path, x[prev_len : prev_len + cur_len])
