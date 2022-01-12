@@ -10,6 +10,8 @@ class Parameter():
     type: Literal['scalar', 'vector', 'element'] = 'vector'
     index: list[int] = field(default_factory=lambda: [0])
     length: int = 1
+    copy_to_path: str = ''
+    copy_to_index: list[list[int]] = field(default_factory=lambda: [[0]]) 
 
     def __post_init__(self):
         if isinstance(self.min_value, float):

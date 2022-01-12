@@ -154,8 +154,23 @@ def update_sim_parameters(sim, x, parameters):
             for idx_len,idx_arr in zip(range(cur_len), p.index):
                 arr[idx_arr] = value[idx_len]
             cur_dict = keystring_todict(p.path, arr)
+
+            ## NOTE: Hack to copy flowrate values within the connections matrix
+            if p.copy_to_path: 
+                arr2 = sim.root
+                for key in p.copy_to_path.split('.'):
+                    arr2 = arr2[key]
+                for idx_len,idx_copy_list in zip(range(cur_len), p.copy_to_index):
+                    for idx_copy in idx_copy_list: 
+                        arr2[idx_copy] = value[idx_len]
+                cur_dict.update(keystring_todict(p.copy_to_path, arr2))
+
         else:
             cur_dict = keystring_todict(p.path, x[prev_len : prev_len + cur_len])
+
+            ## NOTE: Don't need this, so commented for safety, but written for generality
+            # if p.copy_to_path: 
+            #     cur_dict.update(keystring_todict(p.copy_to_path, x[prev_len : prev_len + cur_len]))
 
         sim.root.update(cur_dict)
         prev_len += p.length
