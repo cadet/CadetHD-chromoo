@@ -3,6 +3,9 @@ load_checkpoint: checkpoint.npy
 force_checkpoint_continue: false
 nproc: 4
 store_temp: false
+transforms:
+  parameters: lognorm
+  objectives: geometric
 parameters:
   - name: axial
     type: scalar
@@ -21,6 +24,7 @@ objectives:
 algorithm: 
   name: unsga3
   pop_size: 10
+  init_sobol: true
 termination:
   x_tol: 1e-8
   cv_tol: 1e-6
