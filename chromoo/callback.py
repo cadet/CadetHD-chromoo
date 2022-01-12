@@ -13,7 +13,6 @@ class ChromooCallback(Callback):
     def notify(self, algorithm):
         """ Main callback method """
 
-        ## TODO: asyncio subprocess
         self.cache.update(algorithm)
 
         asyncio.run(self.subcallback())
@@ -21,6 +20,4 @@ class ChromooCallback(Callback):
     async def subcallback(self):
         await asyncio.gather(
             asyncio.to_thread(self.cache.write),
-            asyncio.to_thread(self.cache.update_scatter_plot),
-            asyncio.to_thread(self.cache.plot_best_scores)
         )
