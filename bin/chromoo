@@ -78,19 +78,6 @@ def main():
     logger.info(f"Fitted Parameters (Transformed): {res.X}")
     logger.info(f"SSE: {res.F}")
 
-    if len(config.objectives) == 1: 
-        # For single objective systems we get one fixed point
-        run_sim(res.X, config.simulation, config.parameters, name='final.h5', store=True)
-        sim = loadh5('final.h5')
-        plotter(sim, config.objectives) 
-    else:
-        # For multiobjective systems, we get a set of solutions, a pareto front.
-        # We find the parameters that created the best vector magnitude for the
-        # scores, and save the simulation and plots.
-        # TODO: Fix after implementing combined objective scoring
-        pass
-
-
     if not config.store_temp:
         import shutil
         shutil.rmtree(prob.tempdir)
