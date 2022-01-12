@@ -2,13 +2,9 @@
 
 from chromoo import __version__, __git_version__
 from chromoo import ChromooProblem, AlgorithmFactory, ConfigHandler, ChromooCallback
-from chromoo.utils import plotter
 from chromoo.log import Logger
-from chromoo.simulation import loadh5
 
 from chromoo.cache import Cache
-from chromoo.simulation import run_sim
-from chromoo.transforms import transform_population
 
 from pymoo.util.termination.default import MultiObjectiveDefaultTermination
 
