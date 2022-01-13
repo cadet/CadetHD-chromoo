@@ -31,14 +31,7 @@ def main():
     config.construct_simulation()
 
     df = pd.read_csv(args.csv)
-
-    if args.mean == 'geometric': 
-        df[args.mean] = stats.gmean(df.iloc[:,config.n_par:config.n_par+config.n_obj], axis=1)
-    elif args.mean == 'arithmetic':
-        df[args.mean] = df.iloc[:,config.n_par:config.n_par+config.n_obj].mean(axis=1)
-    elif args.mean == 'rms':
-        df[args.mean] = np.sqrt(np.square(df.iloc[:,config.n_par:config.n_par+config.n_obj]).mean(axis=1)) 
-
+    df = calculate_mean(df, args.mean, config.objective_names)
     df = df.sort_values(by=[args.mean])
 
     columns = list(df.columns[0:config.n_par])
@@ -90,6 +83,16 @@ def main():
 
         obj_ref_plot.save(f"{str(postdir)}/objectives_reference_final_{i:03d}", dpi=600)
         obj_ref_plot.close()
+
+def calculate_mean(df, mean, columns):
+    if mean == 'geometric': 
+        df[mean] = stats.gmean(df[columns], axis=1)
+    elif mean == 'arithmetic':
+        df[mean] = df[columns].mean(axis=1)
+    elif mean == 'rms':
+        df[mean] = np.sqrt(np.square(df[columns]).mean(axis=1)) 
+
+    return df
 
 
 if __name__=="__main__":
