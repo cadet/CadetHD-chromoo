@@ -37,7 +37,6 @@ objectives:
       # times: timesteps.txt
       score: sse
       path: output.solution.unit_003.solution_outlet_comp_000
-      match_solution_times: true
 algorithm: 
   name: nsga3
   pop_size: 10
@@ -92,30 +91,33 @@ termination:
 - [DONE] Allow YAML input along with h5
 - [DONE] Implement checkpointing!
 - [DONE] Post generation processing takes a lot of time, fix it: Made it async
-    - [TASK] Might need to fully make it a subprocess call for better results
+    - [DONE] Moving to chromoo-post
 - [CRIT] Hypervolume indicator as a convergence criterion
 - [DONE] Timestamp at start
-- [DROP] Last best should be a pareto front
 - [TASK] Implement Objective vs Objective 2D plots
-- [DROP] Write csv of all simulated points to be able to generate plots at will
-    - [DONE] Write Pareto front to csv
 - [TASK] Output results into a subdirectory to avoid polluting root
 - [DONE] Implement sobol initial population sampling
-- [CRIT] Look into parameter transforms: 0->1 at inlet
-- [DROP] Sometimes simulations fail for no reason. Check out timeouts in CADET-Match
-- [TASK] Run plots in subprocess, look at how to create multiple plots safely 
-- [TASK] Implement match_solution_times config setting
-- [TASK] Implement gradient search after GA
-- [TASK] CMAES optimizer: single objective
-- [TASK] Use geometric mean for combining multiple objectives in to single objective
+- [DONE] Look into parameter transforms: 0->1 at inlet
+- [DONE] Use geometric mean for combining multiple objectives in to single objective
 - [DONE] Implement checkpointing
 - [TASK] Adjust Verbose Display according to algorithm used
 - [TASK] Random seeds
 - [TASK] Implement better scores: Check out CADET-Match
 - [TASK] Make sure tests delete temp files
 - [TASK] Write unit tests for all classes
-- [TASK] Look at save_history = True
+- [DONE] Look at save_history = True
 - [TASK] Write a configHandler method to output a dummy config.
 - [CRIT] For the split-chromatogram problem, we know that the axial dispersion in once radial shell won't affect the chromatogram in another, so it does have a constraint. Is there a way to constrain the parameters that way? Or does it just mean we solve the system serially? 
 - [TASK] Unified interface/method for deep getting and setting from/to a Dict or dict
 - [TASK] Fix typings for configHandler attributes
+- [TASK] Pickle pop xs and fs for use with chromoo-post
+- [TASK] Own pareto front
+- [TASK] chromoo-post: plots
+    - [TASK] objectives vs objectives
+    - [TASK] ALL parameters_objectives plots (as subplots and separate)
+    - [TASK] Best per generation (opts)
+    - [TASK] Best per generation (pops)
+    - [TASK] Best ever
+- [TASK] Consider weighting objectives: Look at weighted least squares
+- [TASK] Consider multi-started/restarted systems
+- [TASK] Check out numpickle: https://gwang-jin-kim.medium.com/faster-loading-and-saving-of-pandas-data-frames-using-numpickle-numpy-and-pickle-d15870519529
