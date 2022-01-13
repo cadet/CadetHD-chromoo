@@ -1,5 +1,6 @@
 from chromoo.plotter import Plotter, Subplotter
 import numpy as np
+import pandas as pd
 from chromoo.transforms import transform_array
 
 import csv
@@ -16,6 +17,9 @@ class Cache:
 
         self.opt_Xs = []
         self.opt_Fs = []
+
+        self.populations = pd.DataFrame(columns=['generation'] + config.parameter_names + config.objective_names)
+        self.last_pop    = pd.DataFrame(columns=['generation'] + config.parameter_names + config.objective_names)
 
         self.best_combined_per_gen = []
         self.best_combined_ever = []
@@ -54,6 +58,13 @@ class Cache:
 
         self.update_best_scores()
 
+        self.last_pop[self.parameter_names] = transform_array(algorithm.pop.get('X'), self.par_min_values, self.par_max_values, self.parameter_transform, mode='inverse')
+        self.last_pop[self.objective_names] = algorithm.pop.get('F')
+        self.last_pop['generation'] = algorithm.n_gen
+        
+        self.populations = self.populations.append(self.last_pop)
+
+        self.populations.to_pickle('populations')
         # self.pops.append(transform_population(algorithm.pop, self.par_min_values, self.par_max_values, self.parameter_transform, 'inverse'))
         # self.opts.append(transform_population(algorithm.opt, self.par_min_values, self.par_max_values, self.parameter_transform, 'inverse'))
     #
