@@ -50,6 +50,9 @@ def main():
     hist_plot.save(postdir / f'histogram_{args.mean}_mean', dpi=600)
     hist_plot.close()
 
+    populations = pd.read_pickle('populations')
+    populations = calculate_mean(populations, args.mean, config.objective_names)
+
     with mp.Pool(config.nproc) as pool:
         out = pool.map( 
             partial(run_sim_iter, 
