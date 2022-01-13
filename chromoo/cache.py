@@ -56,7 +56,6 @@ class Cache:
         self.pop_Fs.append(algorithm.pop.get('F'))
         self.opt_Fs.append(algorithm.opt.get('F'))
 
-        self.update_best_scores()
 
         self.last_pop[self.parameter_names] = transform_array(algorithm.pop.get('X'), self.par_min_values, self.par_max_values, self.parameter_transform, mode='inverse')
         self.last_pop[self.objective_names] = algorithm.pop.get('F')
@@ -152,7 +151,6 @@ class Cache:
 
     def write(self):
         self.write_opts()
-        self.write_best_combined_per_gen()
 
     def update_scatter_plot(self):
         """ Update the objectives_vs_parameters scatter plots """
