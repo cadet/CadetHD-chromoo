@@ -53,6 +53,17 @@ def main():
     populations = pd.read_pickle('populations')
     populations = calculate_mean(populations, args.mean, config.objective_names)
 
+    # minned = populations.loc[populations.groupby(['generation'])[args.mean].idxmin()]
+    best_mean_score_per_gen = populations.groupby(['generation'])[args.mean].min()
+    worst_mean_score_per_gen = populations.groupby(['generation'])[args.mean].max()
+
+    best_mean_score_per_gen_plot = Plotter(title='best_mean_score_per_gen', yscale='log')
+    best_mean_score_per_gen_plot.plot(range(len(best_mean_score_per_gen)), best_mean_score_per_gen, label='best')
+    best_mean_score_per_gen_plot.plot(range(len(worst_mean_score_per_gen)), worst_mean_score_per_gen, label='worst')
+    best_mean_score_per_gen_plot.legend('upper right', (1,1))
+    best_mean_score_per_gen_plot.save(f'{str(postdir)}/best_mean_score_per_gen', dpi=600)
+    best_mean_score_per_gen_plot.close()
+
     with mp.Pool(config.nproc) as pool:
         out = pool.map( 
             partial(run_sim_iter, 
