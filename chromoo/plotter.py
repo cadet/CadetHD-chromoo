@@ -34,6 +34,13 @@ class Plotter():
     def save(self, filename, dpi=300) -> None:
         self.fig.savefig(filename, dpi=dpi)
 
+    def legend(self, location='upper center', anchor=(0.5,-0.2), ncol=1, frame=False):
+        self.ax.legend(loc=location, bbox_to_anchor=anchor, ncol=ncol)
+        if frame:
+            plt.rcParams.update({
+                "legend.shadow": True,
+                "legend.frameon": True })
+
     def show(self) -> None:
         plt.show()
 
@@ -79,6 +86,14 @@ class Subplotter():
     def hist(self, x, irow, icol, bins=10):
         ax = self.fig.add_subplot(self.gs[irow * self.ncols + icol])
         ax.hist(x, bins=bins)
+
+    def legend(self, irow, icol, location='upper center', anchor=(0.5,-0.2), ncol=1, frame=False):
+        ax = self.fig.add_subplot(self.gs[irow * self.ncols + icol])
+        ax.legend(loc=location, bbox_to_anchor=anchor, ncol=ncol)
+        if frame:
+            plt.rcParams.update({
+                "legend.shadow": True,
+                "legend.frameon": True })
 
     def save(self, filename, dpi=300) -> None:
         self.fig.savefig(filename, dpi=dpi)
