@@ -52,10 +52,10 @@ def main():
     postdir = Path('post') 
     postdir.mkdir(exist_ok=True)
 
-    plot = Plotter(title=args.mean+' mean')
-    plot.hist(df[args.mean], args.hist)
-    plot.save(postdir / f'histogram_{args.mean}_mean', dpi=600)
-    plot.close()
+    hist_plot = Plotter(title=args.mean+' mean')
+    hist_plot.hist(df[args.mean], args.hist)
+    hist_plot.save(postdir / f'histogram_{args.mean}_mean', dpi=600)
+    hist_plot.close()
 
     with mp.Pool(config.nproc) as pool:
         out = pool.map( 
@@ -72,7 +72,8 @@ def main():
         objectives_contain_times = False
 
     for i,sim in enumerate(out):
-        plot = Plotter( title='title')
+
+        obj_ref_plot = Plotter( title='title')
         for obj in config.objectives:
             simulated = deep_get(sim.root, obj.path)
             simulated = np.array(simulated).flatten()
@@ -84,11 +85,11 @@ def main():
             else:
                 reference = readArray(obj.filename)
 
-            plot.plot(times, reference)
-            plot.plot(times, simulated, ls='dashed')
+            obj_ref_plot.plot(times, reference)
+            obj_ref_plot.plot(times, simulated, ls='dashed')
 
-        plot.save(f"{str(postdir)}/objectives_reference_final_{i:03d}", dpi=600)
-        plot.close()
+        obj_ref_plot.save(f"{str(postdir)}/objectives_reference_final_{i:03d}", dpi=600)
+        obj_ref_plot.close()
 
 
 if __name__=="__main__":
