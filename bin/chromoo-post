@@ -103,6 +103,13 @@ def main():
         best_mean_score_per_gen_plot.save(f'{str(postdir)}/best_mean_score_per_gen', dpi=600)
         best_mean_score_per_gen_plot.close()
 
+        # populations_best_score_ever_index = populations[args.mean].argmin()
+        # print(populations.iloc[populations_best_score_ever_index])
+
+        df = populations.iloc[:,1:].sort_values(by=[args.mean]).drop_duplicates()
+        best = df.iloc[0:args.n]
+        print(best)
+
         plot = Subplotter(
             nrows=config.n_obj,
             ncols=config.n_par,
