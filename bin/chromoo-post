@@ -33,23 +33,58 @@ def main():
     config.load()
     config.construct_simulation()
 
-    df = pd.read_csv(args.csv)
-    df = calculate_mean(df, args.mean, config.objective_names)
-    df = df.sort_values(by=[args.mean])
-
-    columns = list(df.columns[0:config.n_par])
-    columns.append(df.columns[-1])
-
-    best = df[columns].iloc[0:args.n]
-    print(best)
-
     postdir = Path('post') 
     postdir.mkdir(exist_ok=True)
 
-    hist_plot = Plotter(title=args.mean+' mean')
-    hist_plot.hist(df[args.mean], args.hist)
-    hist_plot.save(postdir / f'histogram_{args.mean}_mean', dpi=600)
-    hist_plot.close()
+    if args.csv: 
+        df = pd.read_csv(args.csv)
+        df = calculate_mean(df, args.mean, config.objective_names)
+        df = df.sort_values(by=[args.mean])
+
+        hist_plot = Plotter(title=args.mean+' mean')
+        hist_plot.hist(df[args.mean], args.hist)
+        hist_plot.save(postdir / f'histogram_{args.mean}_mean', dpi=600)
+        hist_plot.close()
+
+        columns = list(df.columns[0:config.n_par])
+        columns.append(df.columns[-1])
+
+        best = df[columns].iloc[0:args.n]
+        print(best)
+
+        with mp.Pool(config.nproc) as pool:
+            out = pool.map( 
+                partial(run_sim_iter, 
+                    sim=config.simulation, 
+                    parameters=config.parameters, 
+                    name=f'final', 
+                    tempdir=postdir, 
+                    store=True), 
+                enumerate(best.values))
+
+        objectives_contain_times = True
+        if config.objectives[0].times:
+            objectives_contain_times = False
+
+        for i,sim in enumerate(out):
+
+            obj_ref_plot = Plotter( title='title')
+            for obj in config.objectives:
+                simulated = deep_get(sim.root, obj.path)
+                simulated = np.array(simulated).flatten()
+
+                times = deep_get(sim.root, 'output.solution.solution_times')
+
+                if objectives_contain_times:
+                    _, reference = readChromatogram(obj.filename)
+                else:
+                    reference = readArray(obj.filename)
+
+                obj_ref_plot.plot(times, reference)
+                obj_ref_plot.plot(times, simulated, ls='dashed')
+
+            obj_ref_plot.save(f"{str(postdir)}/objectives_reference_final_{i:03d}", dpi=600)
+            obj_ref_plot.close()
 
     if args.pop: 
         populations = pd.read_pickle('populations')
@@ -65,40 +100,6 @@ def main():
         best_mean_score_per_gen_plot.legend('upper right', (1,1))
         best_mean_score_per_gen_plot.save(f'{str(postdir)}/best_mean_score_per_gen', dpi=600)
         best_mean_score_per_gen_plot.close()
-
-    with mp.Pool(config.nproc) as pool:
-        out = pool.map( 
-            partial(run_sim_iter, 
-                sim=config.simulation, 
-                parameters=config.parameters, 
-                name=f'final', 
-                tempdir=postdir, 
-                store=True), 
-            enumerate(best.values))
-
-    objectives_contain_times = True
-    if config.objectives[0].times:
-        objectives_contain_times = False
-
-    for i,sim in enumerate(out):
-
-        obj_ref_plot = Plotter( title='title')
-        for obj in config.objectives:
-            simulated = deep_get(sim.root, obj.path)
-            simulated = np.array(simulated).flatten()
-
-            times = deep_get(sim.root, 'output.solution.solution_times')
-
-            if objectives_contain_times:
-                _, reference = readChromatogram(obj.filename)
-            else:
-                reference = readArray(obj.filename)
-
-            obj_ref_plot.plot(times, reference)
-            obj_ref_plot.plot(times, simulated, ls='dashed')
-
-        obj_ref_plot.save(f"{str(postdir)}/objectives_reference_final_{i:03d}", dpi=600)
-        obj_ref_plot.close()
 
 def calculate_mean(df, mean, columns):
     if mean == 'geometric': 
