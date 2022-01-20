@@ -22,6 +22,10 @@ def main():
     ap.add_argument('-n', default=5, type=int, help='Number of best simulations to run')
     ap.add_argument('-m', '--mean', choices=['geometric', 'arithmetic', 'rms'], default='geometric', help='Mode of averaging scores')
     ap.add_argument('--hist', default=20, help='Number of bins in histogram plot')
+
+    ap.add_argument('--pop', action='store_true', help='Use pickled population database')
+    ap.add_argument('--opt', action='store_true', help='Use pickled opt database')
+
     args = ap.parse_args()
 
 
@@ -50,19 +54,20 @@ def main():
     hist_plot.save(postdir / f'histogram_{args.mean}_mean', dpi=600)
     hist_plot.close()
 
-    populations = pd.read_pickle('populations')
-    populations = calculate_mean(populations, args.mean, config.objective_names)
+    if args.pop: 
+        populations = pd.read_pickle('populations')
+        populations = calculate_mean(populations, args.mean, config.objective_names)
 
-    # minned = populations.loc[populations.groupby(['generation'])[args.mean].idxmin()]
-    best_mean_score_per_gen = populations.groupby(['generation'])[args.mean].min()
-    worst_mean_score_per_gen = populations.groupby(['generation'])[args.mean].max()
+        # minned = populations.loc[populations.groupby(['generation'])[args.mean].idxmin()]
+        best_mean_score_per_gen = populations.groupby(['generation'])[args.mean].min()
+        worst_mean_score_per_gen = populations.groupby(['generation'])[args.mean].max()
 
-    best_mean_score_per_gen_plot = Plotter(title='best_mean_score_per_gen', yscale='log')
-    best_mean_score_per_gen_plot.plot(range(len(best_mean_score_per_gen)), best_mean_score_per_gen, label='best')
-    best_mean_score_per_gen_plot.plot(range(len(worst_mean_score_per_gen)), worst_mean_score_per_gen, label='worst')
-    best_mean_score_per_gen_plot.legend('upper right', (1,1))
-    best_mean_score_per_gen_plot.save(f'{str(postdir)}/best_mean_score_per_gen', dpi=600)
-    best_mean_score_per_gen_plot.close()
+        best_mean_score_per_gen_plot = Plotter(title='best_mean_score_per_gen', yscale='log')
+        best_mean_score_per_gen_plot.plot(range(len(best_mean_score_per_gen)), best_mean_score_per_gen, label='best')
+        best_mean_score_per_gen_plot.plot(range(len(worst_mean_score_per_gen)), worst_mean_score_per_gen, label='worst')
+        best_mean_score_per_gen_plot.legend('upper right', (1,1))
+        best_mean_score_per_gen_plot.save(f'{str(postdir)}/best_mean_score_per_gen', dpi=600)
+        best_mean_score_per_gen_plot.close()
 
     with mp.Pool(config.nproc) as pool:
         out = pool.map( 
