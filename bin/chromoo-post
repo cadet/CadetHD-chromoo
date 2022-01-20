@@ -18,16 +18,15 @@ from chromoo.plotter import Plotter
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('config', help='config file to parse and process.')
-    ap.add_argument('--csv', help='CSV file to process')
     ap.add_argument('-n', default=5, type=int, help='Number of best simulations to run')
     ap.add_argument('-m', '--mean', choices=['geometric', 'arithmetic', 'rms'], default='geometric', help='Mode of averaging scores')
+    ap.add_argument('--csv', help='CSV file to process')
     ap.add_argument('--hist', default=20, help='Number of bins in histogram plot')
 
     ap.add_argument('--pop', action='store_true', help='Use pickled population database')
     ap.add_argument('--opt', action='store_true', help='Use pickled opt database')
 
     args = ap.parse_args()
-
 
     config = ConfigHandler()
     config.read(args.config)
@@ -41,9 +40,7 @@ def main():
     columns = list(df.columns[0:config.n_par])
     columns.append(df.columns[-1])
 
-    # best = df.iloc[0:args.n,0:config.n_par]
-    best = df.iloc[0:args.n]
-    best = best.loc[:,columns]
+    best = df[columns].iloc[0:args.n]
     print(best)
 
     postdir = Path('post') 
