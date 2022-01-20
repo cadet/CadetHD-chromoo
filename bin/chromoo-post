@@ -15,6 +15,8 @@ from chromoo.simulation import run_sim_iter
 from chromoo.utils import deep_get, readArray, readChromatogram
 from chromoo.plotter import Plotter, Subplotter
 
+pd.set_option('display.float_format', lambda x: '%e' % x)
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('config', help='config file to parse and process.')
