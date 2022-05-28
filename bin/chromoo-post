@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+from rich import print
+
 import numpy as np
 import pandas as pd
 from scipy import stats
@@ -24,6 +26,7 @@ def main():
     ap.add_argument('-m', '--mean', choices=['geometric', 'arithmetic', 'rms'], default='geometric', help='Mode of averaging scores')
     ap.add_argument('--csv', help='CSV file to process')
     ap.add_argument('--hist', default=20, help='Number of bins in histogram plot')
+    ap.add_argument('--opts-overlay', help='Overlay all opts outputs and reference values')
 
     ap.add_argument('--pop', action='store_true', help='Use pickled population database')
     ap.add_argument('--opt', action='store_true', help='Use pickled opt database')
@@ -45,12 +48,13 @@ def main():
 
         hist_plot = Plotter(title=args.mean+' mean')
         hist_plot.hist(df[args.mean], args.hist)
-        hist_plot.save(postdir / f'histogram_{args.mean}_mean', dpi=600)
+        hist_plot.save(postdir / f'histogram_{args.mean}_mean', dpi=300)
         hist_plot.close()
 
         columns = list(df.columns[0:config.n_par])
         columns.append(df.columns[-1])
 
+        print("Best opts solution: ")
         best = df[columns].iloc[0:args.n]
         print(best)
 
@@ -59,7 +63,7 @@ def main():
                 partial(run_sim_iter, 
                     sim=config.simulation, 
                     parameters=config.parameters, 
-                    name=f'final', 
+                    name=f'final_{args.mean}', 
                     tempdir=postdir, 
                     store=True), 
                 enumerate(best.values))
@@ -85,10 +89,11 @@ def main():
                 obj_ref_plot.plot(times, reference)
                 obj_ref_plot.plot(times, simulated, ls='dashed')
 
-            obj_ref_plot.save(f"{str(postdir)}/objectives_reference_final_{i:03d}", dpi=600)
+            obj_ref_plot.save(f"{str(postdir)}/objectives_reference_{args.mean}_final_{i:03d}", dpi=300)
             obj_ref_plot.close()
 
     if args.pop: 
+        print("Reading pickled populations file...")
         populations = pd.read_pickle('populations')
         populations = calculate_mean(populations, args.mean, config.objective_names)
 
@@ -100,12 +105,13 @@ def main():
         best_mean_score_per_gen_plot.plot(range(len(best_mean_score_per_gen)), best_mean_score_per_gen, label='best')
         best_mean_score_per_gen_plot.plot(range(len(worst_mean_score_per_gen)), worst_mean_score_per_gen, label='worst')
         best_mean_score_per_gen_plot.legend('upper right', (1,1))
-        best_mean_score_per_gen_plot.save(f'{str(postdir)}/best_mean_score_per_gen', dpi=600)
+        best_mean_score_per_gen_plot.save(f'{str(postdir)}/best_mean_score_per_gen', dpi=300)
         best_mean_score_per_gen_plot.close()
 
         # populations_best_score_ever_index = populations[args.mean].argmin()
         # print(populations.iloc[populations_best_score_ever_index])
 
+        print("Best populations solution: ")
         df = populations.iloc[:,1:].sort_values(by=[args.mean]).drop_duplicates()
         best = df.iloc[0:args.n]
         print(best)
@@ -125,7 +131,7 @@ def main():
 
                 plot.scatter(x,y, i_obj,i_par, xlabel=par, ylabel=obj)
 
-        plot.save(postdir / "objectives_parameters", dpi=600)
+        plot.save(postdir / "objectives_parameters", dpi=300)
         plot.close()
 
 
