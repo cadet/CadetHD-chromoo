@@ -7,3 +7,5 @@
 *.yaml
 *solution*
 *.npy
+
+_build/pip_packages
