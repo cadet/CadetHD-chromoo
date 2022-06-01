@@ -87,8 +87,12 @@ def main():
                 else:
                     reference = readArray(obj.filename)
 
-                obj_ref_plot.plot(times, reference)
-                obj_ref_plot.plot(times, simulated, ls='dashed')
+                if len( times ) == len(reference): 
+                    obj_ref_plot.plot(times, reference)
+                    obj_ref_plot.plot(times, simulated, ls='dashed')
+                else: 
+                    obj_ref_plot.plot(list(range(len(reference))), reference)
+                    obj_ref_plot.plot(list(range(len(simulated))), simulated, ls='dashed')
 
             obj_ref_plot.save(f"{str(postdir)}/objectives_reference_{args.mean}_final_{i:03d}", dpi=300)
             obj_ref_plot.close()
