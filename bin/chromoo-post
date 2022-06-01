@@ -18,6 +18,7 @@ from chromoo.utils import deep_get, readArray, readChromatogram
 from chromoo.plotter import Plotter, Subplotter
 
 pd.set_option('display.float_format', lambda x: '%e' % x)
+pd.set_option('display.max_columns', None)
 
 def main():
     ap = argparse.ArgumentParser()
