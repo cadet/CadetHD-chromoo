@@ -1,6 +1,7 @@
 from matplotlib import pyplot as plt
 from matplotlib import gridspec 
 import matplotlib
+from cycler import cycler
 
 matplotlib.use('Agg')
 
@@ -11,7 +12,8 @@ class Plotter():
     xlabel=None,
     ylabel=None,
     xscale='linear', 
-    yscale='linear'
+    yscale='linear',
+    cmap='tab10'
     ) -> None:
 
         # plt.style.use('science')
@@ -22,8 +24,12 @@ class Plotter():
         self.ax.set(ylabel=ylabel)
         self.ax.set(title=title)
 
-    def plot(self, x, y, label=None, ls='solid', lw=1, marker=None) -> None:
-        self.ax.plot(x, y, label=label, linestyle=ls, linewidth=lw, marker=marker)
+        COLORS = plt.cm.get_cmap(cmap).colors
+        self.cycler = cycler('color', COLORS)
+        self.ax.set_prop_cycle(self.cycler)
+
+    def plot(self, x, y, label=None, ls='solid', lw=1, marker=None, zorder=None) -> None:
+        self.ax.plot(x, y, label=label, linestyle=ls, linewidth=lw, marker=marker, zorder=zorder)
 
     def scatter(self, x, y, label=None, ls='solid', lw=1, marker=None) -> None:
         self.ax.scatter(x, y, label=label, linestyle=ls, linewidth=lw, marker=marker)
@@ -33,6 +39,8 @@ class Plotter():
 
     def save(self, filename, dpi=300) -> None:
         self.fig.savefig(filename, dpi=dpi)
+
+
 
     def legend(self, location='upper center', anchor=(0.5,-0.2), ncol=1, frame=False):
         self.ax.legend(loc=location, bbox_to_anchor=anchor, ncol=ncol)

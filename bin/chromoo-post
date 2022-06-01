@@ -76,7 +76,7 @@ def main():
 
         for i,sim in enumerate(out):
 
-            obj_ref_plot = Plotter( title='title')
+            obj_ref_plot = Plotter(title='Solution vs Reference', cmap='tab20')
             for obj in config.objectives:
                 simulated = deep_get(sim.root, obj.path)
                 simulated = np.array(simulated).flatten()
@@ -90,7 +90,7 @@ def main():
 
                 if len( times ) == len(reference): 
                     obj_ref_plot.plot(times, reference)
-                    obj_ref_plot.plot(times, simulated, ls='dashed')
+                    obj_ref_plot.plot(times, simulated, ls='dashed', zorder=100)
                 else: 
                     obj_ref_plot.plot(list(range(len(reference))), reference)
                     obj_ref_plot.plot(list(range(len(simulated))), simulated, ls='dashed')
