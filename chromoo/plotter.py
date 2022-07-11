@@ -16,6 +16,8 @@ class Plotter():
     cmap='tab10'
     ) -> None:
 
+        plt.style.use('science')
+
         # plt.style.use('science')
         self.fig, self.ax = plt.subplots()
         self.ax.set(xscale=xscale)
@@ -32,7 +34,7 @@ class Plotter():
         self.ax.plot(x, y, label=label, linestyle=ls, linewidth=lw, marker=marker, zorder=zorder)
 
     def scatter(self, x, y, label=None, ls='solid', lw=1, marker=None) -> None:
-        self.ax.scatter(x, y, label=label, linestyle=ls, linewidth=lw, marker=marker)
+        self.ax.scatter(x, y, s=1, label=label, linestyle=ls, linewidth=lw, marker=marker)
 
     def hist(self, x, bins=10):
         self.ax.hist(x, bins=bins)
