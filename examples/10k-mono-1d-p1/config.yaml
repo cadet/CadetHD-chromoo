@@ -1,6 +1,8 @@
 filename: 10k-mono.mono1d.yaml
 nproc: 4
 store_temp: false
+transforms:
+  parameters: lognorm
 parameters:
     - name: axial
       length: 1
@@ -13,15 +15,15 @@ objectives:
       # times: timesteps.txt
       score: sse
       path: output.solution.unit_003.solution_outlet_comp_000
-      match_solution_times: true
 algorithm: 
-    name: nsga3
-    pop_size: 10
+  name: unsga3
+  pop_size: 10
+  # init_sobol: true
 termination:
   # x_tol: 1e-8
   # cv_tol: 1e-6
   f_tol: 1e-9
   nth_gen: 2
-  n_last: 10
-  n_max_gen: 10
+  n_last: 5
+  n_max_gen: 100
   n_max_evals: 100000

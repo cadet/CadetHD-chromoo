@@ -1,5 +1,7 @@
 filename: 10k-mono.mono2d.yaml
 nproc: 4
+transforms:
+  parameters: lognorm
 parameters:
     - name: axial
       length: 1
@@ -40,6 +42,7 @@ objectives:
 algorithm: 
   name: nsga3
   pop_size: 10
+  init_sobol: true
 termination:
   # x_tol: 1e-8
   # cv_tol: 1e-6
