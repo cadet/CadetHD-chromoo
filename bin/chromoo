@@ -1,27 +1,32 @@
 #!/usr/bin/env python3
 
-from chromoo import __version__, __git_version__
-from chromoo import ChromooProblem, AlgorithmFactory, ConfigHandler, ChromooCallback
-from chromoo.log import Logger
+import numpy as np
+import argparse
 
-from chromoo.cache import Cache
-
-from pymoo.util.termination.default import MultiObjectiveDefaultTermination
+from datetime import datetime as dt
 
 from SALib.sample import sobol_sequence
 
-import numpy as np
-import argparse
-import numpy as np
+from pymoo import __version__ as __pymoo_version__
+from pymoo.util.termination.default import MultiObjectiveDefaultTermination
 
-from datetime import datetime as dt
+from chromoo import __version__, __git_version__
+from chromoo import ChromooProblem, AlgorithmFactory, ConfigHandler, ChromooCallback
+from chromoo.cache import Cache
+from chromoo.log import Logger
+
+def version() -> str: 
+    return ( 
+            f'Chromoo version {__version__} built from git version {__git_version__}.\n'
+            f'Uses pymoo version {__pymoo_version__}'
+            )
 
 def main():
 
     ap = argparse.ArgumentParser()
     ap.add_argument("file", nargs='?', help="yaml config file")
     ap.add_argument("-v", "--version", action='version', 
-            version=f'chromoo version {__version__} built from git version {__git_version__}', 
+            version=version(), 
             help="print version information")
     args = vars(ap.parse_args())
 
