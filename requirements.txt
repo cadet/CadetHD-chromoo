@@ -1,0 +1,10 @@
+numpy>=1.21
+matplotlib>=3.4
+addict>=2.4
+cadet-python>=0.11
+pymoo>=0.5
+rich>10.15
+ruamel.yaml>=0.17
+SALib
+pandas
+GitPython
