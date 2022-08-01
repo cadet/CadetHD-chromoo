@@ -70,10 +70,6 @@ def main():
                     store=True), 
                 enumerate(best.values))
 
-        objectives_contain_times = True
-        if config.objectives[0].times:
-            objectives_contain_times = False
-
         for i,sim in enumerate(out):
 
             obj_ref_plot = Plotter(title='Solution vs Reference', cmap='tab20')
@@ -83,10 +79,10 @@ def main():
 
                 times = deep_get(sim.root, 'output.solution.solution_times')
 
-                if objectives_contain_times:
-                    _, reference = readChromatogram(obj.filename)
-                else:
+                if obj.times: 
                     reference = readArray(obj.filename)
+                else:
+                    _, reference = readChromatogram(obj.filename)
 
                 if len( times ) == len(reference): 
                     obj_ref_plot.plot(times, reference)

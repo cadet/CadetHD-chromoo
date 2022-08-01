@@ -53,7 +53,6 @@ def run_and_eval(x, sim, parameters, objectives, name=None, tempdir=Path('temp')
     return scores
 
 
-
 def run_sim(x, sim, parameters, name=None, tempdir=Path('temp'), store=False):
     """
         - run one simulation
@@ -119,19 +118,13 @@ def run_sim_iter(index_x, sim, parameters, name='sim', tempdir=Path('temp'), sto
 def evaluate_sim(newsim, objectives):
     scores = []
 
-    # FIXME: only objectives[0] is checked
-    
-    objectives_contain_times = True
-    if objectives[0].times:
-        objectives_contain_times = False
-
     for obj in objectives:
         y = deep_get(newsim.root, obj.path)
         y = np.array(y).flatten()
-        if objectives_contain_times:
-            _, y0 = readChromatogram(obj.filename)
-        else:
+        if obj.times: 
             y0 = readArray(obj.filename)
+        else:
+            _, y0 = readChromatogram(obj.filename)
 
         scores.append(scores_dict[obj.score](y0, y))
 

@@ -138,13 +138,10 @@ class ConfigHandler:
         self.simulation =  load_file(self.filename)
 
         # NOTE: Only the first objective is checked for timesteps
-        # FIXME:
         if self.objectives[0].times:
             t0 = readArray(self.objectives[0].times)
-            self.objectives_contain_times = False
         else:
             t0,_ = readChromatogram(self.objectives[0].filename)
-            self.objectives_contain_times = True
 
         self.simulation.root.input.solver.sections.section_times = [min(t0), max(t0)]
         self.simulation.root.input.solver.user_solution_times = t0
