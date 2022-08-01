@@ -19,7 +19,10 @@ from datetime import datetime as dt
 def main():
 
     ap = argparse.ArgumentParser()
-    ap.add_argument("file", nargs=1, help="yaml config file")
+    ap.add_argument("file", nargs='?', help="yaml config file")
+    ap.add_argument("-v", "--version", action='version', 
+            version=f'chromoo version {__version__} built from git version {__git_version__}', 
+            help="print version information")
     args = vars(ap.parse_args())
 
     TIMESTAMP = dt.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -29,7 +32,7 @@ def main():
     logger.note('chromoo version', __version__, 'built from git version', __git_version__)
 
     config = ConfigHandler()
-    config.read(args['file'][0])
+    config.read(args['file'])
     config.load()
     config.construct_simulation()
 

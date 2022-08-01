@@ -1,16 +1,14 @@
 #!/usr/bin/env python
 
 import setuptools
+import git
 
 def git_version():
     """ Return version with local version identifier. """
-    import git
-    repo = git.Repo('.git')
+    repo = git.Repo('.', search_parent_directories=True)
     repo.git.status()
-    print(repo)
     sha = repo.head.commit.hexsha
     sha = repo.git.rev_parse(sha, short=6)
-    print(sha)
     if repo.is_dirty():
         return '{sha}.dirty'.format(sha=sha)
     else:
