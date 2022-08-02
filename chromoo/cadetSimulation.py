@@ -146,7 +146,9 @@ class CadetSimulation(Cadet):
 def new_run_and_eval(x, sim, parameters, objectives, name:Optional[str]=None, tempdir:Path=Path('temp'), store:bool=False): 
     simulation = CadetSimulation(sim.root)
     simulation.run_with_parameters(x, parameters, name, tempdir, store)
-    results = evaluate_outlet(simulation, objectives)
+
+    results = np.hstack(list(map(lambda obj: obj.evaluate(simulation), objectives)))
+
     return results
 
 def evaluate_outlet(simulation, objectives):
@@ -159,3 +161,4 @@ def evaluate_outlet(simulation, objectives):
         scores.append(scores_dict[obj.score](y0, y))
 
     return scores
+

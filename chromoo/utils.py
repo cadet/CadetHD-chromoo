@@ -2,6 +2,8 @@ from functools import reduce
 from matplotlib import pyplot as plt
 from typing import TypeVar, Callable, Any, Optional, overload
 
+import numpy as np
+
 T = TypeVar("T")
 
 def keystring_todict(key, value):
@@ -65,7 +67,7 @@ def readChromatogram(data_path):
             if (data_line != []):
                 time.append(float(data_line[0]))
                 conc.append(float(data_line[1]))
-    return time, conc
+    return np.array(time), np.array(conc)
 
 def readArray(data_path):
     """
@@ -75,7 +77,7 @@ def readArray(data_path):
     with open(data_path, newline='') as csvfile:
         for line in csvfile:
             values.append(float(line.strip()))
-    return values
+    return np.array(values)
 
 def plotter(sim, objectives):
     """
