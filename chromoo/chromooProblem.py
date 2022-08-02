@@ -7,6 +7,8 @@ from pathlib import Path
 from chromoo.simulation import run_and_eval
 from chromoo.transforms import transform_array
 
+from chromoo.cadetSimulation import new_run_and_eval
+
 class ChromooProblem(Problem):
     def __init__(self, sim, parameters, objectives, nproc=4, tempdir='temp', store_temp=False, transform='none'):
         
@@ -49,5 +51,13 @@ class ChromooProblem(Problem):
 
         with mp.Pool(self.nproc) as pool:
             denormalized_inputs = transform_array(X, self.min_values, self.max_values, self.transform, mode='inverse')
-            out["F"] = pool.map( partial(run_and_eval, sim=self.sim, parameters=self.parameters, objectives=self.objectives, name=None, tempdir=self.tempdir, store=self.store_temp), denormalized_inputs)
-
+            out["F"] = pool.map( 
+                    partial(
+                        new_run_and_eval, 
+                        sim=self.sim, 
+                        parameters=self.parameters, 
+                        objectives=self.objectives, 
+                        name=None, 
+                        tempdir=self.tempdir, 
+                        store=self.store_temp), 
+                    denormalized_inputs)

@@ -37,6 +37,7 @@ from .callback import ChromooCallback
 from .algorithmFactory import AlgorithmFactory
 from .cache import Cache
 
+
 from . import parameter
 from . import objective
 
@@ -45,3 +46,5 @@ from . import plotter
 from . import utils
 from . import log
 from . import transforms
+
+from . import cadetSimulation
