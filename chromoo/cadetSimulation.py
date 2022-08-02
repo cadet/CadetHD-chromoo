@@ -154,13 +154,7 @@ def evaluate_outlet(simulation, objectives):
 
     for obj in objectives:
         y = simulation.get(obj.path, vartype=np.array)
-
-        # TODO: Create an objectives class that can read this into memory in the beginning and hold this information?
-        # Or as a hack, just store it using confighandler's initialization of this dict
-        if obj.times: 
-            y0 = readArray(obj.filename)
-        else:
-            _, y0 = readChromatogram(obj.filename)
+        y0 = obj.y0
 
         scores.append(scores_dict[obj.score](y0, y))
 

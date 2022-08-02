@@ -24,6 +24,7 @@ from chromoo.objective import Objective
 from typing import Any
 
 from itertools import chain
+import numpy as np
 
 class ConfigHandler:
 
@@ -137,11 +138,8 @@ class ConfigHandler:
     def construct_simulation(self):
         self.simulation =  load_file(self.filename)
 
-        # NOTE: Only the first objective is checked for timesteps
-        if self.objectives[0].times:
-            t0 = readArray(self.objectives[0].times)
-        else:
-            t0,_ = readChromatogram(self.objectives[0].filename)
+        t0 = self.objectives[0].x0
+        assert all(map(lambda obj: np.allclose(obj.x0, t0), self.objectives))
 
         self.simulation.root.input.solver.sections.section_times = [min(t0), max(t0)]
         self.simulation.root.input.solver.user_solution_times = t0
