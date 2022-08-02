@@ -150,15 +150,3 @@ def new_run_and_eval(x, sim, parameters, objectives, name:Optional[str]=None, te
     results = np.hstack(list(map(lambda obj: obj.evaluate(simulation), objectives)))
 
     return results
-
-def evaluate_outlet(simulation, objectives):
-    scores = []
-
-    for obj in objectives:
-        y = simulation.get(obj.path, vartype=np.array)
-        y0 = obj.y0
-
-        scores.append(scores_dict[obj.score](y0, y))
-
-    return scores
-
