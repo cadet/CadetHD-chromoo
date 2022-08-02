@@ -9,15 +9,15 @@ class Objective:
     """
     A class to store the objective paths and reference values, and evaluate a simulation's score.
     """
-    name: str
-    path: str
-    filename: str
-    shape: tuple = field(default_factory=tuple)
-    times: str = ''
-    combine_scores_axis: Optional[int] = None
-    score: str = 'sse'
-    x0: np.ndarray = np.array([])
-    y0: np.ndarray = np.array([])
+    name: str                                           # Objective name
+    filename: str                                       # filename with objective reference values
+    path: str                                           # dot-separated CADET Path 
+    shape: tuple = field(default_factory=tuple)         # shape of data at path
+    times: str = ''                                     # timestep data, if separate from objective reference
+    combine_scores_axis: Optional[int] = None           # combine/avg scores along axis
+    score: str = 'sse'                                  # score type
+    x0: np.ndarray = np.array([])                       # time steps
+    y0: np.ndarray = np.array([])                       # data values
 
     def __post_init__(self): 
         """ 
@@ -43,15 +43,18 @@ class Objective:
             object.__setattr__(self, 'y0', y0)
 
     def evaluate(self, sim): 
+        """ Evaluate a simulation based on reference objective data and score function """
         y = sim.get(self.path)
         y0 = self.y0
-        sses = np.sum((y0 - y)**2)
+        sses = np.sum((y0 - y)**2, axis=0)
         if self.combine_scores_axis is not None: 
             sses = np.average(sses, axis=self.combine_scores_axis)
         return sses.flatten()
 
     def split(self, sim):
+        """ Split an ndarray objective into a list of 1D time-series curves """
         y = sim.get(self.path)
 
         # Move time axis to the end, and reshape array
-        return np.moveaxis(y, 0, -1).reshape(-1,y.shape[0]).squeeze()
+        # This effectively splits the array into a bunch of time-series curves
+        return np.moveaxis(y, 0, -1).reshape(-1,y.shape[0])
