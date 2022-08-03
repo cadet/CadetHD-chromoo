@@ -18,27 +18,22 @@ objectives:
       filename: equidistant-5-corrected/shell_0_corrected.csv
       score: sse
       path: output.solution.unit_001.solution_outlet_port_000_comp_000
-      match_solution_times: true
     - name: port1
       filename: equidistant-5-corrected/shell_1_corrected.csv
       score: sse
       path: output.solution.unit_001.solution_outlet_port_001_comp_000
-      match_solution_times: true
     - name: port2
       filename: equidistant-5-corrected/shell_2_corrected.csv
       score: sse
       path: output.solution.unit_001.solution_outlet_port_002_comp_000
-      match_solution_times: true
     - name: port3
       filename: equidistant-5-corrected/shell_3_corrected.csv
       score: sse
       path: output.solution.unit_001.solution_outlet_port_003_comp_000
-      match_solution_times: true
     - name: port4
       filename: equidistant-5-corrected/shell_4_corrected.csv
       score: sse
       path: output.solution.unit_001.solution_outlet_port_004_comp_000
-      match_solution_times: true
 algorithm: 
   name: nsga3
   pop_size: 10
