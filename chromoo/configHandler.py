@@ -20,6 +20,7 @@ from chromoo.simulation import load_file
 from addict import Dict
 from chromoo.parameter import Parameter
 from chromoo.objective import Objective
+from chromoo.cadetSimulation import CadetSimulation
 
 from typing import Any
 
@@ -104,11 +105,12 @@ class ConfigHandler:
                 self.parameter_names.append(f"{p.name}[{i}]")
 
         for o in self.objectives:
-            self.objective_names.append(f"{o.name}")
+            for i in range(o.n_obj): 
+                self.objective_names.append(f"{o.name}[{i}]")
 
 
         self.n_par = sum( p.length for p in self.parameters )
-        self.n_obj = len(self.objectives)
+        self.n_obj = sum( o.n_obj for o in self.objectives )
 
 
         # If i'm passing a dict to a class, might be better to take the full
@@ -120,7 +122,7 @@ class ConfigHandler:
         self.algorithm.name = self.get('algorithm.name', 'unsga3', str(), ['unsga3', 'nsga3'])
         self.algorithm.pop_size= self.get('algorithm.pop_size', 10, vartype=int)
         self.algorithm.n_offsprings = self.get('algorithm.n_offsprings', self.algorithm.pop_size, vartype=int)
-        self.algorithm.n_obj= len(self.objectives)
+        self.algorithm.n_obj = self.n_obj
         self.algorithm.init_sobol = self.get('algorithm.init_sobol', False, bool)
 
         self.parameter_transform = self.get('transforms.parameters', 'none', str, ['none', 'lognorm', 'norm'])
@@ -136,7 +138,7 @@ class ConfigHandler:
         self.termination.n_max_evals = self.get('termination.n_max_evals', 1000, int)
 
     def construct_simulation(self):
-        self.simulation =  load_file(self.filename)
+        self.simulation =  CadetSimulation(load_file(self.filename).root)
 
         t0 = self.objectives[0].x0
         assert all(map(lambda obj: np.allclose(obj.x0, t0), self.objectives))
@@ -144,7 +146,10 @@ class ConfigHandler:
         self.simulation.root.input.solver.sections.section_times = [min(t0), max(t0)]
         self.simulation.root.input.solver.user_solution_times = t0
 
+        assert all( [ obj.verify(self.simulation) for obj in self.objectives ] )
+
         if self.nproc > 1: 
             self.simulation.root.input.solver.nthreads = 1
         else: 
             self.simulation.root.input.solver.nthreads = -1
+

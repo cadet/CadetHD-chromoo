@@ -33,7 +33,7 @@ class ChromooProblem(Problem):
 
         super().__init__(
             n_var = n_var,
-            n_obj = len(objectives), 
+            n_obj = sum(o.n_obj for o in objectives), 
             n_constr=0, 
             xl=xls,
             xu=xus )
