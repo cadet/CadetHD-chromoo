@@ -98,15 +98,31 @@ def main():
         best = df.iloc[0:args.n]
         print(best)
 
-        # plot = Subplotter(
-        #     nrows=config.n_obj,
-        #     ncols=config.n_par,
-        #     title='Objectives_Parameters',
-        #     xscale='log',
-        #     yscale='log'
-        # )
+        plot = Subplotter(
+            nrows=config.n_obj,
+            ncols=config.n_par,
+            title='Objectives_Parameters',
+            xscale='log',
+            yscale='log'
+        )
+
+        for i_obj, obj in enumerate(config.objective_names): 
+            for i_par, par in enumerate(config.parameter_names): 
+
+                x = populations[par]
+                y = populations[obj]
+
+                plot.scatter( 
+                        x,y, 
+                        i_obj, i_par, 
+                        fontsize=7,
+                        s=8,
+                        title=f'{config.parameter_names[i_par]} v {config.objective_names[i_obj]}' )
+        plot.save(postdir / f"objectives_parameters.pdf", dpi=300)
+        plot.close()
 
         if args.plot_obj_par: 
+            # Plot the objectives_parameters plot individually
             for i_obj, obj in enumerate(config.objective_names): 
                 for i_par, par in enumerate(config.parameter_names): 
                     plot = Plotter(title=f"{par} vs {obj}", xlabel=f"{par}", ylabel=f"{obj}", xscale='log', yscale='log')
