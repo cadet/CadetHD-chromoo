@@ -7,5 +7,6 @@
 *.yaml
 *solution*
 *.npy
+populations
 
 _build/pip_packages
