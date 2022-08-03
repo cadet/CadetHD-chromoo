@@ -70,42 +70,16 @@ termination:
 - [CRIT] Got simulation failure due to `error 4 in libpthread` (see dmesg when it happens) on IBT012. Simulation runs manually.
 
 # TODO
-- [DONE] Implement logging
-- [DONE] Store outputs of every generation
 - [CRIT] Corner plots, 
-- [DONE] each var vs score, 
-    - Make sure parameters aren't ineffective
-- [DONE] Store the best simulations of the last generation
-- [DONE] Check if I need to use MCMC to speed things up: No. It's used in CADET-Match for the error estimator
-- [DONE] Look at pymoo.Callback
-- [DONE] There's probably a neater way to reconcile using `cache`  and `ChromooCallback`
-- [DONE] Look into hopsy for sampling the existing space properly: Ask Johannes, it seems like it's for constrained optimization
-    - Not a great experience
-    - No MOO support
-- [DONE] Use subplots
 - [ONGO] Move to numpy arrays
-- [DONE] Allow modifying a scalar at a position inside a vector
-- [DONE] Allow elements of vectors as parameters: flowrate in connections matrix.
-- [DONE] Implment an own Parameter and Objective class to handle vector parameter indices easily
-- [DONE] Fix plot axis labels to include parameter/objective names and indices
-- [DONE] Allow YAML input along with h5
-- [DONE] Implement checkpointing!
-- [DONE] Post generation processing takes a lot of time, fix it: Made it async
-    - [DONE] Moving to chromoo-post
 - [CRIT] Hypervolume indicator as a convergence criterion
-- [DONE] Timestamp at start
 - [TASK] Implement Objective vs Objective 2D plots
 - [TASK] Output results into a subdirectory to avoid polluting root
-- [DONE] Implement sobol initial population sampling
-- [DONE] Look into parameter transforms: 0->1 at inlet
-- [DONE] Use geometric mean for combining multiple objectives in to single objective
-- [DONE] Implement checkpointing
 - [TASK] Adjust Verbose Display according to algorithm used
 - [TASK] Random seeds
 - [TASK] Implement better scores: Check out CADET-Match
 - [TASK] Make sure tests delete temp files
 - [TASK] Write unit tests for all classes
-- [DONE] Look at save_history = True
 - [TASK] Write a configHandler method to output a dummy config.
 - [CRIT] For the split-chromatogram problem, we know that the axial dispersion in once radial shell won't affect the chromatogram in another, so it does have a constraint. Is there a way to constrain the parameters that way? Or does it just mean we solve the system serially? 
 - [TASK] Unified interface/method for deep getting and setting from/to a Dict or dict
@@ -121,3 +95,5 @@ termination:
 - [TASK] Consider weighting objectives: Look at weighted least squares
 - [TASK] Consider multi-started/restarted systems
 - [TASK] Check out numpickle: https://gwang-jin-kim.medium.com/faster-loading-and-saving-of-pandas-data-frames-using-numpickle-numpy-and-pickle-d15870519529
+- Performance of np.take() with numbajit vs boolean indexing: https://stackoverflow.com/questions/46041811/performance-of-various-numpy-fancy-indexing-methods-also-with-numba
+- Improved plotting for large number of subplots in post: https://stackoverflow.com/questions/13046127/matplotlib-very-slow-is-it-normal/13060980#13060980
