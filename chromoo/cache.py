@@ -62,7 +62,7 @@ class Cache:
         self.last_pop['generation'] = algorithm.n_gen
         
         # self.populations = self.populations.append(self.last_pop)
-        pd.concat([self.populations, self.last_pop])
+        self.populations = pd.concat([self.populations, self.last_pop])
 
         self.populations.to_pickle('populations')
         # self.pops.append(transform_population(algorithm.pop, self.par_min_values, self.par_max_values, self.parameter_transform, 'inverse'))
