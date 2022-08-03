@@ -1,0 +1,38 @@
+filename: ./long.poly2d.yaml
+nproc: 4
+# load_checkpoint: checkpoint.npy
+transforms:
+  parameters: lognorm
+parameters:
+    - name: axial
+      type: vector
+      length: 5
+      path: input.model.unit_002.col_dispersion
+      min_value: 1.0e-12
+      max_value: 1.0e-4
+    - name: radial
+      type: vector
+      length: 5
+      path: input.model.unit_002.col_dispersion_radial
+      min_value: 1.0e-12
+      max_value: 1.0e-4
+objectives: 
+    - name: all-radial
+      filename: ./reference/reshaped_final_y
+      times: ./reference/final.x
+      score: sse
+      path: output.solution.unit_002.solution_bulk
+      combine_data_axis: 1
+      shape: [121,5,1]
+algorithm:
+  name: unsga3
+  pop_size: 2
+  init_sobol: true
+termination:
+  x_tol: 1e-12
+  cv_tol: 1e-6
+  f_tol: 1e-8
+  nth_gen: 5
+  n_last: 10
+  n_max_gen: 1000000
+  n_max_evals: 10

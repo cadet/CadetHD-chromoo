@@ -1,0 +1,4 @@
+Convert existing time-series data into one big array with dimensions: nts, ncol, nrad, ncomp. 
+
+y = reshaped_final_y
+x = final.x

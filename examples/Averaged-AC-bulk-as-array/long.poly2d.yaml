@@ -1,0 +1,170 @@
+# NOTE: Interstitial velocity in the column is given from XNS, and corresponding flowrates are calculated.
+# Then the PFR lengths are adjusted assuming same residence time as before, but with the reduced flowrates: l2 = l1/f1 * f2
+input:
+  model:
+    connections:
+      connections_include_ports: 1
+      nswitches: 1
+      switch_000:
+        connections: [0, 1, 0, 0, -1, -1, 1.5794048560335719e-10, 1, 2, 0, 0, -1,
+          -1, 4.358096907599139e-12, 1, 2, 0, 1, -1, -1, 1.4486473538964543e-11, 1,
+          2, 0, 2, -1, -1, 2.5754102556321198e-11, 1, 2, 0, 3, -1, -1, 4.314356912330378e-11,
+          1, 2, 0, 4, -1, -1, 7.019824347716853e-11, 2, 3, 0, 0, -1, -1, 4.358096907599139e-12,
+          2, 3, 1, 0, -1, -1, 1.4486473538964543e-11, 2, 3, 2, 0, -1, -1, 2.5754102556321198e-11,
+          2, 3, 3, 0, -1, -1, 4.314356912330378e-11, 2, 3, 4, 0, -1, -1, 7.019824347716853e-11]
+        section: 0
+    nunits: 4
+    solver: {gs_type: 1, max_krylov: 0, max_restarts: 10, schur_safety: 1e-08}
+    unit_000:
+      inlet_type: PIECEWISE_CUBIC_POLY
+      ncomp: 1
+      ports: 1
+      sec_000:
+        const_coeff: [0.00714]
+      unit_type: INLET
+    unit_001:
+      adsorption_model: NONE
+      col_dispersion: 0
+      col_length: 1.9166899e-4
+      cross_section_area: 7.885428976436918e-07
+      discretization:
+        nbound: [0]
+        ncol: 20
+        reconstruction: WENO
+        use_analytic_jacobian: 1
+        weno: {boundary_model: 0, weno_eps: 1e-10, weno_order: 3}
+      init_c: [0.0]
+      init_q: [0.0]
+      ncomp: 1
+      ports: 1
+      total_porosity: 1
+      unit_type: LUMPED_RATE_MODEL_WITHOUT_PORES
+      velocity: 1
+    unit_002:
+      adsorption:
+        is_kinetic: true
+        mcl_ka: [1.144]
+        mcl_kd: [0.002]
+        mcl_qmax: [4.88]
+      adsorption_model: [MULTI_COMPONENT_LANGMUIR]
+      adsorption_model_multiplex: 1
+      col_dispersion: [ 1.207270490406395e-05,3.541995889855088e-09,8.333719260563993e-11,4.631096202907744e-08,2.904828326949324e-11 ]
+      col_dispersion_radial: [ 1.8295869684453614e-08,4.3666826350956795e-09,1.0764684662023975e-08,8.304269765897436e-10,1.578598971075037e-09 ]
+      col_length: 0.015640994396748625
+      col_porosity: [0.35691724976991945, 0.36812689921036346, 0.3731237013049895,
+        0.38515380778588415, 0.44517687641296566]
+      col_radius: 0.000501
+      cross_section_area: 7.885428976436918e-07
+      discretization:
+        gs_type: 1
+        max_krylov: 0
+        max_restarts: 10
+        nbound: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        ncol: 10
+        npar: [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+        nrad: 5
+        par_disc_type: [EQUIDISTANT_PAR]
+        radial_disc_type: EQUIDISTANT
+        schur_safety: 1e-08
+        use_analytic_jacobian: 1
+        weno: {boundary_model: 0, weno_eps: 1e-10, weno_order: 3}
+      film_diffusion: 1000
+      init_c: 0.0
+      init_cp: 0.0
+      init_q: 0.0
+      ncomp: 1
+      par_diffusion: [7.07e-11]
+      par_porosity: [0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75,
+        0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75]
+      par_radius: [1.2527005083416476e-05, 1.583743870960526e-05, 1.9147872335794045e-05,
+        2.2458305961982828e-05, 2.576873958817161e-05, 2.9079173214360394e-05, 3.238960684054918e-05,
+        3.5700040466737966e-05, 3.901047409292675e-05, 4.232090771911553e-05, 4.5631341345304314e-05,
+        4.89417749714931e-05, 5.225220859768188e-05, 5.556264222387066e-05, 5.887307585005945e-05,
+        6.218350947624824e-05, 6.549394310243701e-05, 6.880437672862581e-05, 7.211481035481459e-05,
+        7.542524398100337e-05]
+      par_surfdiffusion: 0
+      par_type_volfrac: [0.0011485196439372108, 0.002479549068501892, 0.0043209534762796925,
+        0.009572427015885267, 0.013488675519002033, 0.027652948886122027, 0.03200940275520943,
+        0.037761166658492586, 0.04511058723275792, 0.058286501208047195, 0.08504479439669264,
+        0.09049069940648992, 0.08674183400726301, 0.10363508746433676, 0.09596501686254363,
+        0.10446990950230127, 0.0772460406883663, 0.059548298793604466, 0.05379716176995875,
+        0.011230425644207948, 0.0007437045081495981, 0.0018901656351006713, 0.0031728306663108773,
+        0.006524121911274469, 0.010656912884575223, 0.018744664294629666, 0.029008735733830882,
+        0.0318647841191988, 0.05432154020124623, 0.06831922737113469, 0.07941156352641554,
+        0.1078560732917077, 0.11788653198794148, 0.10482252801926657, 0.10851249069749803,
+        0.11821339145568405, 0.06919821129628496, 0.05903213129081555, 0.009820391108935204,
+        0.0, 0.0007478018196416195, 0.001851189779344051, 0.003022973846407031, 0.00744252797402319,
+        0.010088967611481075, 0.01854115318163139, 0.0284863094531073, 0.03686173160115314,
+        0.05168897750836092, 0.06486232243046838, 0.08253588557002815, 0.09021088112360055,
+        0.09739645786722366, 0.11272128605166941, 0.1272359584169501, 0.11042962334480026,
+        0.08492005982598935, 0.04721431522599522, 0.023741577368125263, 0.0, 0.0008466309534831349,
+        0.0019524139847626719, 0.0034196727868575274, 0.007629769631525504, 0.011026128490706227,
+        0.020498515002854233, 0.030996192434487157, 0.03127646111839931, 0.04492750391180647,
+        0.05804707209016092, 0.07419504135672532, 0.09498972505242538, 0.09710043906629554,
+        0.10538864289659286, 0.12087711310048907, 0.13064933596017791, 0.08358148780646744,
+        0.058722862340290054, 0.02387499201549339, 0.0, 0.00044197358645267117, 0.0009601734497028124,
+        0.0019028959345607681, 0.0034579832348786347, 0.005343930853975646, 0.0090439683089618,
+        0.012060997673823012, 0.012570177798830599, 0.022988964934729093, 0.03658231173529627,
+        0.05359462371261906, 0.06843428688042096, 0.09647034074175362, 0.10778420986283918,
+        0.16149708621231654, 0.19427778763674128, 0.13559127250167627, 0.07699701494042183,
+        0.0, 0.0]
+      par_type_volfrac_multiplex: 1
+      ports: 5
+      unit_type: GENERAL_RATE_MODEL_2D
+      velocity: 1
+    unit_003:
+      adsorption_model: NONE
+      col_dispersion: 0
+      col_length: 1.9166899e-4
+      cross_section_area: 7.885428976436918e-07
+      discretization:
+        nbound: [0]
+        ncol: 10
+        reconstruction: WENO
+        use_analytic_jacobian: 1
+        weno: {boundary_model: 0, weno_eps: 1e-10, weno_order: 3}
+      init_c: [0.0]
+      init_q: [0.0]
+      ncomp: 1
+      ports: 1
+      total_porosity: 1
+      unit_type: LUMPED_RATE_MODEL_WITHOUT_PORES
+      velocity: 1
+  return:
+    split_components_data: 1
+    split_ports_data: 1
+    unit: {write_sens_bulk: 0, write_sens_column: 0, write_sens_column_inlet: 0, write_sens_column_outlet: 0,
+      write_sens_flux: 0, write_sens_inlet: 0, write_sens_outlet: 0, write_sens_particle: 0,
+      write_solution_bulk: 1, write_solution_column: 0, write_solution_column_inlet: 1,
+      write_solution_column_outlet: 1, write_solution_flux: 1, write_solution_inlet: 1,
+      write_solution_outlet: 1, write_solution_particle: 1, write_solution_solid: 1}
+    unit_000: {write_sens_bulk: 0, write_sens_column: 0, write_sens_column_inlet: 0,
+      write_sens_column_outlet: 0, write_sens_flux: 0, write_sens_inlet: 0, write_sens_outlet: 0,
+      write_sens_particle: 0, write_solution_bulk: 1, write_solution_column: 0, write_solution_column_inlet: 1,
+      write_solution_column_outlet: 1, write_solution_flux: 1, write_solution_inlet: 1,
+      write_solution_outlet: 1, write_solution_particle: 1, write_solution_solid: 1}
+    unit_001: {write_sens_bulk: 0, write_sens_column: 0, write_sens_column_inlet: 0,
+      write_sens_column_outlet: 0, write_sens_flux: 0, write_sens_inlet: 0, write_sens_outlet: 0,
+      write_sens_particle: 0, write_solution_bulk: 1, write_solution_column: 0, write_solution_column_inlet: 1,
+      write_solution_column_outlet: 1, write_solution_flux: 1, write_solution_inlet: 1,
+      write_solution_outlet: 1, write_solution_particle: 1, write_solution_solid: 1}
+    unit_002: {write_sens_bulk: 0, write_sens_column: 0, write_sens_column_inlet: 0,
+      write_sens_column_outlet: 0, write_sens_flux: 0, write_sens_inlet: 0, write_sens_outlet: 0,
+      write_sens_particle: 0, write_solution_bulk: 1, write_solution_column: 0, write_solution_column_inlet: 1,
+      write_solution_column_outlet: 1, write_solution_flux: 1, write_solution_inlet: 1,
+      write_solution_outlet: 1, write_solution_particle: 1, write_solution_solid: 1}
+    unit_003: {write_sens_bulk: 0, write_sens_column: 0, write_sens_column_inlet: 0,
+      write_sens_column_outlet: 0, write_sens_flux: 0, write_sens_inlet: 0, write_sens_outlet: 0,
+      write_sens_particle: 0, write_solution_bulk: 1, write_solution_column: 0, write_solution_column_inlet: 1,
+      write_solution_column_outlet: 1, write_solution_flux: 1, write_solution_inlet: 1,
+      write_solution_outlet: 1, write_solution_particle: 1, write_solution_solid: 1}
+    write_solution_times: 1
+  solver:
+    nthreads: 0
+    sections:
+      nsec: 1
+      section_continuity: []
+      section_times: [0, 12000]
+    time_integrator: {abstol: 1e-10, algtol: 1e-12, init_step_size: 1e-06, max_steps: 1000000,
+      reltol: 1e-10}
+    user_solution_times: [ 0.0,100.0,200.0,300.0,400.0,500.0,600.0,700.0,800.0,900.0,1000.0,1100.0,1200.0,1300.0,1400.0,1500.0,1600.0,1700.0,1800.0,1900.0,2000.0,2100.0,2200.0,2300.0,2400.0,2500.0,2600.0,2700.0,2800.0,2900.0,3000.0,3100.0,3200.0,3300.0,3400.0,3500.0,3600.0,3700.0,3800.0,3900.0,4000.0,4100.0,4200.0,4300.0,4400.0,4500.0,4600.0,4700.0,4800.0,4900.0,5000.0,5100.0,5200.0,5300.0,5400.0,5500.0,5600.0,5700.0,5800.0,5900.0,6000.0,6100.0,6200.0,6300.0,6400.0,6500.0,6600.0,6700.0,6800.0,6900.0,7000.0,7100.0,7200.0,7300.0,7400.0,7500.0,7600.0,7700.0,7800.0,7900.0,8000.0,8100.0,8200.0,8300.0,8400.0,8500.0,8600.0,8700.0,8800.0,8900.0,9000.0,9100.0,9200.0,9300.0,9400.0,9500.0,9600.0,9700.0,9800.0,9900.0,10000.0,10100.0,10200.0,10300.0,10400.0,10500.0,10600.0,10700.0,10800.0,10900.0,11000.0,11100.0,11200.0,11300.0,11400.0,11500.0,11600.0,11700.0,11800.0,11900.0,12000.0 ]
