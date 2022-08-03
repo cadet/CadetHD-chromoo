@@ -71,28 +71,8 @@ def main():
                 enumerate(best.values))
 
         for i,sim in enumerate(out):
-
-            obj_ref_plot = Plotter(title='Solution vs Reference', cmap='tab20')
             for obj in config.objectives:
-                simulated = deep_get(sim.root, obj.path)
-                simulated = np.array(simulated).flatten()
-
-                times = deep_get(sim.root, 'output.solution.solution_times')
-
-                if obj.times: 
-                    reference = readArray(obj.filename)
-                else:
-                    _, reference = readChromatogram(obj.filename)
-
-                if len( times ) == len(reference): 
-                    obj_ref_plot.plot(times, reference)
-                    obj_ref_plot.plot(times, simulated, ls='dashed', zorder=100)
-                else: 
-                    obj_ref_plot.plot(list(range(len(reference))), reference)
-                    obj_ref_plot.plot(list(range(len(simulated))), simulated, ls='dashed')
-
-            obj_ref_plot.save(f"{str(postdir)}/objectives_reference_{args.mean}_final_{i:03d}", dpi=300)
-            obj_ref_plot.close()
+                obj.plot(sim, fname=f"{str(postdir)}/objectives_reference_{args.mean}_final_{i:03d}")
 
     if args.pop: 
         print("Reading pickled populations file...")
