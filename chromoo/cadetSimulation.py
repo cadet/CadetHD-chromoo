@@ -8,6 +8,7 @@ from typing import TypeVar, Callable, Any, Optional
 
 from chromoo.scores import scores_dict
 
+import re
 import os
 import random
 import string
@@ -43,6 +44,23 @@ class CadetSimulation(Cadet):
         array = self.get(path, vartype=np.array)
         taken = np.take(array, indices=take_indices, axis=take_axis)
         return np.trapz(taken, x=avg_x, axis=avg_axis) / (max(avg_x) - min(avg_x)) 
+
+    # A hack to pre-emptively know what the cadet output path shape is 
+    def get_shape_pre(self, path:str): 
+        unit = re.findall(r'unit_\d+', path)[0]
+        output_type = path.split('.')[-1].split('_')[1]
+        nts = len(self.root.input.solver.user_solution_times)
+
+        ncol = self.root.input.model[unit].discretization.ncol
+        nrad = self.root.input.model[unit].discretization.nrad
+        ncomp = self.root.input.model[unit].ncomp
+
+        if output_type == 'outlet': 
+            return (nts,)
+        elif output_type == 'bulk': 
+            return tuple(filter(None, (nts, ncol, nrad, ncomp)))
+        else: 
+            raise NotImplementedError
 
 
     def load_file(self, fname: str) -> None: 
