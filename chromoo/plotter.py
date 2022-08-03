@@ -65,7 +65,8 @@ class Subplotter():
     ncols = 1,
     title = None,
     xscale='linear', 
-    yscale='linear'
+    yscale='linear',
+    figsize=(16,9)
     ) -> None:
 
         self.xscale = xscale
@@ -73,7 +74,7 @@ class Subplotter():
 
         self.nrows = nrows
         self.ncols = ncols
-        self.fig = plt.figure(figsize=(16,9), constrained_layout=True)
+        self.fig = plt.figure(figsize=figsize, constrained_layout=True)
         self.gs = gridspec.GridSpec(nrows, ncols, figure=self.fig)
         self.fig.suptitle(title)
 
@@ -85,13 +86,18 @@ class Subplotter():
         ax.set(xlabel=xlabel)
         ax.set(ylabel=ylabel)
 
-    def scatter(self, x, y, irow, icol, xlabel=None, ylabel=None, ls='solid', lw=0.1, marker=None) -> None:
+    def scatter(self, x, y, irow, icol, title=None, xlabel=None, ylabel=None, ls='solid', lw=0.1, marker=None, s=None, fontsize=None) -> None:
         ax = self.fig.add_subplot(self.gs[irow * self.ncols + icol])
-        ax.scatter(x, y, ls=ls, lw=lw, marker=marker)
+        ax.scatter(x, y, ls=ls, lw=lw, marker=marker, s=s)
         ax.set(xscale=self.xscale)
         ax.set(yscale=self.yscale)
+        ax.set_title(title, fontsize=fontsize)
         ax.set(xlabel=xlabel)
         ax.set(ylabel=ylabel)
+        plt.gca().axes.get_xaxis().set_visible(False)
+        plt.gca().axes.get_yaxis().set_visible(False)
+        ax.grid('off')
+        # ax.axis('off')
 
     def hist(self, x, irow, icol, bins=10):
         ax = self.fig.add_subplot(self.gs[irow * self.ncols + icol])
