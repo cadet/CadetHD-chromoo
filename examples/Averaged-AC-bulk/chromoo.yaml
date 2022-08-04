@@ -21,31 +21,31 @@ objectives:
       filename: ./reference/radial_shell_integrate_time_scalar_0_0_new.csv
       score: sse
       path: output.solution.unit_002.solution_bulk
-      take: [1,0]
+      take: [2,0]
       combine_data_axis: 1
     - name: port1
       filename: ./reference/radial_shell_integrate_time_scalar_0_1_new.csv
       score: sse
       path: output.solution.unit_002.solution_bulk
-      take: [1,1]
+      take: [2,1]
       combine_data_axis: 1
     - name: port2
       filename: ./reference/radial_shell_integrate_time_scalar_0_2_new.csv
       score: sse
       path: output.solution.unit_002.solution_bulk
-      take: [1,2]
+      take: [2,2]
       combine_data_axis: 1
     - name: port3
       filename: ./reference/radial_shell_integrate_time_scalar_0_3_new.csv
       score: sse
       path: output.solution.unit_002.solution_bulk
-      take: [1,3]
+      take: [2,3]
       combine_data_axis: 1
     - name: port4
       filename: ./reference/radial_shell_integrate_time_scalar_0_4_new.csv
       score: sse
       path: output.solution.unit_002.solution_bulk
-      take: [1,4]
+      take: [2,4]
       combine_data_axis: 1
 algorithm:
   name: unsga3
