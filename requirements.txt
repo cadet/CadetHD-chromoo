@@ -8,3 +8,4 @@ ruamel.yaml>=0.17
 SALib
 pandas
 GitPython
+corner
