@@ -77,6 +77,13 @@ class Objective:
         else: 
             return 1
 
+    @property
+    def names(self):
+        if self.n_obj == 1: 
+            return [ self.name ]
+        else: 
+            return [ f"{self.name}[{num}]" for num in range(self.n_obj) ]
+
     def process(self, sim): 
         """ Process the objective.path to return the sliced and averaged array, making it comparable to the reference data array """
         y = sim.get(self.path)

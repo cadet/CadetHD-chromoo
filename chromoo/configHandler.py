@@ -105,8 +105,7 @@ class ConfigHandler:
                 self.parameter_names.append(f"{p.name}[{i}]")
 
         for o in self.objectives:
-            for i in range(o.n_obj): 
-                self.objective_names.append(f"{o.name}[{i}]")
+            self.objective_names.extend(o.names)
 
 
         self.n_par = sum( p.length for p in self.parameters )
