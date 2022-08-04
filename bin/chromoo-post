@@ -65,7 +65,7 @@ def main():
                 partial(run_sim_iter, 
                     sim=config.simulation, 
                     parameters=config.parameters, 
-                    name=f'final_{args.mean}', 
+                    name=f'opts_final_{args.mean}', 
                     tempdir=postdir, 
                     store=True), 
                 enumerate(best.values))
