@@ -48,36 +48,19 @@ def deep_get(input_dict:dict, keys:str, vartype:Optional[Callable[[Any], T]] = N
 
     return value
 
-def readChromatogram(data_path):
+def readChromatogram(data_path, delimiter=','):
     """
         Read chromatogram files in csv, or space-delimited format
         Return two vectors: time, concentration
     """
-    time= []
-    conc= []
-    delimiter = ' '
-    with open(data_path, newline='') as csvfile:
-        if ',' in csvfile.readline():
-            delimiter = ','
-    with open(data_path, newline='') as csvfile:
-        # data = list(csv.reader(csvfile))
-        for line in csvfile:
-            data_line = line.strip().split(delimiter)
-            data_line = list(filter(None, data_line))
-            if (data_line != []):
-                time.append(float(data_line[0]))
-                conc.append(float(data_line[1]))
-    return np.array(time), np.array(conc)
+    arr = np.loadtxt(data_path, delimiter=delimiter).T
+    return arr[0], arr[1]
 
 def readArray(data_path):
     """
         Read a text file with one value per line into a list
     """
-    values =[]
-    with open(data_path, newline='') as csvfile:
-        for line in csvfile:
-            values.append(float(line.strip()))
-    return np.array(values)
+    return np.loadtxt(data_path)
 
 def plotter(sim, objectives):
     """
