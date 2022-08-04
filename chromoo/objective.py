@@ -114,18 +114,41 @@ class Objective:
 
         return sses.ravel()
 
-    def plot(self, sim, fname="reference_simulation.pdf"): 
+    def split(self, y): 
+        """
+        Split an NDarray objective path into several 1D arrays
+        """
+        # Move time axis to the end, and reshape array
+        # This effectively splits the array into a bunch of time-series curves
+        split_y = np.moveaxis(y, 0, -1).reshape(-1,y.shape[0])
+
+        return split_y
+
+
+    def plot(self, sim, ax): 
+        t0 = self.x0
+        y0 = self.y0
+        y = self.process(sim)
+
+        split_y0 = self.split(y0)
+        split_y  = self.split(y)
+
+        # WARNING: We assume timesteps are the same between reference and simulation.
+
+        for i in range(self.n_obj): 
+            ax.plot(t0, split_y0[i], label='reference')
+            ax.plot(t0, split_y[i], label='simulation', ls='dashed')
+
+
+    def plotsave(self, sim, fname="reference_simulation.pdf"): 
         """ Plot the solution vs reference plots for a given simulation """
 
         t0 = self.x0
         y0 = self.y0
         y = self.process(sim)
 
-        # Move time axis to the end, and reshape array
-        # This effectively splits the array into a bunch of time-series curves
-        split_y = np.moveaxis(y, 0, -1).reshape(-1,y.shape[0])
-        split_y0 = np.moveaxis(y0, 0, -1).reshape(-1,y0.shape[0])
-
+        split_y0 = self.split(y0)
+        split_y  = self.split(y)
 
         # WARNING: We assume timesteps are the same between reference and simulation.
 

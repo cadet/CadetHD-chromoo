@@ -73,9 +73,10 @@ def main():
                     store=True), 
                 enumerate(best.values))
 
+        # FIXME: Plots objectives per file. Meaning separate objectives lie on separate files.
         for i,sim in enumerate(out):
             for obj in config.objectives:
-                obj.plot(sim, fname=f"{str(postdir)}/objectives_reference_{args.mean}_final_{i:03d}")
+                obj.plotsave(sim, fname=f"{str(postdir)}/objectives_reference_{obj.name}_{args.mean}_final_{i:03d}")
 
     if args.pop: 
         print("Reading pickled populations file...")
@@ -121,7 +122,7 @@ def main():
                         fontsize=7,
                         s=8,
                         title=f'{config.parameter_names[i_par]} v {config.objective_names[i_obj]}' )
-        plot.save(postdir / f"objectives_parameters.pdf", dpi=300)
+        plot.save(postdir / f"objectives_parameters", dpi=300)
         plot.close()
 
         if args.plot_obj_par: 
