@@ -45,8 +45,8 @@ class CadetSimulation(Cadet):
         taken = np.take(array, indices=take_indices, axis=take_axis)
         return np.trapz(taken, x=avg_x, axis=avg_axis) / (max(avg_x) - min(avg_x)) 
 
-    # A hack to pre-emptively know what the cadet output path shape is 
     def get_shape_pre(self, path:str): 
+        """ A hack to pre-emptively know what the cadet output path shape is """
         unit = re.findall(r'unit_\d+', path)[0]
         output_type = path.split('.')[-1].split('_')[1]
         nts = len(self.root.input.solver.user_solution_times)
