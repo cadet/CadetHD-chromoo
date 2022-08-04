@@ -24,6 +24,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('config', help='config file to parse and process.')
     ap.add_argument('-n', default=5, type=int, help='Number of best simulations to run')
+    ap.add_argument('--nproc', type=int, help='Number of processes to use to run simulations')
     ap.add_argument('-m', '--mean', choices=['geometric', 'arithmetic', 'rms'], default='geometric', help='Mode of averaging scores')
     ap.add_argument('--csv', help='CSV file to process')
     ap.add_argument('--hist', default=20, help='Number of bins in histogram plot')
@@ -43,6 +44,8 @@ def main():
     postdir = Path('post') 
     postdir.mkdir(exist_ok=True)
 
+    nproc = args.nproc or config.nproc
+
     if args.csv: 
         df = pd.read_csv(args.csv)
         df = calculate_mean(df, args.mean, config.objective_names)
@@ -60,7 +63,7 @@ def main():
         best = df[columns].iloc[0:args.n]
         print(best)
 
-        with mp.Pool(config.nproc) as pool:
+        with mp.Pool(nproc) as pool:
             out = pool.map( 
                 partial(run_sim_iter, 
                     sim=config.simulation, 
