@@ -2,6 +2,7 @@
 
 from rich import print
 import corner
+from chromoo.cadetSimulation import CadetSimulation
 
 import numpy as np
 import pandas as pd
@@ -28,6 +29,7 @@ def main():
     ap.add_argument('--nproc', type=int, help='Number of processes to use to run simulations')
     ap.add_argument('-m', '--mean', choices=['geometric', 'arithmetic', 'rms'], default='geometric', help='Mode of averaging scores')
     ap.add_argument('--csv', help='CSV file to process')
+    ap.add_argument('--combine-port-breakthroughs', type=int, help='Combine breakthroughs of individual ports for this unit op.')
     ap.add_argument('--hist', default=20, help='Number of bins in histogram plot')
     ap.add_argument('--opts-overlay', help='Overlay all opts outputs and reference values')
     ap.add_argument('--plot-obj-par', action='store_true', help='plot objectives vs parameters')
@@ -78,6 +80,15 @@ def main():
         for i,sim in enumerate(out):
             for obj in config.objectives:
                 obj.plotsave(sim, fname=f"{str(postdir)}/objectives_reference_{obj.name}_{args.mean}_final_{i:03d}")
+
+        # When using 2D GRM, use this to output the combined chromatogram at
+        # the end of the unit without relying on an OUTLET unit op.
+        if args.combine_port_breakthroughs is not None:
+            t0 = config.objectives[0].x0
+            for i,sim in enumerate(out): 
+                sim = CadetSimulation(sim.root)
+                arr = sim.combine_port_breakthroughs(args.combine_port_breakthroughs)
+                np.savetxt(postdir / f'combined_breakthrough_opt_{i}.csv', np.stack([t0, arr], axis=1))
 
     if args.pop: 
         print("Reading pickled populations file...")
