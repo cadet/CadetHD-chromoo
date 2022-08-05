@@ -161,6 +161,43 @@ class CadetSimulation(Cadet):
         if not store:
             os.remove(self.filename)
 
+    def combine_port_breakthroughs(self, unit:int, comp:int=0, switch:int=0): 
+
+        solution_unit = self.root.output.solution[f'unit_{unit:03d}']
+
+        keys = [ key 
+                for key in solution_unit.keys()
+                if f'comp_{comp:03d}' in key if 'outlet' in key]
+
+        nrad = self.root.input.model[f'unit_{unit:03d}'].discretization.nrad
+
+        solutions = np.stack([ solution_unit[key] for key in keys ])
+
+        assert(len(keys) == nrad)
+
+        connections = self.root.input.model.connections[f'switch_{switch:03d}'].connections
+        assert self.root.input.model.connections.connections_include_ports == 1
+        connections = np.reshape(connections, (-1,7))
+        my_unit_filter = np.asarray([unit])
+
+        # Input flowrates into this unit
+        filtered_connections = connections[np.in1d(connections[:,1], my_unit_filter)]
+
+        # Sort by current unit's ports
+        filtered_connections = filtered_connections[filtered_connections[:,3].argsort()]
+        # Find indices where ports change
+        d = np.diff(filtered_connections[:,3])
+        e = np.where(d)[0]
+        indices = np.r_[0,e+1]
+        # Reduce (add) at/upto the given indices
+        # Essentially adds all incoming flowrates, since we only extract flowrates
+        flowrates = np.add.reduceat(filtered_connections, indices, axis=0)[:,6]
+
+        assert(len(flowrates) == nrad)
+
+        return np.sum(solutions.T * flowrates, axis=1) / sum(flowrates)
+
+
 def new_run_and_eval(x, sim, parameters, objectives, name:Optional[str]=None, tempdir:Path=Path('temp'), store:bool=False): 
     simulation = CadetSimulation(sim.root)
     simulation.run_with_parameters(x, parameters, name, tempdir, store)
