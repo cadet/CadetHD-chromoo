@@ -52,6 +52,8 @@ in pkgs.mkShell rec {
   buildInputs = with pkgs; [
     mnpyreq
     cadet
+    git
+    which
   ];
 
   shellHook = ''
