@@ -78,8 +78,13 @@ def main():
 
         # FIXME: Plots objectives per file. Meaning separate objectives lie on separate files.
         for i,sim in enumerate(out):
+            obj_ref_plot = Plotter(title='Simulation vs Reference', cmap='tab20')
             for obj in config.objectives:
-                obj.plotsave(sim, fname=f"{str(postdir)}/objectives_reference_{obj.name}_{args.mean}_final_{i:03d}")
+                # obj.plotsave(sim, fname=f"{str(postdir)}/objectives_reference_{obj.name}_{args.mean}_final_{i:03d}")
+                obj.plot(sim, obj_ref_plot)
+
+            obj_ref_plot.save(f"{str(postdir)}/objectives_reference_{args.mean}_final_{i:03d}", dpi=300)
+            obj_ref_plot.close()
 
         # When using 2D GRM, use this to output the combined chromatogram at
         # the end of the unit without relying on an OUTLET unit op.
