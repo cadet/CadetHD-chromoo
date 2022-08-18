@@ -57,10 +57,8 @@ in pkgs.mkShell rec {
   shellHook = ''
     # Tells pip to put packages into $PIP_PREFIX instead of the usual locations.
     # See https://pip.pypa.io/en/stable/user_guide/#environment-variables.
-    # export PYTHONPATH="$(pwd):$PYTHONPATH"
-    # export PATH="$(pwd)/bin:$PATH"
-    export PYTHONPATH="/home/jayghoshter/dev/tools/chromoo:$PYTHONPATH"
-    export PATH="/home/jayghoshter/dev/tools/chromoo/bin:$PATH"
+    export PYTHONPATH="$(pwd):$PYTHONPATH"
+    export PATH="$(pwd)/bin:$PATH"
     unset SOURCE_DATE_EPOCH
   '';
 
