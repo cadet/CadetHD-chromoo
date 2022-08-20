@@ -54,17 +54,19 @@ def main():
         df = calculate_mean(df, args.mean, config.objective_names)
         df = df.sort_values(by=[args.mean])
 
-        hist_plot = Plotter(title=args.mean+' mean')
-        hist_plot.hist(df[args.mean], args.hist)
-        hist_plot.save(postdir / f'histogram_{args.mean}_mean', dpi=300)
-        hist_plot.close()
+        with Plotter(title=args.mean+' mean') as hist_plot: 
+            hist_plot.hist(df[args.mean], args.hist)
+            hist_plot.save(postdir / f'histogram_{args.mean}_mean', dpi=300)
 
         columns = list(df.columns[0:config.n_par])
         columns.append(df.columns[-1])
 
         print("Best opts solution: ")
         best = df[columns].iloc[0:args.n]
+        best_pars_reversed = best[df.columns[0:config.n_par]].iloc[::-1]
         print(best)
+
+        parameter_violin(best_pars_reversed, args, config, postdir)
 
         with mp.Pool(nproc) as pool:
             out = pool.map( 
@@ -76,15 +78,12 @@ def main():
                     store=True), 
                 enumerate(best.values))
 
-        # FIXME: Plots objectives per file. Meaning separate objectives lie on separate files.
         for i,sim in enumerate(out):
-            obj_ref_plot = Plotter(title='Simulation vs Reference', cmap='tab20')
-            for obj in config.objectives:
-                # obj.plotsave(sim, fname=f"{str(postdir)}/objectives_reference_{obj.name}_{args.mean}_final_{i:03d}")
-                obj.plot(sim, obj_ref_plot)
+            with Plotter(title='Simulation vs Reference', cmap='tab20') as obj_ref_plot: 
+                for obj in config.objectives:
+                    obj.plot(sim, obj_ref_plot)
 
-            obj_ref_plot.save(f"{str(postdir)}/objectives_reference_{args.mean}_final_{i:03d}", dpi=300)
-            obj_ref_plot.close()
+                obj_ref_plot.save(f"{str(postdir)}/objectives_reference_{args.mean}_final_{i:03d}", dpi=300)
 
         # When using 2D GRM, use this to output the combined chromatogram at
         # the end of the unit without relying on an OUTLET unit op.
@@ -98,6 +97,7 @@ def main():
     if args.pop: 
         print("Reading pickled populations file...")
         populations = pd.read_pickle('populations')
+        populations = populations.apply(pd.to_numeric)
         populations = calculate_mean(populations, args.mean, config.objective_names)
 
         # minned = populations.loc[populations.groupby(['generation'])[args.mean].idxmin()]
@@ -119,7 +119,7 @@ def main():
         best = df.iloc[0:args.n]
         print(best)
 
-        corner_plot = corner.corner(populations[config.parameter_names])
+        corner_plot = corner.corner(np.log10(populations[config.parameter_names]))
         corner_plot.savefig(postdir / 'corner.pdf')
 
         plot = Subplotter(
@@ -170,6 +170,19 @@ def calculate_mean(df, mean, columns):
 
     return df
 
+def parameter_violin(best_pars_reversed, args, config, postdir): 
+    """
+    Generate violin plots of all optimal parameters, joined by lines
+    """
+    with Plotter('Parameter values', cmap='rainbow', n_total_curves=args.n, yscale='log') as parameters_violin: 
+        parameters_violin.ax.violinplot(dataset = list(best_pars_reversed.to_numpy().T), positions=range(config.n_par))
+        for i in range(args.n): 
+            parameters_violin.scatter(range(config.n_par), best_pars_reversed.to_numpy()[i], marker='x', s=10 )
+        parameters_violin.ax.plot(range(config.n_par), list(best_pars_reversed.to_numpy().T))
+        parameters_violin.ax.set_xticks(range(config.n_par))
+        parameters_violin.ax.set_xticklabels(config.parameter_names, rotation=45, ha='right')
+        parameters_violin.ax.minorticks_off()
+        parameters_violin.save(postdir / 'parameters_violin', dpi=300)
 
 if __name__=="__main__":
     main()
