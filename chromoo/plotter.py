@@ -13,7 +13,8 @@ class Plotter():
     ylabel=None,
     xscale='linear', 
     yscale='linear',
-    cmap='tab10'
+    cmap='tab10',
+    n_total_curves=1
     ) -> None:
 
         plt.style.use('science')
@@ -26,7 +27,14 @@ class Plotter():
         self.ax.set(ylabel=ylabel)
         self.ax.set(title=title)
 
-        COLORS = plt.cm.get_cmap(cmap).colors
+        _cmap = plt.cm.get_cmap(cmap)
+        if 'colors' in _cmap.__dict__: 
+            COLORS = _cmap.colors
+        elif n_total_curves == 1: 
+            COLORS = [_cmap(0.5)]
+        else: 
+            COLORS = [_cmap(1.*i/(n_total_curves-1)) for i in range(n_total_curves)]
+
         self.cycler = cycler('color', COLORS)
         self.ax.set_prop_cycle(self.cycler)
 
@@ -39,16 +47,14 @@ class Plotter():
     def plot(self, x, y, label=None, ls='solid', lw=1, marker=None, zorder=None) -> None:
         self.ax.plot(x, y, label=label, linestyle=ls, linewidth=lw, marker=marker, zorder=zorder)
 
-    def scatter(self, x, y, label=None, ls='solid', lw=1, marker=None) -> None:
-        self.ax.scatter(x, y, s=1, label=label, linestyle=ls, linewidth=lw, marker=marker)
+    def scatter(self, x, y, label=None, ls='solid', lw=1, marker=None, s=1) -> None:
+        self.ax.scatter(x, y, s=s, label=label, linestyle=ls, linewidth=lw, marker=marker)
 
     def hist(self, x, bins=10):
         self.ax.hist(x, bins=bins)
 
     def save(self, filename, dpi=300) -> None:
         self.fig.savefig(filename, dpi=dpi)
-
-
 
     def legend(self, location='upper center', anchor=(0.5,-0.2), ncol=1, frame=False):
         self.ax.legend(loc=location, bbox_to_anchor=anchor, ncol=ncol)
