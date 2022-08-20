@@ -30,6 +30,12 @@ class Plotter():
         self.cycler = cycler('color', COLORS)
         self.ax.set_prop_cycle(self.cycler)
 
+    def __enter__(self): 
+        return self
+
+    def __exit__(self, type, value, traceback): 
+        plt.close(self.fig)
+
     def plot(self, x, y, label=None, ls='solid', lw=1, marker=None, zorder=None) -> None:
         self.ax.plot(x, y, label=label, linestyle=ls, linewidth=lw, marker=marker, zorder=zorder)
 
@@ -77,6 +83,12 @@ class Subplotter():
         self.fig = plt.figure(figsize=figsize, constrained_layout=True)
         self.gs = gridspec.GridSpec(nrows, ncols, figure=self.fig)
         self.fig.suptitle(title)
+
+    def __enter__(self): 
+        return self
+
+    def __exit__(self, type, value, traceback): 
+        plt.close(self.fig)
 
     def plot(self, x, y, irow, icol, xlabel=None, ylabel=None, ls='solid', lw=1, marker=None) -> None:
         ax = self.fig.add_subplot(self.gs[irow * self.nrows + icol])
