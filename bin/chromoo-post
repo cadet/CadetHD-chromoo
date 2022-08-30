@@ -38,6 +38,7 @@ def main():
     ap.add_argument('--hist', default=20, help='Number of bins in histogram plot')
     ap.add_argument('--opts-overlay', help='Overlay all opts outputs and reference values')
     ap.add_argument('--plot-obj-par', action='store_true', help='plot objectives vs parameters')
+    ap.add_argument('--corner', action='store_true', help='plot corner plots')
 
     ap.add_argument('--pop', action='store_true', help='Use pickled population database')
     ap.add_argument('--opt', action='store_true', help='Use pickled opt database')
@@ -110,19 +111,20 @@ def main():
                 arr = sim.combine_port_breakthroughs(args.combine_port_breakthroughs)
                 np.savetxt(postdir / f'combined_breakthrough_opt_{i}.csv', np.stack([t0, arr], axis=1))
 
-        corner_plot_par = corner.corner(
-                np.log10(df_opt[config.parameter_names]),
-                labels=config.parameter_names,
-                show_titles=True
-                )
-        corner_plot_par.savefig(postdir / 'corner_opt_par.pdf')
+        if args.corner: 
+            corner_plot_par = corner.corner(
+                    np.log10(df_opt[config.parameter_names]),
+                    labels=config.parameter_names,
+                    show_titles=True
+                    )
+            corner_plot_par.savefig(postdir / 'corner_opt_par.pdf')
 
-        corner_plot_obj = corner.corner(
-                np.log10(df_opt[config.objective_names]),
-                labels=config.objective_names,
-                show_titles=True
-                )
-        corner_plot_obj.savefig(postdir / 'corner_opt_obj.pdf')
+            corner_plot_obj = corner.corner(
+                    np.log10(df_opt[config.objective_names]),
+                    labels=config.objective_names,
+                    show_titles=True
+                    )
+            corner_plot_obj.savefig(postdir / 'corner_opt_obj.pdf')
 
 
     if args.pop: 
@@ -150,26 +152,27 @@ def main():
         best = df.iloc[0:args.n]
         print(best)
 
-        corner_plot_par = corner.corner(
-                np.log10(populations[config.parameter_names]),
-                labels=config.parameter_names,
-                show_titles=True
-                )
-        corner_plot_par.savefig(postdir / 'corner_pop_par.pdf')
+        if args.corner: 
+            corner_plot_par = corner.corner(
+                    np.log10(populations[config.parameter_names]),
+                    labels=config.parameter_names,
+                    show_titles=True
+                    )
+            corner_plot_par.savefig(postdir / 'corner_pop_par.pdf')
 
-        corner_plot_obj = corner.corner(
-                np.log10(populations[config.objective_names]),
-                labels=config.objective_names,
-                show_titles=True
-                )
-        corner.corner(
-                np.log10(df_opt[config.objective_names]),
-                labels=config.objective_names,
-                show_titles=True,
-                fig=corner_plot_obj, 
-                color='red'
-                )
-        corner_plot_obj.savefig(postdir / 'corner_pop_obj.pdf')
+            corner_plot_obj = corner.corner(
+                    np.log10(populations[config.objective_names]),
+                    labels=config.objective_names,
+                    show_titles=True
+                    )
+            corner.corner(
+                    np.log10(df_opt[config.objective_names]),
+                    labels=config.objective_names,
+                    show_titles=True,
+                    fig=corner_plot_obj, 
+                    color='red'
+                    )
+            corner_plot_obj.savefig(postdir / 'corner_pop_obj.pdf')
 
         plot = Subplotter(
             nrows=config.n_obj,
