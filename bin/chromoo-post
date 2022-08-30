@@ -174,15 +174,40 @@ def parameter_violin(best_pars_reversed, args, config, postdir):
     """
     Generate violin plots of all optimal parameters, joined by lines
     """
-    with Plotter('Parameter values', cmap='rainbow', n_total_curves=args.n, yscale='log') as parameters_violin: 
-        parameters_violin.ax.violinplot(dataset = list(best_pars_reversed.to_numpy().T), positions=range(config.n_par))
-        for i in range(args.n): 
-            parameters_violin.scatter(range(config.n_par), best_pars_reversed.to_numpy()[i], marker='x', s=10 )
-        parameters_violin.ax.plot(range(config.n_par), list(best_pars_reversed.to_numpy().T))
+    cmapname = 'YlOrRd'
+    npoints = len(best_pars_reversed)
+    with Plotter('Parameter values', cmap=cmapname, n_total_curves=npoints, yscale='log') as parameters_violin: 
+        violin_parts = parameters_violin.ax.violinplot(dataset = list(best_pars_reversed.to_numpy().T), positions=range(config.n_par))
+        for pc in violin_parts['bodies']:
+            pc.set_facecolor('blue')
+            pc.set_edgecolor('black')
+        for partname in ('cbars','cmins','cmaxes'):
+            vp = violin_parts[partname]
+            vp.set_edgecolor('black')
+            vp.set_linewidth(1)
+        for i in range(npoints): 
+            parameters_violin.scatter(range(config.n_par), best_pars_reversed.to_numpy()[i], s=4 )
+        # parameters_violin.ax.plot(range(config.n_par), list(best_pars_reversed.to_numpy().T))
         parameters_violin.ax.set_xticks(range(config.n_par))
         parameters_violin.ax.set_xticklabels(config.parameter_names, rotation=45, ha='right')
         parameters_violin.ax.minorticks_off()
         parameters_violin.save(postdir / 'parameters_violin', dpi=300)
+
+        # # Normalizer
+        # df_with_mean = calculate_mean(best_pars_reversed, args.mean, config.objective_names)
+        # # vmin=df_with_mean.apply(pd.to_numeric).columns[-1].values
+        # # vmax=df_with_mean.apply(pd.to_numeric).columns[-1]
+        # vmin = df_with_mean.columns[arg.mean].values.min()
+        # vmax = df_with_mean.columns[arg.mean].values.max()
+        # print(vmin, vmax)
+        # norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
+        #   
+        # # creating ScalarMappable
+        # sm = plt.cm.ScalarMappable(cmap=cmapname, norm=norm)
+        # sm.set_array([])
+        #   
+        # plt.colorbar(sm, ticks=np.linspace(vmin, vmax, 4), format='%.2e')
+
 
 if __name__=="__main__":
     main()
