@@ -19,6 +19,11 @@ from chromoo.simulation import run_sim_iter
 from chromoo.utils import deep_get, readArray, readChromatogram
 from chromoo.plotter import Plotter, Subplotter
 
+from mpl_toolkits.axes_grid.inset_locator import InsetPosition
+
+from matplotlib import pyplot as plt
+import matplotlib as mpl 
+
 pd.set_option('display.float_format', lambda x: '%e' % x)
 pd.set_option('display.max_columns', None)
 
@@ -50,23 +55,24 @@ def main():
     nproc = args.nproc or config.nproc
 
     if args.csv: 
-        df = pd.read_csv(args.csv)
-        df = calculate_mean(df, args.mean, config.objective_names)
-        df = df.sort_values(by=[args.mean])
+        df_opt = pd.read_csv(args.csv)
+        df_opt = calculate_mean(df_opt, args.mean, config.objective_names)
+        df_opt = df_opt.sort_values(by=[args.mean])
 
         with Plotter(title=args.mean+' mean') as hist_plot: 
-            hist_plot.hist(df[args.mean], args.hist)
+            hist_plot.hist(df_opt[args.mean], args.hist)
             hist_plot.save(postdir / f'histogram_{args.mean}_mean', dpi=300)
 
-        columns = list(df.columns[0:config.n_par])
-        columns.append(df.columns[-1])
+        columns = list(df_opt.columns[0:config.n_par])
+        columns.append(df_opt.columns[-1])
 
         print("Best opts solution: ")
-        best = df[columns].iloc[0:args.n]
-        best_pars_reversed = best[df.columns[0:config.n_par]].iloc[::-1]
+        best = df_opt[columns].iloc[0:args.n]
+        df_pars_reversed = df_opt[df_opt.columns[0:config.n_par]].iloc[::-1]
         print(best)
 
-        parameter_violin(best_pars_reversed, args, config, postdir)
+        # TODO: Implement drawing bounds of parameters
+        parameter_violin(df_pars_reversed, args, config, postdir)
 
         with mp.Pool(nproc) as pool:
             out = pool.map( 
@@ -83,7 +89,17 @@ def main():
                 for obj in config.objectives:
                     obj.plot(sim, obj_ref_plot)
 
+                inset_ax = obj_ref_plot.fig.add_axes([0,0,1,1])
+                ip = InsetPosition(obj_ref_plot.ax, [0.05,0.8,0.25,0.15])
+                inset_ax.set_axes_locator(ip)
+                # inset_ax.axis('off')
+                inset_ax.get_xaxis().set_visible(False)
+                inset_ax.get_yaxis().set_visible(False)
+                inset_ax.bar(range(config.n_par), best[best.columns[0:config.n_par]].iloc[i].values)
+                inset_ax.set(yscale='log')
+
                 obj_ref_plot.save(f"{str(postdir)}/objectives_reference_{args.mean}_final_{i:03d}", dpi=300)
+
 
         # When using 2D GRM, use this to output the combined chromatogram at
         # the end of the unit without relying on an OUTLET unit op.
@@ -93,6 +109,21 @@ def main():
                 sim = CadetSimulation(sim.root)
                 arr = sim.combine_port_breakthroughs(args.combine_port_breakthroughs)
                 np.savetxt(postdir / f'combined_breakthrough_opt_{i}.csv', np.stack([t0, arr], axis=1))
+
+        corner_plot_par = corner.corner(
+                np.log10(df_opt[config.parameter_names]),
+                labels=config.parameter_names,
+                show_titles=True
+                )
+        corner_plot_par.savefig(postdir / 'corner_opt_par.pdf')
+
+        corner_plot_obj = corner.corner(
+                np.log10(df_opt[config.objective_names]),
+                labels=config.objective_names,
+                show_titles=True
+                )
+        corner_plot_obj.savefig(postdir / 'corner_opt_obj.pdf')
+
 
     if args.pop: 
         print("Reading pickled populations file...")
@@ -119,8 +150,26 @@ def main():
         best = df.iloc[0:args.n]
         print(best)
 
-        corner_plot = corner.corner(np.log10(populations[config.parameter_names]))
-        corner_plot.savefig(postdir / 'corner.pdf')
+        corner_plot_par = corner.corner(
+                np.log10(populations[config.parameter_names]),
+                labels=config.parameter_names,
+                show_titles=True
+                )
+        corner_plot_par.savefig(postdir / 'corner_pop_par.pdf')
+
+        corner_plot_obj = corner.corner(
+                np.log10(populations[config.objective_names]),
+                labels=config.objective_names,
+                show_titles=True
+                )
+        corner.corner(
+                np.log10(df_opt[config.objective_names]),
+                labels=config.objective_names,
+                show_titles=True,
+                fig=corner_plot_obj, 
+                color='red'
+                )
+        corner_plot_obj.savefig(postdir / 'corner_pop_obj.pdf')
 
         plot = Subplotter(
             nrows=config.n_obj,
