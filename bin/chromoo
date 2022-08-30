@@ -43,7 +43,7 @@ def main():
 
     cache = Cache(config)
 
-    prob = ChromooProblem(config.simulation, config.parameters, config.objectives, nproc=config.nproc, store_temp=config.store_temp, transform = config.parameter_transform)
+    prob = ChromooProblem(config.simulation, config.parameters, config.objectives, nproc=config.nproc, tempdir=config.temp_dir, store_temp=config.store_temp, transform = config.parameter_transform)
 
     term = MultiObjectiveDefaultTermination(
         x_tol       = config.termination.x_tol,

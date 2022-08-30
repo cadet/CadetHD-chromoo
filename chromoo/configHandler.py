@@ -77,6 +77,7 @@ class ConfigHandler:
         self.filename   =  self.get('filename', vartype=str())
         self.nproc      =  self.get('nproc', vartype=int, default =4)
         self.store_temp =  self.get('store_temp', vartype=bool, default=False)
+        self.temp_dir =  self.get('temp_dir', vartype=str(), default='/dev/shm/chromoo')
 
         self.load_checkpoint = self.get('load_checkpoint', vartype=str, default='.', wrapper=Path)
         self.force_checkpoint_continue = self.get('force_checkpoint_continue', vartype=bool, default=False)
