@@ -135,10 +135,12 @@ def main():
 
         # minned = populations.loc[populations.groupby(['generation'])[args.mean].idxmin()]
         best_mean_score_per_gen = populations.groupby(['generation'])[args.mean].min()
+        median_mean_score_per_gen = populations.groupby(['generation'])[args.mean].median()
         worst_mean_score_per_gen = populations.groupby(['generation'])[args.mean].max()
 
         best_mean_score_per_gen_plot = Plotter(title=f'Best {args.mean} mean per gen', yscale='log')
         best_mean_score_per_gen_plot.plot(range(len(best_mean_score_per_gen)), best_mean_score_per_gen, label='best')
+        best_mean_score_per_gen_plot.plot(range(len(median_mean_score_per_gen)), median_mean_score_per_gen, label='median')
         best_mean_score_per_gen_plot.plot(range(len(worst_mean_score_per_gen)), worst_mean_score_per_gen, label='worst')
         best_mean_score_per_gen_plot.legend('upper right', (1,1))
         best_mean_score_per_gen_plot.save(f'{str(postdir)}/best_{args.mean}_mean_per_gen', dpi=300)
