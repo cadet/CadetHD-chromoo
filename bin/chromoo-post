@@ -30,9 +30,9 @@ pd.set_option('display.max_columns', None)
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('config', help='config file to parse and process.')
-    ap.add_argument('-n', default=5, type=int, help='Number of best simulations to run')
+    ap.add_argument('-n', default=1, type=int, help='Number of best simulations to run')
     ap.add_argument('--nproc', type=int, help='Number of processes to use to run simulations')
-    ap.add_argument('-m', '--mean', choices=['geometric', 'arithmetic', 'rms'], default='geometric', help='Mode of averaging scores')
+    ap.add_argument('-m', '--mean', choices=['geometric', 'arithmetic', 'rms'], default='rms', help='Mode of averaging scores')
     ap.add_argument('--csv', help='CSV file to process')
     ap.add_argument('--combine-port-breakthroughs', type=int, help='Combine breakthroughs of individual ports for this unit op.')
     ap.add_argument('--hist', default=20, help='Number of bins in histogram plot')
@@ -86,7 +86,7 @@ def main():
                 enumerate(best.values))
 
         for i,sim in enumerate(out):
-            with Plotter(title='Simulation vs Reference', cmap='tab20') as obj_ref_plot: 
+            with Plotter(title='Simulation vs Reference', cmap='tab20', xlabel='x axis', ylabel='y axis') as obj_ref_plot: 
                 for obj in config.objectives:
                     obj.plot(sim, obj_ref_plot)
 
@@ -133,12 +133,16 @@ def main():
         populations = populations.apply(pd.to_numeric)
         populations = calculate_mean(populations, args.mean, config.objective_names)
 
+        # for i in range(populations['generation'].max()): 
+        #     cur_gen = populations[populations['generation'] == i+1].to_numpy()
+        #     np.savetxt(f'pop_gen_{i}.csv', cur_gen, delimiter=',')
+
         # minned = populations.loc[populations.groupby(['generation'])[args.mean].idxmin()]
         best_mean_score_per_gen = populations.groupby(['generation'])[args.mean].min()
         median_mean_score_per_gen = populations.groupby(['generation'])[args.mean].median()
         worst_mean_score_per_gen = populations.groupby(['generation'])[args.mean].max()
 
-        best_mean_score_per_gen_plot = Plotter(title=f'Best {args.mean} mean per gen', yscale='log')
+        best_mean_score_per_gen_plot = Plotter(title=f'Convergence', yscale='log', xlabel='Generations', ylabel=f'Meta-objective ({args.mean})')
         best_mean_score_per_gen_plot.plot(range(len(best_mean_score_per_gen)), best_mean_score_per_gen, label='best')
         best_mean_score_per_gen_plot.plot(range(len(median_mean_score_per_gen)), median_mean_score_per_gen, label='median')
         best_mean_score_per_gen_plot.plot(range(len(worst_mean_score_per_gen)), worst_mean_score_per_gen, label='worst')
@@ -184,6 +188,18 @@ def main():
             yscale='log'
         )
 
+        gens = populations['generation'].to_numpy()
+        nmax = max(gens)
+
+        # cmap = mpl.cm.get_cmap(name=args['colormap'])
+        cmap = mpl.cm.get_cmap(name='cool')
+        if 'colors' in cmap.__dict__: 
+            COLORS = cmap.colors
+        else: 
+            COLORS = [cmap(1.*i/(nmax-1)) for i in range(nmax)]
+
+        FINAL_COLORS=list(map(lambda g: COLORS[g-1], gens))
+
         for i_obj, obj in enumerate(config.objective_names): 
             for i_par, par in enumerate(config.parameter_names): 
 
@@ -195,6 +211,7 @@ def main():
                         i_obj, i_par, 
                         fontsize=7,
                         s=8,
+                        c=FINAL_COLORS,
                         title=f'{config.parameter_names[i_par]} v {config.objective_names[i_obj]}' )
         plot.save(postdir / f"objectives_parameters", dpi=300)
         plot.close()
@@ -228,8 +245,10 @@ def parameter_violin(best_pars_reversed, args, config, postdir):
     """
     Generate violin plots of all optimal parameters, joined by lines
     """
-    cmapname = 'YlOrRd'
-    npoints = len(best_pars_reversed)
+    # cmapname = 'YlOrRd'
+    cmapname = 'cool'
+    # npoints = len(best_pars_reversed)
+    npoints = 1
     with Plotter('Parameter values', cmap=cmapname, n_total_curves=npoints, yscale='log') as parameters_violin: 
         violin_parts = parameters_violin.ax.violinplot(dataset = list(best_pars_reversed.to_numpy().T), positions=range(config.n_par))
         for pc in violin_parts['bodies']:

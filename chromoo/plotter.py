@@ -31,7 +31,7 @@ class Plotter():
         if 'colors' in _cmap.__dict__: 
             COLORS = _cmap.colors
         elif n_total_curves == 1: 
-            COLORS = [_cmap(0.5)]
+            COLORS = [_cmap(1.0)]
         else: 
             COLORS = [_cmap(1.*i/(n_total_curves-1)) for i in range(n_total_curves)]
 
@@ -104,9 +104,9 @@ class Subplotter():
         ax.set(xlabel=xlabel)
         ax.set(ylabel=ylabel)
 
-    def scatter(self, x, y, irow, icol, title=None, xlabel=None, ylabel=None, ls='solid', lw=0.1, marker=None, s=None, fontsize=None) -> None:
+    def scatter(self, x, y, irow, icol, title=None, xlabel=None, ylabel=None, ls='solid', lw=0.1, marker=None, s=None, fontsize=None, c=None) -> None:
         ax = self.fig.add_subplot(self.gs[irow * self.ncols + icol])
-        ax.scatter(x, y, ls=ls, lw=lw, marker=marker, s=s)
+        ax.scatter(x, y, ls=ls, lw=lw, marker=marker, s=s, c=c)
         ax.set(xscale=self.xscale)
         ax.set(yscale=self.yscale)
         ax.set_title(title, fontsize=fontsize)
