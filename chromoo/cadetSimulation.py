@@ -54,11 +54,17 @@ class CadetSimulation(Cadet):
         ncol = self.root.input.model[unit].discretization.ncol
         nrad = self.root.input.model[unit].discretization.nrad
         ncomp = self.root.input.model[unit].ncomp
+        npar = self.root.input.model[unit].npar
 
+        ## WARNING: Haven't doublechecked this
         if output_type == 'outlet': 
             return (nts,)
         elif output_type == 'bulk': 
             return tuple(filter(None, (nts, ncol, nrad, ncomp)))
+        elif output_type == 'particle': 
+            return tuple(filter(None, (nts, ncol, nrad, npar)))
+        elif output_type == 'solid': 
+            return tuple(filter(None, (nts, ncol, nrad, npar)))
         else: 
             raise NotImplementedError
 
