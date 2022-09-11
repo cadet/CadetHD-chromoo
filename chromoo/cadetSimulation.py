@@ -203,6 +203,44 @@ class CadetSimulation(Cadet):
 
         return np.sum(solutions.T * flowrates, axis=1) / sum(flowrates)
 
+    def get_vol_bulk(self, unit:int): 
+        UNIT = self.root.input.model[f'unit_{unit:03d}']
+
+        nrad = UNIT.discretization.nrad or 1 
+        ncol = UNIT.discretization.ncol
+
+        col_radius = UNIT.col_radius or np.sqrt(UNIT.cross_section_area / (np.pi))
+        col_porosity = np.array(UNIT.col_porosity)
+
+        # assert nrad > 1
+        nrad = nrad or 1
+
+        nShells = nrad + 1 #Including r = 0
+        rShells = []
+
+        if UNIT.discretization.radial_disc_type == 'EQUIVOLUME':
+            for n in range(nShells):
+                rShells.append(UNIT.col_radius * np.sqrt(n/nrad))
+        elif UNIT.discretization.radial_disc_type == 'EQUIDISTANT':
+            for n in range(nShells):
+                rShells.append(UNIT.col_radius * (n/nrad))
+        else: 
+            rShells = [0.0, col_radius]
+
+        dx = UNIT.col_length / ncol
+
+        vol_rad = []
+        for r_in, r_out, in zip(rShells[:-1], rShells[1:]+rShells[:0]):
+            vol_rad.append(np.pi * (r_out**2 - r_in**2) * dx)
+
+        total_volume = np.pi * col_radius**2 * UNIT.col_length
+        assert np.isclose(np.sum(vol_rad) * ncol, total_volume, rtol=1e-6, atol=0.0)
+
+        vol_rad_bulk = np.array(vol_rad) * col_porosity
+        vol_arr = np.stack([vol_rad_bulk] * ncol, axis=0)
+
+        return vol_arr
+
 
 def new_run_and_eval(x, sim, parameters, objectives, name:Optional[str]=None, tempdir:Path=Path('temp'), store:bool=False): 
     simulation = CadetSimulation(sim.root)
