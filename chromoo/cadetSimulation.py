@@ -67,6 +67,8 @@ class CadetSimulation(Cadet):
             return tuple(filter(None, (nts, ncol, nrad, npar)))
         elif output_type == 'solid': 
             return tuple(filter(None, (nts, ncol, nrad, npar)))
+        elif path.split('.')[1] == 'post': 
+            return tuple(filter(None, (nts, ncol, nrad)))
         else: 
             raise NotImplementedError
 
