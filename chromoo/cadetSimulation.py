@@ -1,6 +1,6 @@
 from addict import Dict
 from cadet import Cadet
-from chromoo.utils import deep_get, keystring_todict, readChromatogram, readArray
+from chromoo.utils import deep_get, keystring_todict, readChromatogram, readArray, pairwise
 from pathlib import Path
 from ruamel.yaml import YAML
 from typing import Any
@@ -203,7 +203,64 @@ class CadetSimulation(Cadet):
 
         return np.sum(solutions.T * flowrates, axis=1) / sum(flowrates)
 
+    def post_internal_mass(self, unit:int): 
+        """
+        Return array of internal mass (num. moles) calculated as 
+        $\sum c \cdot V$, where c -> concentration and V -> volume.
+
+        Conc. within particles is averaged out
+        """
+        UNIT = self.root.input.model[f'unit_{unit:03d}']
+        UNIT_OUT = self.root.output.solution[f'unit_{unit:03d}']
+
+        col_radius = UNIT.col_radius or np.sqrt(UNIT.cross_section_area / (np.pi))
+
+        sol_bulk     = UNIT_OUT.solution_bulk.squeeze()
+        sol_particle = UNIT_OUT.solution_particle.squeeze()
+        sol_solid    = UNIT_OUT.solution_solid.squeeze()
+
+        vol_bulk     = self.get_vol_array(unit, 'bulk')
+        vol_particle = self.get_vol_array(unit, 'particle')
+        vol_solid    = self.get_vol_array(unit, 'solid')
+        vol_total    = self.get_vol_array(unit, 'total')
+
+        if UNIT.discretization.par_disc_type == b'EQUIDISTANT_PAR':
+            par_radius = UNIT.par_radius
+            assert isinstance(par_radius, np.floating)
+            npar = UNIT.discretization.npar
+            nShells = npar + 1 #Including r = 0
+            rShells = [ par_radius * (n/npar) for n in range(nShells) ]
+        else:
+            print(UNIT.discretization.par_disc_type)
+            raise NotImplementedError
+
+        # # WARNING: Hacky. Unsure where components go.
+        # if UNIT.unit_type == b'GENERAL_RATE_MODEL_2D': 
+        #     # Assumes (nts, ncol, nrad, npar)
+        #     par_axis = 3
+        # else: 
+        #     # Assumes (nts, ncol, npar)
+        #     par_axis = 2
+
+        vol_par_shells = np.array([ (r_out**3 - r_in**3)/par_radius**3 for r_in, r_out in pairwise(rShells) ])
+
+        # Integrated results per ncol x nrad cells
+        # NOTE: Assumes npar is the last axis of sol_*
+        sol_particle = np.tensordot(sol_particle, vol_par_shells, 1 )
+        sol_solid    = np.tensordot(sol_solid, vol_par_shells, 1 )
+
+        assert np.allclose(vol_bulk + vol_particle + vol_solid, vol_total, rtol=1e-6, atol=0.0)
+
+        mass_bulk     = sol_bulk     * vol_bulk[np.newaxis, :]
+        mass_particle = sol_particle * vol_particle[np.newaxis, :]
+        mass_solid    = sol_solid    * vol_solid[np.newaxis, :]
+
+        # WARNING: Somehow broken in addict v2.4 with chromoo-post. Works in v2.3
+        # Potentially relevant: https://github.com/mewwts/addict/issues/136
+        self.root.output.post[f'unit_{unit:03d}'].post_internal_mass = mass_bulk + mass_particle + mass_solid
+
     def get_vol_rad(self, unit:int): 
+        """ Return an array of shape (nrad,) with volumes of each radial port/zone """
         UNIT = self.root.input.model[f'unit_{unit:03d}']
 
         nrad = UNIT.discretization.nrad or 1 
@@ -232,6 +289,10 @@ class CadetSimulation(Cadet):
         return np.array(vol_rad)
 
     def get_vol_array(self, unit:int, output_type:str): 
+        """ 
+        Return an array of shape (ncol, nrad) but squeezed, containing volumes of each discretization volume by type. 
+        output_type can be 'bulk', 'particle', 'solid', or 'total'
+        """
         UNIT = self.root.input.model[f'unit_{unit:03d}']
 
         ncol = UNIT.discretization.ncol

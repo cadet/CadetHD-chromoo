@@ -1,6 +1,7 @@
 from functools import reduce
 from matplotlib import pyplot as plt
 from typing import TypeVar, Callable, Any, Optional, overload
+import itertools as it
 
 import numpy as np
 
@@ -84,3 +85,10 @@ def plotter(sim, objectives):
 
         ax.set(title=obj.name)
         fig.savefig(f"chromoo_{obj.name}_result.png")
+
+def pairwise(iterable):
+    """ Given an iterable, return a set of pairwise tuples. This is added to itertools in 3.10 """
+    # pairwise('ABCDEFG') --> AB BC CD DE EF FG
+    a, b = it.tee(iterable)
+    next(b, None)
+    return zip(a, b)
