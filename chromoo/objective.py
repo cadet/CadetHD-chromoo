@@ -23,6 +23,7 @@ class Objective:
     combine_scores_axis: Optional[int] = None           # combine/avg scores along axis
     take: Optional[Tuple[int,int]] = None               # take a slice of sim data along (axis, index)
     combine_data_axis: Optional[int] = None
+    sum_data_axis: Optional[int] = None
     score: str = 'sse'                                  # score type
     x0: np.ndarray = np.array([])                       # time steps
     y0: np.ndarray = np.array([])                       # data values
@@ -63,6 +64,9 @@ class Objective:
         if self.combine_data_axis is not None: 
             pre_shape = np.delete(pre_shape, self.combine_data_axis)
 
+        if self.sum_data_axis is not None: 
+            pre_shape = np.delete(pre_shape, self.sum_data_axis)
+
         pre_shape = tuple(pre_shape)
 
         return pre_shape == self.y0.shape
@@ -97,6 +101,9 @@ class Objective:
         # Eg. Average the concentration along axial dim.
         if self.combine_data_axis is not None:
             y = np.average(y, axis=self.combine_data_axis)
+
+        if self.sum_data_axis is not None:
+            y = np.sum(y, axis=self.sum_data_axis)
 
         return y
 
