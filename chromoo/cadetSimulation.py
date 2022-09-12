@@ -8,6 +8,8 @@ from typing import TypeVar, Callable, Any, Optional
 
 from chromoo.scores import scores_dict
 
+import multiprocessing as mp
+
 import re
 import os
 import random
@@ -344,3 +346,9 @@ def new_run_and_eval(x, sim, parameters, objectives, name:Optional[str]=None, te
     results = np.hstack(list(map(lambda obj: obj.evaluate(simulation), objectives)))
 
     return results
+
+def new_run_sim_iter(x, sim, parameters, name:Optional[str]=None, tempdir:Path=Path('temp'), store:bool=False): 
+    simulation = CadetSimulation(sim.root)
+    index = mp.current_process().name
+    simulation.run_with_parameters(x, parameters, f"{name}_{index}.h5", tempdir, store)
+    return simulation
