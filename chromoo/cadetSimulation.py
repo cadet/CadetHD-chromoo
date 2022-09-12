@@ -324,8 +324,22 @@ class CadetSimulation(Cadet):
         return vol_arr.squeeze()
 
 def new_run_and_eval(x, sim, parameters, objectives, name:Optional[str]=None, tempdir:Path=Path('temp'), store:bool=False): 
+    """
+    Run simulation -> Postprocess -> Evaluate objective scores
+    """
     simulation = CadetSimulation(sim.root)
     simulation.run_with_parameters(x, parameters, name, tempdir, store)
+
+    # NOTE: This is a custom way to store postproc data in the hierarchy 
+    # Postprocessed data is stored as "output.post.unit_001.post_internal_mass" for ex.
+    # The first 'post' key separates it from cadet solutions
+    # The final 'post_*' key is the name of the CadetSimulation method to run on the specified unit
+    # Here, we run the postproc function specified. It is the responsibility of
+    # the function to store the data at the right path
+    for obj in objectives: 
+        path_split = obj.path.split('.')
+        if path_split[1] == 'post':
+            CadetSimulation.__dict__[path_split[3]](simulation, int(path_split[2].replace('unit_', '')))
 
     results = np.hstack(list(map(lambda obj: obj.evaluate(simulation), objectives)))
 
