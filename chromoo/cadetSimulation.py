@@ -203,25 +203,21 @@ class CadetSimulation(Cadet):
 
         return np.sum(solutions.T * flowrates, axis=1) / sum(flowrates)
 
-    def get_vol_bulk(self, unit:int): 
+    def get_vol_rad(self, unit:int): 
         UNIT = self.root.input.model[f'unit_{unit:03d}']
 
         nrad = UNIT.discretization.nrad or 1 
         ncol = UNIT.discretization.ncol
 
         col_radius = UNIT.col_radius or np.sqrt(UNIT.cross_section_area / (np.pi))
-        col_porosity = np.array(UNIT.col_porosity)
-
-        # assert nrad > 1
-        nrad = nrad or 1
 
         nShells = nrad + 1 #Including r = 0
         rShells = []
 
-        if UNIT.discretization.radial_disc_type == 'EQUIVOLUME':
+        if UNIT.discretization.radial_disc_type == b'EQUIVOLUME':
             for n in range(nShells):
                 rShells.append(UNIT.col_radius * np.sqrt(n/nrad))
-        elif UNIT.discretization.radial_disc_type == 'EQUIDISTANT':
+        elif UNIT.discretization.radial_disc_type == b'EQUIDISTANT':
             for n in range(nShells):
                 rShells.append(UNIT.col_radius * (n/nrad))
         else: 
@@ -233,14 +229,38 @@ class CadetSimulation(Cadet):
         for r_in, r_out, in zip(rShells[:-1], rShells[1:]+rShells[:0]):
             vol_rad.append(np.pi * (r_out**2 - r_in**2) * dx)
 
+        return np.array(vol_rad)
+
+    def get_vol_array(self, unit:int, output_type:str): 
+        UNIT = self.root.input.model[f'unit_{unit:03d}']
+
+        ncol = UNIT.discretization.ncol
+
+        vol_rad = self.get_vol_rad(unit)
+
+        col_porosity = np.array(UNIT.col_porosity)
+        par_porosity = np.array(UNIT.par_porosity)
+
+        col_radius = UNIT.col_radius or np.sqrt(UNIT.cross_section_area / (np.pi))
+
         total_volume = np.pi * col_radius**2 * UNIT.col_length
         assert np.isclose(np.sum(vol_rad) * ncol, total_volume, rtol=1e-6, atol=0.0)
 
-        vol_rad_bulk = np.array(vol_rad) * col_porosity
-        vol_arr = np.stack([vol_rad_bulk] * ncol, axis=0)
+        if output_type == 'bulk': 
+            factor = col_porosity
+        elif output_type == 'particle': 
+            factor = (1.0 - col_porosity) * par_porosity
+        elif output_type == 'solid': 
+            factor = (1.0 - col_porosity) * (1.0 - par_porosity)
+        elif output_type == 'total': 
+            factor = 1.0
+        else: 
+            raise ValueError("Bad output_type!")
 
-        return vol_arr
+        vol_rad_factor = vol_rad * factor
+        vol_arr = np.stack([vol_rad_factor] * ncol, axis=0)
 
+        return vol_arr.squeeze()
 
 def new_run_and_eval(x, sim, parameters, objectives, name:Optional[str]=None, tempdir:Path=Path('temp'), store:bool=False): 
     simulation = CadetSimulation(sim.root)
