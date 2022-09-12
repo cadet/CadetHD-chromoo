@@ -9,15 +9,11 @@ parameters:
       path: input.model.unit_002.col_dispersion
       min_value: 1.0e-9
       max_value: 1.0e-4
-    - name: flowrate
-      type: element
+    - name: porosity
       length: 1
-      path: input.model.connections.switch_000.connections
-      index: [6]
-      min_value: 1.e-10
-      max_value: 1e-9
-      copy_to_path: input.model.connections.switch_000.connections
-      copy_to_index: [[13, 20]]
+      path: input.model.unit_002.col_porosity
+      min_value: 0.30
+      max_value: 0.50
 objectives: 
     - name: outlet
       filename: chromatogram-corrected.csv
