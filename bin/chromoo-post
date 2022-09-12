@@ -83,7 +83,7 @@ def main():
                     name=f'opts_final_{args.mean}', 
                     tempdir=postdir, 
                     store=True), 
-                best.values)
+                enumerate(best.values))
 
         for i,sim in enumerate(out):
             for obj in config.objectives: 

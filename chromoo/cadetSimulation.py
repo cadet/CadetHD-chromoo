@@ -151,7 +151,7 @@ class CadetSimulation(Cadet):
         """
 
         if name:
-            self.filename = name
+            self.filename = tempdir.joinpath(name + '.h5')
         else:
             self.filename = tempdir.joinpath('temp' + ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase + string.digits, k=6)) + '.h5')
 
@@ -349,8 +349,8 @@ def new_run_and_eval(x, sim, parameters, objectives, name:Optional[str]=None, te
 
     return results
 
-def new_run_sim_iter(x, sim, parameters, name:Optional[str]=None, tempdir:Path=Path('temp'), store:bool=False): 
+def new_run_sim_iter(index_x, sim, parameters, name:Optional[str]=None, tempdir:Path=Path('temp'), store:bool=False): 
     simulation = CadetSimulation(sim.root)
-    index = mp.current_process().name
-    simulation.run_with_parameters(x, parameters, f"{name}_{index}.h5", tempdir, store)
+    index, x = index_x
+    simulation.run_with_parameters(x, parameters, f"{name}_{index}", tempdir, store)
     return simulation
