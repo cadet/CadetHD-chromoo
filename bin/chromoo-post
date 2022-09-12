@@ -2,7 +2,7 @@
 
 from rich import print
 import corner
-from chromoo.cadetSimulation import CadetSimulation
+from chromoo.cadetSimulation import CadetSimulation, new_run_sim_iter
 
 import numpy as np
 import pandas as pd
@@ -77,15 +77,20 @@ def main():
 
         with mp.Pool(nproc) as pool:
             out = pool.map( 
-                partial(run_sim_iter, 
+                partial(new_run_sim_iter, 
                     sim=config.simulation, 
                     parameters=config.parameters, 
                     name=f'opts_final_{args.mean}', 
                     tempdir=postdir, 
                     store=True), 
-                enumerate(best.values))
+                best.values)
 
         for i,sim in enumerate(out):
+            for obj in config.objectives: 
+                path_split = obj.path.split('.')
+                if path_split[1] == 'post':
+                    CadetSimulation.__dict__[path_split[3]](sim, int(path_split[2].replace('unit_', '')))
+
             with Plotter(title='Simulation vs Reference', cmap='tab20', xlabel='x axis', ylabel='y axis') as obj_ref_plot: 
                 for obj in config.objectives:
                     obj.plot(sim, obj_ref_plot)
