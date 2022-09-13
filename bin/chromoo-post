@@ -201,7 +201,10 @@ def main():
         if 'colors' in cmap.__dict__: 
             COLORS = cmap.colors
         else: 
-            COLORS = [cmap(1.*i/(nmax-1)) for i in range(nmax)]
+            if nmax == 1: 
+                COLORS = [cmap(1.0)]
+            else: 
+                COLORS = [cmap(1.*i/(nmax-1)) for i in range(nmax)]
 
         FINAL_COLORS=list(map(lambda g: COLORS[g-1], gens))
 
