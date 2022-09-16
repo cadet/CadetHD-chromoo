@@ -230,7 +230,7 @@ class CadetSimulation(Cadet):
 
         if UNIT.discretization.par_disc_type == b'EQUIDISTANT_PAR':
             par_radius = UNIT.par_radius
-            assert isinstance(par_radius, np.floating)
+            assert isinstance(par_radius, np.floating) or isinstance(par_radius, float)
             npar = UNIT.discretization.npar
             nShells = npar + 1 #Including r = 0
             rShells = [ par_radius * (n/npar) for n in range(nShells) ]
