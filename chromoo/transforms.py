@@ -15,27 +15,13 @@ def lognorm_inverse(array, mins, maxs):
     logmaxs = log10(maxs)
 
     deno = denormalize(array, logmins, logmaxs)
-    return [ 10**x for x in deno ]
+    return np.power(10, deno)
 
 def normalize(array, mins, maxs):
-    return list(
-                map(
-                    lambda x,min,max: (x-min)/(max-min), 
-                    array, 
-                    mins, 
-                    maxs
-                    )
-                )
+    return (array - mins) / (maxs - mins)
 
 def denormalize(array, mins, maxs):
-    return list(
-        map(
-            lambda x, min, max: x * (max - min) + min,
-            array,
-            mins,
-            maxs
-        )
-    )
+    return array * (maxs - mins) + mins
 
 def identity(array, *args, **kwargs):
     return array
@@ -59,8 +45,9 @@ def transform_array(arrays, mins, maxs, transform, mode='transform'):
     """
     mode = 'inverse' or 'transform' allows bidirectional mapping
     """
-    return list(map(lambda x: transforms[transform][mode](x, mins, maxs), arrays))
+    return transforms[transform][mode](arrays, mins, maxs)
 
+# TODO: Numpy-ify
 def transform_population(population:Population, mins, maxs, transform, mode='transform'):
     """
     mode = 'inverse' or 'transform' allows bidirectional mapping

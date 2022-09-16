@@ -14,6 +14,7 @@ from chromoo import __version__, __git_version__
 from chromoo import ChromooProblem, AlgorithmFactory, ConfigHandler, ChromooCallback
 from chromoo.cache import Cache
 from chromoo.log import Logger
+from chromoo.transforms import transform_array
 
 def version() -> str: 
     return ( 
@@ -79,8 +80,8 @@ def main():
     res = algo.result()
 
     logger.info(f"Took {res.exec_time:.2f} seconds ({res.exec_time/3600:.2f} hours) to terminate with {len(cache.opt_Fs)} generations.")
-    logger.info(f"Fitted Parameters (Transformed): {res.X}")
-    logger.info(f"SSE: {res.F}")
+    logger.info(f"Fitted Parameters: {transform_array(res.X, prob.min_values, prob.max_values, config.parameter_transform, mode='inverse')}")
+    logger.info(f"Scores: {res.F}")
 
     if not config.store_temp:
         import shutil
