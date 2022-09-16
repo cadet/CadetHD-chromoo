@@ -5,6 +5,7 @@ from typing import Optional, Tuple
 import numpy as np
 
 from chromoo.plotter import Plotter
+from chromoo.scores import evaluate_scores
 
 @dataclass(init=True, order=True, repr=True, frozen=True)
 class Objective: 
@@ -114,12 +115,12 @@ class Objective:
 
         y = self.process(sim)
 
-        sses = np.sum((y0 - y)**2, axis=0)
+        scores = evaluate_scores(y0, y, self.score)
 
         if self.combine_scores_axis is not None: 
-            sses = np.average(sses, axis=self.combine_scores_axis)
+            scores = np.average(scores, axis=self.combine_scores_axis)
 
-        return sses.ravel()
+        return scores.ravel()
 
     def split(self, y): 
         """

@@ -48,3 +48,4 @@ from . import log
 from . import transforms
 
 from . import cadetSimulation
+from . import scores
