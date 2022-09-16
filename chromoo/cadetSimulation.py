@@ -276,11 +276,9 @@ class CadetSimulation(Cadet):
         rShells = []
 
         if UNIT.discretization.radial_disc_type == b'EQUIVOLUME':
-            for n in range(nShells):
-                rShells.append(UNIT.col_radius * np.sqrt(n/nrad))
+            rShells = [ col_radius * np.sqrt(n/nrad) for n in range(nShells) ]
         elif UNIT.discretization.radial_disc_type == b'EQUIDISTANT':
-            for n in range(nShells):
-                rShells.append(UNIT.col_radius * (n/nrad))
+            rShells = [ col_radius * (n/nrad) for n in range(nShells) ]
         else: 
             rShells = [0.0, col_radius]
 
