@@ -78,16 +78,18 @@ class Subplotter():
     title = None,
     xscale='linear', 
     yscale='linear',
-    figsize=(16,9)
+    figsize=None,
     ) -> None:
+
+        if not figsize: 
+            self.figsize = (ncols * 4, nrows * 3)
 
         self.xscale = xscale
         self.yscale = yscale
 
         self.nrows = nrows
         self.ncols = ncols
-        self.fig = plt.figure(figsize=figsize, constrained_layout=True)
-        self.gs = gridspec.GridSpec(nrows, ncols, figure=self.fig)
+        self.fig, self.axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=self.figsize, constrained_layout=True, sharex=True, sharey=True, squeeze=False)
         self.fig.suptitle(title)
 
     def __enter__(self): 
@@ -97,7 +99,7 @@ class Subplotter():
         plt.close(self.fig)
 
     def plot(self, x, y, irow, icol, xlabel=None, ylabel=None, ls='solid', lw=1, marker=None) -> None:
-        ax = self.fig.add_subplot(self.gs[irow * self.nrows + icol])
+        ax = self.axes[irow, icol]
         ax.plot(x, y, ls=ls, lw=lw, marker=marker)
         ax.set(xscale=self.xscale)
         ax.set(yscale=self.yscale)
@@ -105,16 +107,16 @@ class Subplotter():
         ax.set(ylabel=ylabel)
 
     def scatter(self, x, y, irow, icol, title=None, xlabel=None, ylabel=None, ls='solid', lw=0.1, marker=None, s=None, fontsize=None, c=None) -> None:
-        ax = self.fig.add_subplot(self.gs[irow * self.ncols + icol])
+        ax = self.axes[irow, icol]
         ax.scatter(x, y, ls=ls, lw=lw, marker=marker, s=s, c=c)
         ax.set(xscale=self.xscale)
         ax.set(yscale=self.yscale)
         ax.set_title(title, fontsize=fontsize)
         ax.set(xlabel=xlabel)
         ax.set(ylabel=ylabel)
-        plt.gca().axes.get_xaxis().set_visible(False)
-        plt.gca().axes.get_yaxis().set_visible(False)
-        ax.grid('off')
+        # plt.gca().axes.get_xaxis().set_visible(False)
+        # plt.gca().axes.get_yaxis().set_visible(False)
+        # ax.grid('off')
         # ax.axis('off')
 
     def hist(self, x, irow, icol, bins=10):
