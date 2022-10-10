@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from chromoo.utils import readArray, readChromatogram
+from pathlib import Path
 
 from typing import Optional, Tuple
 import numpy as np
@@ -167,3 +168,18 @@ class Objective:
 
         plot.save(fname, dpi=300)
         plot.close()
+
+    def to_csv(self, sim, fname="objective.csv"): 
+
+        t0 = self.x0
+        y0 = self.y0
+        y = self.process(sim)
+
+        split_y0 = self.split(y0)
+        split_y  = self.split(y)
+
+        fname = Path(fname)
+
+        for i in range(self.n_obj): 
+            np.savetxt(f'{fname.parent}/{fname.stem}_obj_{i}{fname.suffix}', np.stack([t0, split_y[i]],axis=1), delimiter=',')
+            np.savetxt(f'{fname.parent}/{fname.stem}_ref_{i}{fname.suffix}', np.stack([t0, split_y0[i]],axis=1), delimiter=',')

@@ -107,6 +107,9 @@ def main():
                 obj_ref_plot.ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.2))
                 obj_ref_plot.save(f"{str(postdir)}/objectives_reference_{args.mean}_final_{i:03d}", dpi=300)
 
+        for i,sim in enumerate(out): 
+            for obj in config.objectives:
+                obj.to_csv(sim, f'{postdir.as_posix()}/final_{i}.csv')
 
         # When using 2D GRM, use this to output the combined chromatogram at
         # the end of the unit without relying on an OUTLET unit op.
@@ -116,6 +119,7 @@ def main():
                 sim = CadetSimulation(sim.root)
                 arr = sim.combine_port_breakthroughs(args.combine_port_breakthroughs)
                 np.savetxt(postdir / f'combined_breakthrough_opt_{i}.csv', np.stack([t0, arr], axis=1))
+
 
         if args.corner: 
             corner_plot_par = corner.corner(
