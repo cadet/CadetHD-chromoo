@@ -68,23 +68,23 @@ termination:
 
 # Known Issues
 - [CRIT] Got simulation failure due to `error 4 in libpthread` (see dmesg when it happens) on IBT012. Simulation runs manually.
+- Reading inputs from YAML loads strings as `str` and from h5 files we get `numpy.bytes_`. CADET-Python run_load() uses load_results() instead of full load(). So if we check for input string values after simulation, the type of it depends on whether we use full load() or load_results() since we deal with YAML files as well. So we have to consider whether we deal with strings or bytestrings. Simple solution: Don't use run_load in scripts.
+- Loading checkpoints also loads the previous values for all/most parameters. So if nproc is updated before loading, the new value isn't used.
 
 # TODO
-- [CRIT] Corner plots, 
 - [ONGO] Move to numpy arrays
 - [CRIT] Hypervolume indicator as a convergence criterion
-- [TASK] Implement Objective vs Objective 2D plots
-- [TASK] Output results into a subdirectory to avoid polluting root
+- [DONE] Replace readArray, readChromatogram with np.genfromtxt or loadtxt
+- [DONE] Implement Objective vs Objective 2D plots
 - [TASK] Adjust Verbose Display according to algorithm used
 - [TASK] Random seeds
-- [TASK] Implement better scores: Check out CADET-Match
 - [TASK] Make sure tests delete temp files
 - [TASK] Write unit tests for all classes
 - [TASK] Write a configHandler method to output a dummy config.
 - [CRIT] For the split-chromatogram problem, we know that the axial dispersion in once radial shell won't affect the chromatogram in another, so it does have a constraint. Is there a way to constrain the parameters that way? Or does it just mean we solve the system serially? 
 - [TASK] Unified interface/method for deep getting and setting from/to a Dict or dict
 - [TASK] Fix typings for configHandler attributes
-- [TASK] Pickle pop xs and fs for use with chromoo-post
+- [DONE] Pickle pop xs and fs for use with chromoo-post
 - [TASK] Own pareto front
 - [TASK] chromoo-post: plots
     - [TASK] objectives vs objectives
