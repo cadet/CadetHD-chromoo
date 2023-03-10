@@ -135,6 +135,24 @@ class CadetSimulation(Cadet):
             self.root.update(cur_dict)
             prev_len += p.length
 
+    def save_run_load(self, overwrite=True):
+        p = Path(self.filename)
+
+        if p.exists(): 
+            if not overwrite:
+                print("File {} already exists! Use overwrite flag to continue.")
+                exit(-1)
+
+        self.save()
+
+        try:
+            self.run(check=True)
+        except subprocess.CalledProcessError as error:
+            print(f"{self.filename} failed: {error.stderr.decode('utf-8').strip()}")
+            print(f"Parameters: {x}\n")
+            raise(RuntimeError("Simulation Failure"))
+
+        self.load()
 
     def run_with_parameters(self, x, parameters, name:Optional[str]=None, tempdir:Path=Path('temp'), store:bool=False): 
         """ 
@@ -262,6 +280,9 @@ class CadetSimulation(Cadet):
         # WARNING: Somehow broken in addict v2.4 with chromoo-post. Works in v2.3
         # Potentially relevant: https://github.com/mewwts/addict/issues/136
         self.root.output.post[f'unit_{unit:03d}'].post_internal_mass = mass_bulk + mass_particle + mass_solid
+        self.root.output.post[f'unit_{unit:03d}'].post_bulk_mass = mass_bulk 
+        self.root.output.post[f'unit_{unit:03d}'].post_particle_mass = mass_particle
+        self.root.output.post[f'unit_{unit:03d}'].post_solid_mass = mass_solid
 
     def get_vol_rad(self, unit:int): 
         """ Return an array of shape (nrad,) with volumes of each radial port/zone """
