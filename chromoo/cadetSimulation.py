@@ -225,6 +225,34 @@ class CadetSimulation(Cadet):
 
         return np.sum(solutions.T * flowrates, axis=1) / sum(flowrates)
 
+    def post_bulk_mass(self, unit:int): 
+        """
+        Return array of internal mass (num. moles) calculated as 
+        $\sum c \cdot V$, where c -> concentration and V -> volume.
+
+        Conc. within particles is averaged out
+        """
+        UNIT = self.root.input.model[f'unit_{unit:03d}']
+        UNIT_OUT = self.root.output.solution[f'unit_{unit:03d}']
+
+        col_radius = UNIT.col_radius or np.sqrt(UNIT.cross_section_area / (np.pi))
+
+        sol_bulk     = UNIT_OUT.solution_bulk.squeeze()
+        vol_bulk     = self.get_vol_array(unit, 'bulk')
+        mass_bulk     = sol_bulk     * vol_bulk[np.newaxis, :]
+
+        # # WARNING: Hacky. Unsure where components go.
+        # if UNIT.unit_type == b'GENERAL_RATE_MODEL_2D': 
+        #     # Assumes (nts, ncol, nrad, npar)
+        #     par_axis = 3
+        # else: 
+        #     # Assumes (nts, ncol, npar)
+        #     par_axis = 2
+
+        # WARNING: Somehow broken in addict v2.4 with chromoo-post. Works in v2.3
+        # Potentially relevant: https://github.com/mewwts/addict/issues/136
+        self.root.output.post[f'unit_{unit:03d}'].post_bulk_mass = mass_bulk 
+
     def post_internal_mass(self, unit:int): 
         """
         Return array of internal mass (num. moles) calculated as 
@@ -322,8 +350,9 @@ class CadetSimulation(Cadet):
 
         vol_rad = self.get_vol_rad(unit)
 
-        col_porosity = np.array(UNIT.col_porosity)
-        par_porosity = np.array(UNIT.par_porosity)
+        # WARNING: if else to make it work for DPFRs
+        col_porosity = np.array(UNIT.col_porosity) if UNIT.col_porosity else 1.0
+        par_porosity = np.array(UNIT.par_porosity) if UNIT.par_porosity else 1.0
 
         col_radius = UNIT.col_radius or np.sqrt(UNIT.cross_section_area / (np.pi))
 
