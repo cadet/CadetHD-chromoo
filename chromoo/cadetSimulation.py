@@ -225,10 +225,10 @@ class CadetSimulation(Cadet):
 
         return np.sum(solutions.T * flowrates, axis=1) / sum(flowrates)
 
-    def post_bulk_mass(self, unit:int): 
+    def post_mass_bulk(self, unit:int): 
         """
         Return array of internal mass (num. moles) calculated as 
-        $\sum c \cdot V$, where c -> concentration and V -> volume.
+        $\sum c \cdot V$, where c -> concentration and V -> interstitial volume.
 
         Conc. within particles is averaged out
         """
@@ -251,7 +251,77 @@ class CadetSimulation(Cadet):
 
         # WARNING: Somehow broken in addict v2.4 with chromoo-post. Works in v2.3
         # Potentially relevant: https://github.com/mewwts/addict/issues/136
-        self.root.output.post[f'unit_{unit:03d}'].post_bulk_mass = mass_bulk 
+        self.root.output.post[f'unit_{unit:03d}'].post_mass_bulk = mass_bulk 
+
+    def post_mass_par(self, unit:int): 
+        """
+        Return array of internal mass (num. moles) calculated as 
+        $\sum c \cdot V$, where c -> concentration and V -> particle pore volume.
+        """
+        UNIT = self.root.input.model[f'unit_{unit:03d}']
+        UNIT_OUT = self.root.output.solution[f'unit_{unit:03d}']
+
+        col_radius = UNIT.col_radius or np.sqrt(UNIT.cross_section_area / (np.pi))
+
+        sol_particle = UNIT_OUT.solution_particle.squeeze()
+        vol_particle = self.get_vol_array(unit, 'particle')
+
+        if UNIT.discretization.par_disc_type == b'EQUIDISTANT_PAR':
+            par_radius = UNIT.par_radius
+            assert isinstance(par_radius, np.floating) or isinstance(par_radius, float)
+            npar = UNIT.discretization.npar
+            nShells = npar + 1 #Including r = 0
+            rShells = [ par_radius * (n/npar) for n in range(nShells) ]
+        else:
+            print(UNIT.discretization.par_disc_type)
+            raise NotImplementedError
+
+        vol_par_shells = np.array([ (r_out**3 - r_in**3)/par_radius**3 for r_in, r_out in pairwise(rShells) ])
+
+        # Integrated results per ncol x nrad cells
+        # NOTE: Assumes npar is the last axis of sol_*
+        sol_particle = np.tensordot(sol_particle, vol_par_shells, 1 )
+
+        mass_particle = sol_particle * vol_particle[np.newaxis, :]
+
+        # WARNING: Somehow broken in addict v2.4 with chromoo-post. Works in v2.3
+        # Potentially relevant: https://github.com/mewwts/addict/issues/136
+        self.root.output.post[f'unit_{unit:03d}'].post_mass_par = mass_particle
+
+    def post_mass_solid(self, unit:int): 
+        """
+        Return array of internal mass (num. moles) calculated as 
+        $\sum c \cdot V$, where c -> concentration and V -> particle solid volume.
+        """
+        UNIT = self.root.input.model[f'unit_{unit:03d}']
+        UNIT_OUT = self.root.output.solution[f'unit_{unit:03d}']
+
+        col_radius = UNIT.col_radius or np.sqrt(UNIT.cross_section_area / (np.pi))
+
+        sol_solid = UNIT_OUT.solution_solid.squeeze()
+        vol_solid = self.get_vol_array(unit, 'solid')
+
+        if UNIT.discretization.par_disc_type == b'EQUIDISTANT_PAR':
+            par_radius = UNIT.par_radius
+            assert isinstance(par_radius, np.floating) or isinstance(par_radius, float)
+            npar = UNIT.discretization.npar
+            nShells = npar + 1 #Including r = 0
+            rShells = [ par_radius * (n/npar) for n in range(nShells) ]
+        else:
+            print(UNIT.discretization.par_disc_type)
+            raise NotImplementedError
+
+        vol_par_shells = np.array([ (r_out**3 - r_in**3)/par_radius**3 for r_in, r_out in pairwise(rShells) ])
+
+        # Integrated results per ncol x nrad cells
+        # NOTE: Assumes npar is the last axis of sol_*
+        sol_solid = np.tensordot(sol_solid, vol_par_shells, 1 )
+
+        mass_solid = sol_solid * vol_solid[np.newaxis, :]
+
+        # WARNING: Somehow broken in addict v2.4 with chromoo-post. Works in v2.3
+        # Potentially relevant: https://github.com/mewwts/addict/issues/136
+        self.root.output.post[f'unit_{unit:03d}'].post_mass_solid = mass_solid
 
     def post_internal_mass(self, unit:int): 
         """
