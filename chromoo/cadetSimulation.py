@@ -323,7 +323,7 @@ class CadetSimulation(Cadet):
         # Potentially relevant: https://github.com/mewwts/addict/issues/136
         self.root.output.post[f'unit_{unit:03d}'].post_mass_solid = mass_solid
 
-    def post_internal_mass(self, unit:int): 
+    def post_mass_total(self, unit:int): 
         """
         Return array of internal mass (num. moles) calculated as 
         $\sum c \cdot V$, where c -> concentration and V -> volume.
@@ -377,10 +377,10 @@ class CadetSimulation(Cadet):
 
         # WARNING: Somehow broken in addict v2.4 with chromoo-post. Works in v2.3
         # Potentially relevant: https://github.com/mewwts/addict/issues/136
-        self.root.output.post[f'unit_{unit:03d}'].post_internal_mass = mass_bulk + mass_particle + mass_solid
-        self.root.output.post[f'unit_{unit:03d}'].post_bulk_mass = mass_bulk 
-        self.root.output.post[f'unit_{unit:03d}'].post_particle_mass = mass_particle
-        self.root.output.post[f'unit_{unit:03d}'].post_solid_mass = mass_solid
+        self.root.output.post[f'unit_{unit:03d}'].post_mass_total = mass_bulk + mass_particle + mass_solid
+        self.root.output.post[f'unit_{unit:03d}'].post_mass_bulk = mass_bulk 
+        self.root.output.post[f'unit_{unit:03d}'].post_mass_par = mass_particle
+        self.root.output.post[f'unit_{unit:03d}'].post_mass_solid = mass_solid
 
     def get_vol_rad(self, unit:int): 
         """ Return an array of shape (nrad,) with volumes of each radial port/zone """
