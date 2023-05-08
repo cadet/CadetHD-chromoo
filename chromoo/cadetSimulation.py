@@ -421,8 +421,8 @@ class CadetSimulation(Cadet):
         vol_rad = self.get_vol_rad(unit)
 
         # WARNING: if else to make it work for DPFRs
-        col_porosity = np.array(UNIT.col_porosity) if UNIT.col_porosity else 1.0
-        par_porosity = np.array(UNIT.par_porosity) if UNIT.par_porosity else 1.0
+        col_porosity = np.array(UNIT.col_porosity) if UNIT.col_porosity is not None else 1.0
+        par_porosity = np.array(UNIT.par_porosity) if UNIT.par_porosity is not None else 1.0
 
         col_radius = UNIT.col_radius or np.sqrt(UNIT.cross_section_area / (np.pi))
 
