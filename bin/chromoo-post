@@ -60,15 +60,17 @@ def main():
         df_opt = calculate_mean(df_opt, args.mean, config.objective_names)
         df_opt = df_opt.sort_values(by=[args.mean])
 
+        plot_obj_par_gens(config, df_opt, postdir / "objectives_parameters_opts")
+
         with Plotter(title=args.mean+' mean') as hist_plot: 
             hist_plot.hist(df_opt[args.mean], args.hist)
             hist_plot.save(postdir / f'histogram_{args.mean}_mean', dpi=300)
 
-        columns = list(df_opt.columns[0:config.n_par])
-        columns.append(df_opt.columns[-1])
+        columns_par_mean = list(df_opt.columns[0:config.n_par])
+        columns_par_mean.append(df_opt.columns[-1])
 
         print("Best opts solution: ")
-        best = df_opt[columns].iloc[0:args.n]
+        best = df_opt[columns_par_mean].iloc[0:args.n]
         df_pars_reversed = df_opt[df_opt.columns[0:config.n_par]].iloc[::-1]
         print(best)
 
@@ -104,7 +106,7 @@ def main():
                 inset_ax.bar(range(config.n_par), best[best.columns[0:config.n_par]].iloc[i].values)
                 inset_ax.set(yscale='log')
 
-                obj_ref_plot.ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.2))
+                obj_ref_plot.ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=2)
                 obj_ref_plot.save(f"{str(postdir)}/objectives_reference_{args.mean}_final_{i:03d}", dpi=300)
 
         for i,sim in enumerate(out): 
@@ -136,7 +138,6 @@ def main():
                     )
             corner_plot_obj.savefig(postdir / 'corner_opt_obj.pdf')
 
-        
 
     if args.pop: 
         print("Reading pickled populations file...")
@@ -190,7 +191,9 @@ def main():
                     color='red'
                     )
             corner_plot_obj.savefig(postdir / 'corner_pop_obj.pdf')
-        
+
+        df = populations[populations['generation'] == populations['generation'].max()]
+        plot_obj_par_gens(config, df, postdir / "objectives_parameters_last_gen")
         plot_obj_par_gens(config, populations, postdir / "objectives_parameters")
 
         if args.plot_obj_par: 
@@ -216,7 +219,10 @@ def plot_obj_par_gens(config, populations, filename=f"objectives_parameters"):
         yscale='log'
     )
 
-    gens = populations['generation'].to_numpy()
+    try:
+        gens = populations['generation'].to_numpy()
+    except KeyError: 
+        gens = np.array([1])
     nmax = max(gens)
 
     # cmap = mpl.cm.get_cmap(name=args['colormap'])
