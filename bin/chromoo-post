@@ -37,7 +37,8 @@ def main():
     ap.add_argument('--combine-port-breakthroughs', type=int, help='Combine breakthroughs of individual ports for this unit op.')
     ap.add_argument('--hist', default=20, help='Number of bins in histogram plot')
     ap.add_argument('--opts-overlay', help='Overlay all opts outputs and reference values')
-    ap.add_argument('--plot-obj-par', action='store_true', help='plot objectives vs parameters')
+    ap.add_argument('--plot-obj-par', action='store_true', help='plot objectives vs parameters in a single plot')
+    ap.add_argument('--plot-obj-par-split', action='store_true', help='plot objectives vs parameters plots individually')
     ap.add_argument('--corner', action='store_true', help='plot corner plots')
 
     ap.add_argument('--pop', action='store_true', help='Use pickled population database')
@@ -183,9 +184,11 @@ def main():
 
         df = populations[populations['generation'] == populations['generation'].max()]
         plot_obj_par_gens(config, df, postdir / "objectives_parameters_last_gen")
-        plot_obj_par_gens(config, populations, postdir / "objectives_parameters")
 
         if args.plot_obj_par: 
+            plot_obj_par_gens(config, populations, postdir / "objectives_parameters")
+
+        if args.plot_obj_par_split: 
             # Plot the objectives_parameters plot individually
             for i_obj, obj in enumerate(config.objective_names): 
                 for i_par, par in enumerate(config.parameter_names): 
