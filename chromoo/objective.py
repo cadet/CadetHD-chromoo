@@ -144,9 +144,12 @@ class Objective:
 
         # WARNING: We assume timesteps are the same between reference and simulation.
 
+        label_prefix = f'{self.name}'
+
         for i in range(self.n_obj): 
-            ax.plot(t0, split_y0[i], label='reference')
-            ax.plot(t0, split_y[i], label='simulation', ls='dashed')
+            label = label_prefix if self.n_obj == 1 else f'{label_prefix}[{i}]'
+            ax.plot(t0, split_y0[i], label=f'{label} ref')
+            ax.plot(t0, split_y[i], label=f'{label} sim', ls='dashed')
 
 
     def plotsave(self, sim, fname="reference_simulation.pdf"): 
