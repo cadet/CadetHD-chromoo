@@ -149,21 +149,10 @@ def main():
         #     cur_gen = populations[populations['generation'] == i+1].to_numpy()
         #     np.savetxt(f'pop_gen_{i}.csv', cur_gen, delimiter=',')
 
-        # minned = populations.loc[populations.groupby(['generation'])[args.mean].idxmin()]
-        best_mean_score_per_gen = populations.groupby(['generation'])[args.mean].min()
-        median_mean_score_per_gen = populations.groupby(['generation'])[args.mean].median()
-        worst_mean_score_per_gen = populations.groupby(['generation'])[args.mean].max()
+        plot_best_worst_gens(populations, args.mean, postdir / f"best_{args.mean}_mean_per_gen", labels=['best', 'median', 'worst'])
 
-        best_mean_score_per_gen_plot = Plotter(title=f'Convergence', yscale='log', xlabel='Generations', ylabel=f'Meta-objective ({args.mean})')
-        best_mean_score_per_gen_plot.plot(range(len(best_mean_score_per_gen)), best_mean_score_per_gen, label='best')
-        best_mean_score_per_gen_plot.plot(range(len(median_mean_score_per_gen)), median_mean_score_per_gen, label='median')
-        best_mean_score_per_gen_plot.plot(range(len(worst_mean_score_per_gen)), worst_mean_score_per_gen, label='worst')
-        best_mean_score_per_gen_plot.legend('upper right', (1,1))
-        best_mean_score_per_gen_plot.save(f'{str(postdir)}/best_{args.mean}_mean_per_gen', dpi=300)
-        best_mean_score_per_gen_plot.close()
-
-        # populations_best_score_ever_index = populations[args.mean].argmin()
-        # print(populations.iloc[populations_best_score_ever_index])
+        for column in list(populations.columns[1:config.n_par]): 
+            plot_best_worst_gens(populations, column, postdir / f"param_range_{column}_per_gen")
 
         print("Best populations solution: ")
         df = populations.iloc[:,1:].sort_values(by=[args.mean]).drop_duplicates()
@@ -303,6 +292,22 @@ def parameter_violin(best_pars_reversed, args, config, postdir):
         #   
         # plt.colorbar(sm, ticks=np.linspace(vmin, vmax, 4), format='%.2e')
 
+def plot_best_worst_gens(populations, column, filename, labels=['min', 'median', 'max']):
+    # minned = populations.loc[populations.groupby(['generation'])[args.mean].idxmin()]
+    best_per_gen = populations.groupby(['generation'])[column].min()
+    median_per_gen = populations.groupby(['generation'])[column].median()
+    worst_per_gen = populations.groupby(['generation'])[column].max()
+
+    plot = Plotter(title=f'Convergence', yscale='log', xlabel='Generations', ylabel=f'Meta-objective ({column})')
+    plot.plot(range(len(best_per_gen)), best_per_gen, label=labels[0])
+    plot.plot(range(len(median_per_gen)), median_per_gen, label=labels[1])
+    plot.plot(range(len(worst_per_gen)), worst_per_gen, label=labels[2])
+    plot.legend('upper right', (1,1))
+    plot.save(filename, dpi=300)
+    plot.close()
+
+    # populations_best_score_ever_index = populations[args.mean].argmin()
+    # print(populations.iloc[populations_best_score_ever_index])
 
 if __name__=="__main__":
     main()
