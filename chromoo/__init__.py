@@ -25,7 +25,8 @@ def git_version():
 name = 'chromoo'
 __version__ = '0.1'
 # If run locally, return the actual git version, otherwise, return the version installed.
-__git_version__ = git_version() or pkg_resources.get_distribution("chromoo").version
+# __git_version__ = git_version() or pkg_resources.get_distribution("chromoo").version
+__git_version__ = git_version() or 'unknown'
 __author__ = 'Jayghosh Rao'
 __credits__ = 'FZJ/IBG-1/ModSim'
 
