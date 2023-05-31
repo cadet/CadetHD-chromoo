@@ -382,6 +382,42 @@ class CadetSimulation(Cadet):
         self.root.output.post[f'unit_{unit:03d}'].post_mass_par = mass_particle
         self.root.output.post[f'unit_{unit:03d}'].post_mass_solid = mass_solid
 
+    def post_mass_solid_all_partypes(self, unit:int):
+        """ For polydisperse cases """
+        UNIT = self.root.input.model[f'unit_{unit:03d}']
+        UNIT_OUT = self.root.output.solution[f'unit_{unit:03d}']
+        keys = list(filter(lambda key: 'solution_solid_partype_' in key ,UNIT_OUT.keys()))
+
+        result = []
+
+        for ind,key in enumerate(sorted(keys)):
+            col_radius = UNIT.col_radius or np.sqrt(UNIT.cross_section_area / (np.pi))
+
+            sol_solid = UNIT_OUT[key].squeeze()
+            vol_solid = self.get_vol_array(unit, 'solid') * UNIT.par_type_volfrac[ind]
+
+            if UNIT.discretization.par_disc_type == b'EQUIDISTANT_PAR':
+                par_radius = UNIT.par_radius[ind]
+                assert isinstance(par_radius, np.floating) or isinstance(par_radius, float)
+                npar = UNIT.discretization.npar[ind]
+                nShells = npar + 1 #Including r = 0
+                rShells = [ par_radius * (n/npar) for n in range(nShells) ]
+            else:
+                print(UNIT.discretization.par_disc_type)
+                raise NotImplementedError
+
+            vol_par_shells = np.array([ (r_out**3 - r_in**3)/par_radius**3 for r_in, r_out in pairwise(rShells) ])
+
+            # Integrated results per ncol x nrad cells
+            # NOTE: Assumes npar is the last axis of sol_*
+            sol_solid = np.tensordot(sol_solid, vol_par_shells, 1 )
+
+            mass_solid = sol_solid * vol_solid[np.newaxis, :]
+            result.append(mass_solid)
+
+        # np.sum(list(map(lambda key: UNIT_OUT[key], keys)), axis=0)
+        self.root.output.post[f'unit_{unit:03d}'].post_mass_solid_all_partypes = np.sum(result, axis=0)
+
     def get_vol_rad(self, unit:int): 
         """ Return an array of shape (nrad,) with volumes of each radial port/zone """
         UNIT = self.root.input.model[f'unit_{unit:03d}']
