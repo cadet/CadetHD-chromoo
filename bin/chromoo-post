@@ -110,6 +110,12 @@ def main():
                 obj_ref_plot.ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=2)
                 obj_ref_plot.save(f"{str(postdir)}/objectives_reference_{args.mean}_final_{i:03d}", dpi=300)
 
+            for obj in config.objectives:
+                with Plotter(title=f'Simulation vs Reference: {obj.name}', cmap='tab20', xlabel='Time', ylabel='') as obj_ref_plot: 
+                    obj.plot(sim, obj_ref_plot.ax)
+                    obj_ref_plot.ax.legend(loc='best')
+                    obj_ref_plot.save(f"{str(postdir)}/objectives_reference_{obj.name}_{args.mean}_final_{i:03d}", dpi=300)
+
         for i,sim in enumerate(out): 
             for obj in config.objectives:
                 obj.to_csv(sim, f'{postdir.as_posix()}/final_{i}.csv')
