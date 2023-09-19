@@ -87,8 +87,8 @@ termination:
 - [DONE] Pickle pop xs and fs for use with chromoo-post
 - [TASK] Own pareto front
 - [TASK] chromoo-post: plots
-    - [TASK] objectives vs objectives
-    - [TASK] ALL parameters_objectives plots (as subplots and separate)
+    - [DONE] objectives vs objectives: corner
+    - [DONE] ALL parameters_objectives plots (as subplots and separate)
     - [TASK] Best per generation (opts)
     - [TASK] Best per generation (pops)
     - [TASK] Best ever
@@ -97,3 +97,4 @@ termination:
 - [TASK] Check out numpickle: https://gwang-jin-kim.medium.com/faster-loading-and-saving-of-pandas-data-frames-using-numpickle-numpy-and-pickle-d15870519529
 - Performance of np.take() with numbajit vs boolean indexing: https://stackoverflow.com/questions/46041811/performance-of-various-numpy-fancy-indexing-methods-also-with-numba
 - Improved plotting for large number of subplots in post: https://stackoverflow.com/questions/13046127/matplotlib-very-slow-is-it-normal/13060980#13060980
+- [CRIT] Check for behavior when take=[2,[0,1,2...]]. i.e., when indices is a list. Does verify fail? What happens?

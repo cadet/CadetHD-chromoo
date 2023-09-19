@@ -55,12 +55,14 @@ class Objective:
 
             # NOTE: If multiple axially-averaged time-series reference data are given for each radial zone as separate objectives, self.take must be specified. But not for a simple 1D 1 objective case which also reads from chromatogram. A pre-emptive check would require us knowing the shape of the simulation output array.
 
+    # WARNING: Doesn't work if indices is a list
     def verify(self, sim):
         """ Verify that the expected shape of simulation data matches with expected shape of reference data """
         pre_shape = np.array(sim.get_shape_pre(self.path))
 
         if self.take is not None: 
-            pre_shape = np.delete(pre_shape, self.take[0])
+            if not isinstance(self.take[1], list):
+                pre_shape = np.delete(pre_shape, self.take[0])
             pre_shape = np.delete(pre_shape, np.where(pre_shape == 1))
 
         if self.combine_data_axis is not None: 
