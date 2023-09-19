@@ -136,7 +136,7 @@ class Objective:
         return split_y
 
 
-    def plot(self, sim, ax): 
+    def plot(self, sim, ax, plot_ref=True): 
         t0 = self.x0
         y0 = self.y0
         y = self.process(sim)
@@ -150,9 +150,35 @@ class Objective:
 
         for i in range(self.n_obj): 
             label = label_prefix if self.n_obj == 1 else f'{label_prefix}[{i}]'
-            ax.plot(t0, split_y0[i], label=f'{label} ref')
-            ax.plot(t0, split_y[i], label=f'{label} sim', ls='dashed')
+            if plot_ref:
+                ax.plot(t0, split_y0[i], label=f'{label} ref')
+            ax.plot(t0, split_y[i], label=f'{label} fit', ls='dashed')
 
+    def integral(self, sim):
+        """
+        Trapezoidal integration of the objective of a given simulation. Useful to find the lowest/highest curves in a given set.
+        """
+        t0 = self.x0
+        y0 = self.y0
+        y = self.process(sim)
+
+        split_y0 = self.split(y0)
+        split_y  = self.split(y)
+
+        # WARNING: We assume timesteps are the same between reference and simulation.
+
+        return list(map(lambda y: np.trapz(y,t0), split_y))
+
+    def xy(self, sim):
+        """
+        Return t0, split_y
+        """
+        t0 = self.x0
+        y = self.process(sim)
+
+        split_y  = self.split(y)
+
+        return t0, split_y
 
     def plotsave(self, sim, fname="reference_simulation.pdf"): 
         """ Plot the solution vs reference plots for a given simulation """
