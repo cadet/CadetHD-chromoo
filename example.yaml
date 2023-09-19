@@ -33,3 +33,26 @@ termination:
   n_last: 10
   n_max_gen: 1000
   n_max_evals: 100000
+
+post:
+  inputs:
+    opts: opts.csv
+    populations: populations
+  convergence:
+    metascore: false
+    scores: false
+    parameters: false
+  opts_metascore_histogram: true
+  parameters_violin: false
+  response_surface:
+    all_combined: false
+    all_split: false
+    last_gen: false
+    opts: false
+  performance_comparison: 
+    individual: false
+    combined: true
+    opts_range: false
+  corner:
+    opts: false
+    populations: false
