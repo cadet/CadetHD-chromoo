@@ -27,8 +27,8 @@ class Objective:
     combine_data_axis: Optional[int] = None
     sum_data_axis: Optional[int] = None
     score: str = 'sse'                                  # score type
-    x0: np.ndarray = np.array([])                       # time steps
-    y0: np.ndarray = np.array([])                       # data values
+    x0: np.ndarray = field(default_factory=lambda : np.array([]))
+    y0: np.ndarray = field(default_factory=lambda : np.array([]))
 
     def __post_init__(self): 
         """ 
