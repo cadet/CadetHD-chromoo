@@ -15,4 +15,4 @@ def git_version():
         return sha
 
 if __name__ == "__main__":
-    setuptools.setup(version=git_version())
+    setuptools.setup(version="0.1")
