@@ -20,7 +20,7 @@ from chromoo.simulation import run_sim_iter
 from chromoo.utils import deep_get, readArray, readChromatogram
 from chromoo.plotter import Plotter, Subplotter
 
-from mpl_toolkits.axes_grid.inset_locator import InsetPosition
+# from mpl_toolkits.axes_grid1.inset_locator import InsetPosition
 
 from matplotlib import pyplot as plt
 import matplotlib as mpl 
@@ -80,6 +80,11 @@ def main():
         # TODO: Implement drawing bounds of parameters
         if config.get('post.parameters_violin'):
             parameter_violin(df_pars_reversed, args, config, postdir)
+
+        violin_percentile = config.get('post.parameters_violin_percentile') or 0
+        if violin_percentile < 100 and violin_percentile > 0:
+            nrows = int(violin_percentile / 100 * df_pars_reversed.shape[0])
+            parameter_violin(df_pars_reversed.head(nrows), args, config, postdir, f'parameters_violin_{violin_percentile}')
 
         with mp.Pool(nproc) as pool:
             out = pool.map( 
@@ -311,7 +316,7 @@ def calculate_mean(df, mean, columns):
 
     return df
 
-def parameter_violin(best_pars_reversed, args, config, postdir): 
+def parameter_violin(best_pars_reversed, args, config, postdir, name='parameters_violin'): 
     """
     Generate violin plots of all optimal parameters, joined by lines
     """
@@ -334,7 +339,7 @@ def parameter_violin(best_pars_reversed, args, config, postdir):
         parameters_violin.ax.set_xticks(range(config.n_par))
         parameters_violin.ax.set_xticklabels(config.parameter_names, rotation=45, ha='right')
         parameters_violin.ax.minorticks_off()
-        parameters_violin.save(postdir / 'parameters_violin', dpi=300)
+        parameters_violin.save(postdir / name , dpi=300)
 
         # # Normalizer
         # df_with_mean = calculate_mean(best_pars_reversed, args.mean, config.objective_names)
