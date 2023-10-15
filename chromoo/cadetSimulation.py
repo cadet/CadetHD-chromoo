@@ -465,6 +465,7 @@ class CadetSimulation(Cadet):
         total_volume = np.pi * col_radius**2 * UNIT.col_length
         assert np.isclose(np.sum(vol_rad) * ncol, total_volume, rtol=1e-6, atol=0.0)
 
+        # WARNING: Assumes simple par_porosity
         if output_type == 'bulk': 
             factor = col_porosity
         elif output_type == 'particle': 
