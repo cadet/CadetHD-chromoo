@@ -276,7 +276,8 @@ class CadetSimulation(Cadet):
             print(UNIT.discretization.par_disc_type)
             raise NotImplementedError
 
-        vol_par_shells = np.array([ (r_out**3 - r_in**3)/par_radius**3 for r_in, r_out in pairwise(rShells) ])
+        ## Reversed because of how it is in CADET
+        vol_par_shells = np.array([ (r_out**3 - r_in**3)/par_radius**3 for r_out,r_in in pairwise(reversed(rShells)) ])
 
         # Integrated results per ncol x nrad cells
         # NOTE: Assumes npar is the last axis of sol_*
@@ -311,7 +312,8 @@ class CadetSimulation(Cadet):
             print(UNIT.discretization.par_disc_type)
             raise NotImplementedError
 
-        vol_par_shells = np.array([ (r_out**3 - r_in**3)/par_radius**3 for r_in, r_out in pairwise(rShells) ])
+        ## Reversed because of how it is in CADET
+        vol_par_shells = np.array([ (r_out**3 - r_in**3)/par_radius**3 for r_out,r_in in pairwise(reversed(rShells)) ])
 
         # Integrated results per ncol x nrad cells
         # NOTE: Assumes npar is the last axis of sol_*
@@ -362,7 +364,8 @@ class CadetSimulation(Cadet):
         #     # Assumes (nts, ncol, npar)
         #     par_axis = 2
 
-        vol_par_shells = np.array([ (r_out**3 - r_in**3)/par_radius**3 for r_in, r_out in pairwise(rShells) ])
+        ## Reversed because of how it is in CADET
+        vol_par_shells = np.array([ (r_out**3 - r_in**3)/par_radius**3 for r_out,r_in in pairwise(reversed(rShells)) ])
 
         # Integrated results per ncol x nrad cells
         # NOTE: Assumes npar is the last axis of sol_*
@@ -420,7 +423,8 @@ class CadetSimulation(Cadet):
                 print(UNIT.discretization.par_disc_type)
                 raise NotImplementedError
 
-            vol_par_shells = np.array([ (r_out**3 - r_in**3)/par_radius**3 for r_in, r_out in pairwise(rShells) ])
+            ## Reversed because of how it is in CADET
+            vol_par_shells = np.array([ (r_out**3 - r_in**3)/par_radius**3 for r_out,r_in in pairwise(reversed(rShells)) ])
 
             # Integrated results per ncol x nrad cells
             # NOTE: Assumes npar is the last axis of sol_*
@@ -431,6 +435,56 @@ class CadetSimulation(Cadet):
 
         # np.sum(list(map(lambda key: UNIT_OUT[key], keys)), axis=0)
         self.root.output.post[f'unit_{unit:03d}'].post_mass_solid_all_partypes = np.sum(result, axis=0)
+
+    def post_mass_par_all_partypes(self, unit:int):
+        """ For polydisperse cases """
+        UNIT = self.root.input.model[f'unit_{unit:03d}']
+        UNIT_OUT = self.root.output.solution[f'unit_{unit:03d}']
+        keys = list(filter(lambda key: 'solution_particle_partype_' in key ,UNIT_OUT.keys()))
+
+        result = []
+
+        ncol = UNIT.discretization.ncol
+        nrad = UNIT.discretization.nrad
+        npartype = len(UNIT.par_radius)
+
+        col_radius = UNIT.col_radius or np.sqrt(UNIT.cross_section_area / (np.pi))
+
+        for ind,key in enumerate(sorted(keys)):
+
+            sol_par = UNIT_OUT[key].squeeze()
+
+            if len(UNIT.par_type_volfrac) == npartype:
+                vol_par = self.get_vol_array(unit, 'particle') * UNIT.par_type_volfrac[ind]
+            elif len(UNIT.par_type_volfrac) == nrad * npartype:
+                par_type_volfrac = np.reshape(UNIT.par_type_volfrac, (nrad,npartype))
+                vol_par = self.get_vol_array(unit, 'particle') * par_type_volfrac[:,ind]
+            else:
+                raise NotImplementedError
+
+            par_radius = UNIT.par_radius[ind]
+            npar = UNIT.discretization.npar[ind]
+
+            if UNIT.discretization.par_disc_type == b'EQUIDISTANT_PAR':
+                assert isinstance(par_radius, np.floating) or isinstance(par_radius, float)
+                nShells = npar + 1 #Including r = 0
+                rShells = [ par_radius * (n/npar) for n in range(nShells) ]
+            else:
+                print(UNIT.discretization.par_disc_type)
+                raise NotImplementedError
+
+            ## Reversed because of how it is in CADET
+            vol_par_shells = np.array([ (r_out**3 - r_in**3)/par_radius**3 for r_out,r_in in pairwise(reversed(rShells)) ])
+
+            # Integrated results per ncol x nrad cells
+            # NOTE: Assumes npar is the last axis of sol_*
+            sol_par = np.tensordot(sol_par, vol_par_shells, 1 )
+
+            mass_par = sol_par * vol_par[np.newaxis, :]
+            result.append(mass_par)
+
+        # np.sum(list(map(lambda key: UNIT_OUT[key], keys)), axis=0)
+        self.root.output.post[f'unit_{unit:03d}'].post_mass_par_all_partypes = np.sum(result, axis=0)
 
     def get_vol_rad(self, unit:int): 
         """ Return an array of shape (nrad,) with volumes of each radial port/zone """
