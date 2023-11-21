@@ -386,20 +386,34 @@ class CadetSimulation(Cadet):
         """ For polydisperse cases """
         UNIT = self.root.input.model[f'unit_{unit:03d}']
         UNIT_OUT = self.root.output.solution[f'unit_{unit:03d}']
-        keys = list(filter(lambda key: 'solution_solid_partype_' in key ,UNIT_OUT.keys()))
-
+        keys = list(filter(lambda key: 'solution_solid_partype_' in key.lower() ,UNIT_OUT.keys()))
+        
         result = []
 
-        for ind,key in enumerate(sorted(keys)):
-            col_radius = UNIT.col_radius or np.sqrt(UNIT.cross_section_area / (np.pi))
+        ncol = UNIT.discretization.ncol
+        nrad = UNIT.discretization.nrad
+        npartype = len(UNIT.par_radius)
 
+        assert(npartype == len(keys))
+
+        col_radius = UNIT.col_radius or np.sqrt(UNIT.cross_section_area / (np.pi))
+
+        for ind,key in enumerate(sorted(keys)):
             sol_solid = UNIT_OUT[key].squeeze()
-            vol_solid = self.get_vol_array(unit, 'solid') * UNIT.par_type_volfrac[ind]
+
+            if len(UNIT.par_type_volfrac) == npartype:
+                vol_solid = self.get_vol_array(unit, 'solid') * UNIT.par_type_volfrac[ind]
+            elif len(UNIT.par_type_volfrac) == nrad * npartype:
+                par_type_volfrac = np.reshape(UNIT.par_type_volfrac, (nrad,npartype))
+                vol_solid = self.get_vol_array(unit, 'solid') * par_type_volfrac[:,ind]
+            else:
+                raise NotImplementedError
+
+            par_radius = UNIT.par_radius[ind]
+            npar = UNIT.discretization.npar[ind]
 
             if UNIT.discretization.par_disc_type == b'EQUIDISTANT_PAR':
-                par_radius = UNIT.par_radius[ind]
                 assert isinstance(par_radius, np.floating) or isinstance(par_radius, float)
-                npar = UNIT.discretization.npar[ind]
                 nShells = npar + 1 #Including r = 0
                 rShells = [ par_radius * (n/npar) for n in range(nShells) ]
             else:
