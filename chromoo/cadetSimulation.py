@@ -565,8 +565,9 @@ def new_run_and_eval(x, sim, parameters, objectives, name:Optional[str]=None, te
     # The final 'post_*' key is the name of the CadetSimulation method to run on the specified unit
     # Here, we run the postproc function specified. It is the responsibility of
     # the function to store the data at the right path
-    for obj in objectives: 
-        path_split = obj.path.split('.')
+    obj_paths = list(set(obj.path for obj in objectives))
+    for obj_path in obj_paths:
+        path_split = obj_path.split('.')
         if path_split[1] == 'post':
             CadetSimulation.__dict__[path_split[3]](simulation, int(path_split[2].replace('unit_', '')))
 
