@@ -331,6 +331,8 @@ class CadetSimulation(Cadet):
         $\sum c \cdot V$, where c -> concentration and V -> volume.
 
         Conc. within particles is averaged out
+
+        ------------ WARNING: simple code, doesn't consider 2D PSD! --------------
         """
         UNIT = self.root.input.model[f'unit_{unit:03d}']
         UNIT_OUT = self.root.output.solution[f'unit_{unit:03d}']
