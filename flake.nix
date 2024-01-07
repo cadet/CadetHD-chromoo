@@ -19,12 +19,12 @@
 
       name = "cadet";
 
-      version = "4.3.0";
+      version = "4.4.0";
 
       src = pkgs.fetchgit {
         url = "https://github.com/modsim/CADET";
-        rev = "cbc0beea24fa8a25edcadfffa6cee03484fcd209";
-        sha256 = "R6rOaW84qGZDFRT689YZB5XIU9dekvabTB/4O3SGoPU=";
+        rev = "6dfe1f04231aa62874ac4ab3ca4cdbf295708cf0";
+        sha256 = "KCpwcNq2byqL9zEuWAz9w5KDFKEiPUofwEs9slrtWeQ=";
       };
 
       nativeBuildInputs = with pkgs; [ cmake ];
