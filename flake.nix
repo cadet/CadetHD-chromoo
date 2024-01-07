@@ -6,7 +6,9 @@
   flake-utils.lib.eachDefaultSystem (system:
   let 
     pkgs = nixpkgs.legacyPackages.${system}; 
-    # dir = ''/home/jayghoshter/dev/tools/chromoo/'';
+
+    # builtins.toString still makes a nix store path for purity
+    PROJECT_ROOT = builtins.toString ./.;
 
     mach-nix = import (builtins.fetchGit {
       url = "https://github.com/DavHau/mach-nix";
@@ -78,11 +80,15 @@
               which
             ];
 
+            # Setting and using PROJECT_ROOT like this allows us to 
+            # run `nix develop <thisflakedir> --impure --command zsh`
+            # from any directory and get the develop shell.
+            # This comes at the expense of copying the source into the 
+            # nix store on each invocation, and requiring reloads of 
+            # the shell on changes to the source code.
             shellHook = ''
-              # Tells pip to put packages into $PIP_PREFIX instead of the usual locations.
-              # See https://pip.pypa.io/en/stable/user_guide/#environment-variables.
-              export PYTHONPATH="$(pwd):$PYTHONPATH"
-              export PATH="$(pwd)/bin:$PATH"
+              export PYTHONPATH="'' + PROJECT_ROOT + '':$PYTHONPATH"
+              export PATH="'' + PROJECT_ROOT + ''/bin:$PATH"
               unset SOURCE_DATE_EPOCH
             '';
 
