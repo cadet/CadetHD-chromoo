@@ -7,7 +7,17 @@ While I haven't yet fully looked through the source code of CADET-Match, I would
 # Installation
 
 ```
-pip install .
+# Install cadet. This can be done via conda as below 
+# or directly from source https://github.com/modsim/CADET
+conda config --add channels conda-forge
+conda config --set channel_priority strict
+conda install cadet
+
+# Install python dependencies
+pip install -r requirements.txt
+
+# Install this package. Use -e for an editable install.
+pip install . 
 ```
 
 # Usage
