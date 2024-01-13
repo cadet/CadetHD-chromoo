@@ -19,7 +19,7 @@ def git_version():
             return '{sha}.dirty'.format(sha=sha)
         else:
             return sha
-    except git.InvalidGitRepositoryError: 
+    except (git.InvalidGitRepositoryError,git.GitCommandError): 
         return None
 
 name = 'chromoo'
