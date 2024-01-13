@@ -6,10 +6,14 @@ ChroMOO
 """
 
 import pkg_resources
-import git
 
 def git_version():
     """ Return version with local version identifier. """
+    try:
+        import git
+    except ImportError:
+        return None
+
     try: 
         repo = git.Repo('.', search_parent_directories=True)
         repo.git.status()
