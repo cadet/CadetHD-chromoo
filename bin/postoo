@@ -291,7 +291,7 @@ def plot_obj_par_gens(config, populations, filename=f"objectives_parameters", pr
                 c=FINAL_COLORS,
                 # title=f'{config.parameter_names[i_par]} v {config.objective_names[i_obj]}',
                 xlabel=f'{config.parameter_names[i_par]}',
-                ylabel=f'{config.objective_names[i_obj]} {config.objectives[i_obj].score}',
+                ylabel=f'{config.objective_names[i_obj]}',
             )
 
     if print_colorbar: 
