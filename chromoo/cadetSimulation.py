@@ -241,14 +241,6 @@ class CadetSimulation(Cadet):
         vol_bulk     = self.get_vol_array(unit, 'bulk')
         mass_bulk     = sol_bulk     * vol_bulk[np.newaxis, :]
 
-        # # WARNING: Hacky. Unsure where components go.
-        # if UNIT.unit_type == b'GENERAL_RATE_MODEL_2D': 
-        #     # Assumes (nts, ncol, nrad, npar)
-        #     par_axis = 3
-        # else: 
-        #     # Assumes (nts, ncol, npar)
-        #     par_axis = 2
-
         # WARNING: Somehow broken in addict v2.4 with chromoo-post. Works in v2.3
         # Potentially relevant: https://github.com/mewwts/addict/issues/136
         self.root.output.post[f'unit_{unit:03d}'].post_mass_bulk = mass_bulk 

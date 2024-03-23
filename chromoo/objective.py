@@ -60,10 +60,15 @@ class Objective:
         """ Verify that the expected shape of simulation data matches with expected shape of reference data """
         pre_shape = np.array(sim.get_shape_pre(self.path))
 
+        ## Works like .squeeze()
+        ## Necessary when using post_mass routines because they all squeeze outputs
+        ## Also added a squeeze in process()
+        pre_shape = np.delete(pre_shape, np.where(pre_shape == 1))
+
         if self.take is not None: 
             if not isinstance(self.take[1], list):
                 pre_shape = np.delete(pre_shape, self.take[0])
-            pre_shape = np.delete(pre_shape, np.where(pre_shape == 1))
+            # pre_shape = np.delete(pre_shape, np.where(pre_shape == 1))
 
         if self.combine_data_axis is not None: 
             pre_shape = np.delete(pre_shape, self.combine_data_axis)
@@ -72,6 +77,9 @@ class Objective:
             pre_shape = np.delete(pre_shape, self.sum_data_axis)
 
         pre_shape = tuple(pre_shape)
+
+        if pre_shape != self.y0.shape:
+            print(f"{self.name}: {pre_shape} != {self.y0.shape}")
 
         return pre_shape == self.y0.shape
 
@@ -94,7 +102,9 @@ class Objective:
 
     def process(self, sim): 
         """ Process the objective.path to return the sliced and averaged array, making it comparable to the reference data array """
-        y = sim.get(self.path)
+        y = sim.get(self.path).squeeze()
+
+        ## WARNING: Operation order is important. Probably not a good thing.
 
         # Allows using individual objectives representing slices of data
         # Eg. when ref. data (bulk output) is given as a radial section per objective.
