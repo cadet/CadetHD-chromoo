@@ -108,3 +108,4 @@ termination:
 - Performance of np.take() with numbajit vs boolean indexing: https://stackoverflow.com/questions/46041811/performance-of-various-numpy-fancy-indexing-methods-also-with-numba
 - Improved plotting for large number of subplots in post: https://stackoverflow.com/questions/13046127/matplotlib-very-slow-is-it-normal/13060980#13060980
 - [CRIT] Check for behavior when take=[2,[0,1,2...]]. i.e., when indices is a list. Does verify fail? What happens?
+- [TASK] Look into all the uses of .squeeze() and simplify everything. We probably use it to squeeze out the ncomp dimension which we don't need and is always 1.
