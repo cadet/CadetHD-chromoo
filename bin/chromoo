@@ -66,6 +66,7 @@ def main():
     if config.load_checkpoint.is_file(): 
         logger.info(f"Resuming from checkpoint: {config.load_checkpoint}")
         algo, = np.load(config.load_checkpoint, allow_pickle=True).flatten()
+        algo.problem.nproc = config.nproc
         if config.force_checkpoint_continue: 
             algo.has_terminated = False
     else:
