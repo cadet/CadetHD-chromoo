@@ -29,229 +29,7 @@ import matplotlib.cm as cm
 pd.set_option('display.float_format', lambda x: '%e' % x)
 pd.set_option('display.max_columns', None)
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument('config', help='config file to parse and process.')
-    ap.add_argument('-n', default=1, type=int, help='Number of best simulations to run')
-    ap.add_argument('--nproc', type=int, help='Number of processes to use to run simulations')
-    ap.add_argument('-m', '--mean', choices=['geometric', 'arithmetic', 'rms'], default='rms', help='Mode of averaging scores')
-    ap.add_argument('--csv', help='CSV file to process')
-    ap.add_argument('--combine-port-breakthroughs', type=int, help='Combine breakthroughs of individual ports for this unit op.')
-    ap.add_argument('--hist', default=20, help='Number of bins in histogram plot')
-
-    args = ap.parse_args()
-
-    config = ConfigHandler()
-    config.read(args.config)
-    config.load()
-    config.construct_simulation()
-
-    postdir = Path('post') 
-    postdir.mkdir(exist_ok=True)
-
-    nproc = min(args.nproc or config.nproc, os.cpu_count())
-
-    opts_csv = config.get('post.inputs.opts') or 'opts.csv'
-    if opts_csv: 
-        df_opt = pd.read_csv(opts_csv)
-        df_opt = calculate_mean(df_opt, args.mean, config.objective_names)
-        df_opt = df_opt.sort_values(by=[args.mean])
-        df_opt.to_csv(postdir / f"opts_{args.mean}.csv")
-
-        if config.get('post.response_surface.opts'):
-            plot_obj_par_gens(config, df_opt, postdir / "objectives_parameters_opts")
-
-        if config.get('post.opts_metascore_histogram'):
-            with Plotter(title=args.mean+' mean') as hist_plot: 
-                hist_plot.hist(df_opt[args.mean], args.hist)
-                hist_plot.save(postdir / f'histogram_{args.mean}_mean', dpi=300)
-
-            with Plotter(title=args.mean+' mean', yscale='log') as scatter_plot: 
-                scatter_plot.scatter(sorted(df_opt.index), df_opt[args.mean])
-                scatter_plot.save(postdir / f'scatter_{args.mean}_mean', dpi=300)
-
-        columns_par_mean = list(df_opt.columns[0:config.n_par])
-        columns_par_mean.append(df_opt.columns[-1])
-
-        print("Best opts solution: ")
-        best_opt = df_opt[columns_par_mean].iloc[0:args.n]
-        df_opt_pars_reversed = df_opt[df_opt.columns[0:config.n_par]].iloc[::-1]
-        print(best_opt)
-
-        # TODO: Implement drawing bounds of parameters
-        if config.get('post.parameters_violin'):
-            parameter_violin(df_opt_pars_reversed, args, config, postdir)
-
-        violin_percentile = config.get('post.parameters_violin_percentile') or 0
-        if violin_percentile < 100 and violin_percentile > 0:
-            nrows = int(violin_percentile / 100 * df_opt_pars_reversed.shape[0])
-            parameter_violin(df_opt_pars_reversed.head(nrows), args, config, postdir, f'parameters_violin_{violin_percentile}')
-
-        with mp.Pool(nproc) as pool:
-            out = pool.map( 
-                partial(new_run_sim_iter, 
-                    sim=config.simulation, 
-                    parameters=config.parameters, 
-                    name=f'opts_final_{args.mean}', 
-                    tempdir=postdir, 
-                    store=True), 
-                enumerate(best_opt.values))
-
-        performance_comparison_range =  Plotter(title=None, cmap='tab10', xlabel='Time', ylabel='Normalized concentration') 
-        list_integrals_all_sims= []
-
-        for i,sim in enumerate(out):
-            for obj in config.objectives: 
-                path_split = obj.path.split('.')
-                if path_split[1] == 'post':
-                    CadetSimulation.__dict__[path_split[3]](sim, int(path_split[2].replace('unit_', '')))
-
-            if config.get('post.performance_comparison.combined'): 
-                ## OBJ_REF ALL IN ONE
-                with Plotter(title=None, cmap='tab20', xlabel='Time', ylabel='Normalized concentration') as obj_ref_plot: 
-                    for obj in config.objectives:
-                        obj.plot(sim, obj_ref_plot.ax)
-
-                    ## Inset
-                    # inset_ax = obj_ref_plot.fig.add_axes([0,0,1,1])
-                    # ip = InsetPosition(obj_ref_plot.ax, [0.05,0.8,0.25,0.15])
-                    # inset_ax.set_axes_locator(ip)
-                    # # inset_ax.axis('off')
-                    # inset_ax.get_xaxis().set_visible(False)
-                    # inset_ax.get_yaxis().set_visible(False)
-                    # inset_ax.bar(range(config.n_par), best[best.columns[0:config.n_par]].iloc[i].values)
-                    # inset_ax.set(yscale='log')
-
-                    # obj_ref_plot.ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=2)
-                    obj_ref_plot.ax.legend(loc='best')
-                    # obj_ref_plot.ax.legend(loc='center left', bbox_to_anchor=(1.0 , 0.5), ncol=1)
-
-                    obj_ref_plot.save(f"{str(postdir)}/objectives_reference_{args.mean}_final_{i:03d}", dpi=300)
-
-            if config.get('post.performance_comparison.individual'): 
-                ## OBJ_REF INDIVIDUAL
-                for obj in config.objectives:
-                    with Plotter(title=f'{obj.name}', cmap='tab20', xlabel='Time', ylabel='') as obj_ref_plot: 
-                        obj.plot(sim, obj_ref_plot.ax)
-                        obj_ref_plot.ax.legend(loc='best')
-                        obj_ref_plot.save(f"{str(postdir)}/objectives_reference_{obj.name}_{args.mean}_final_{i:03d}", dpi=300)
-
-            if config.get('post.performance_comparison.opts_range'): 
-                list_integrals_all_sims.append(list(map(lambda obj: obj.integral(sim) ,config.objectives)))
-
-        if config.get('post.performance_comparison.opts_range'): 
-            idx_max_integrals = np.argmax(list_integrals_all_sims, axis=0).flatten()
-            idx_min_integrals = np.argmin(list_integrals_all_sims, axis=0).flatten()
-
-            for i, obj in enumerate(config.objectives):
-                t, split_y_max = obj.xy(out[idx_max_integrals[i]])
-                t, split_y_min = obj.xy(out[idx_min_integrals[i]])
-
-                label_prefix = f'{obj.name}'
-                for j in range(obj.n_obj): 
-                    label = label_prefix if obj.n_obj == 1 else f'{label_prefix}[{j}]'
-                    performance_comparison_range.ax.fill_between(t, split_y_max[j], split_y_min[j], interpolate=True)
-
-            performance_comparison_range.save(f"{str(postdir)}/objectives_reference_Nopts_{args.mean}_final", dpi=300)
-
-        performance_comparison_range.close()
-
-        # for i,sim in enumerate(out): 
-        #     for obj in config.objectives:
-        #         obj.to_csv(sim, f'{postdir.as_posix()}/final_{i}.csv')
-
-        # # When using 2D GRM, use this to output the combined chromatogram at
-        # # the end of the unit without relying on an OUTLET unit op.
-        # if args.combine_port_breakthroughs is not None:
-        #     t0 = config.objectives[0].x0
-        #     for i,sim in enumerate(out): 
-        #         sim = CadetSimulation(sim.root)
-        #         arr = sim.combine_port_breakthroughs(args.combine_port_breakthroughs)
-        #         np.savetxt(postdir / f'combined_breakthrough_opt_{i}.csv', np.stack([t0, arr], axis=1))
-
-        if config.get('post.corner.opts'): 
-            corner_plot_par = corner.corner(
-                    np.log10(df_opt[config.parameter_names]),
-                    labels=config.parameter_names,
-                    show_titles=True
-                    )
-            corner_plot_par.savefig(postdir / 'corner_opt_par.pdf')
-
-            corner_plot_obj = corner.corner(
-                    np.log10(df_opt[config.objective_names]),
-                    labels=config.objective_names,
-                    show_titles=True
-                    )
-            corner_plot_obj.savefig(postdir / 'corner_opt_obj.pdf')
-
-    pops = config.get('post.inputs.populations') or 'populations'
-    if pops: 
-        print("Reading pickled populations file...")
-        populations = pd.read_pickle(pops)
-        populations = populations.apply(pd.to_numeric)
-        populations = calculate_mean(populations, args.mean, config.objective_names)
-
-        # for i in range(populations['generation'].max()): 
-        #     cur_gen = populations[populations['generation'] == i+1].to_numpy()
-        #     np.savetxt(f'pop_gen_{i}.csv', cur_gen, delimiter=',')
-
-        if config.get('post.convergence.metascore'):
-            plot_best_worst_gens(populations, args.mean, postdir / f"best_{args.mean}_mean_per_gen", labels=['best', 'median', 'worst'])
-
-        if config.get('post.convergence.parameters'):
-            for column in list(populations.columns[1:config.n_par+1]): 
-                plot_best_worst_gens(populations, column, postdir / f"param_range_{column}_per_gen")
-
-        print("Best populations solution: ")
-        df = populations.iloc[:,1:].sort_values(by=[args.mean]).drop_duplicates()
-        best_opt = df.iloc[0:args.n]
-        print(best_opt)
-
-        if config.get('post.corner.populations'): 
-            corner_plot_par = corner.corner(
-                    np.log10(populations[config.parameter_names]),
-                    labels=config.parameter_names,
-                    show_titles=True
-                    )
-            corner_plot_par.savefig(postdir / 'corner_pop_par.pdf')
-
-            corner_plot_obj = corner.corner(
-                    np.log10(populations[config.objective_names]),
-                    labels=config.objective_names,
-                    show_titles=True
-                    )
-            corner.corner(
-                    np.log10(df_opt[config.objective_names]),
-                    labels=config.objective_names,
-                    show_titles=True,
-                    fig=corner_plot_obj, 
-                    color='red'
-                    )
-            corner_plot_obj.savefig(postdir / 'corner_pop_obj.pdf')
-
-        df = populations[populations['generation'] == populations['generation'].max()]
-
-        if config.get('post.response_surface.last_gen'):
-            plot_obj_par_gens(config, df, postdir / "objectives_parameters_last_gen")
-
-        if config.get('post.response_surface.all_combined'):
-            plot_obj_par_gens(config, populations, postdir / "objectives_parameters", True)
-
-        if config.get('post.response_surface.all_split'):
-            # Plot the objectives_parameters plot individually
-            for i_obj, obj in enumerate(config.objective_names): 
-                for i_par, par in enumerate(config.parameter_names): 
-                    plot = Plotter(title=f"{par} vs {obj}", xlabel=f"{par}", ylabel=f"{obj}", xscale='log', yscale='log')
-
-                    x = populations[par]
-                    y = populations[obj]
-
-                    plot.scatter(x,y, )
-
-                    plot.save(postdir / f"objectives_parameters_{obj}_{par}", dpi=300)
-                    plot.close()
-
-def plot_obj_par_gens(config, populations, filename=f"objectives_parameters", print_colorbar:bool = False):
+def plot_response_surface_per_gen(config, populations, filename=f"objectives_parameters", print_colorbar:bool = False):
     plot = Subplotter(
         nrows=config.n_obj,
         ncols=config.n_par,
@@ -308,13 +86,9 @@ def plot_obj_par_gens(config, populations, filename=f"objectives_parameters", pr
     plot.close()
 
 def calculate_mean(df, mean, columns):
-    if mean == 'geometric': 
-        df[mean] = stats.gmean(df[columns], axis=1)
-    elif mean == 'arithmetic':
-        df[mean] = df[columns].mean(axis=1)
-    elif mean == 'rms':
-        df[mean] = np.sqrt(np.square(df[columns]).mean(axis=1)) 
-
+    df['geometric'] = stats.gmean(df[columns], axis=1)
+    df['arithmetic'] = df[columns].mean(axis=1)
+    df['rms'] = np.sqrt(np.square(df[columns]).mean(axis=1)) 
     return df
 
 def parameter_violin(best_pars_reversed, args, config, postdir, name='parameters_violin'): 
@@ -342,28 +116,13 @@ def parameter_violin(best_pars_reversed, args, config, postdir, name='parameters
         parameters_violin.ax.minorticks_off()
         parameters_violin.save(postdir / name , dpi=300)
 
-        # # Normalizer
-        # df_with_mean = calculate_mean(best_pars_reversed, args.mean, config.objective_names)
-        # # vmin=df_with_mean.apply(pd.to_numeric).columns[-1].values
-        # # vmax=df_with_mean.apply(pd.to_numeric).columns[-1]
-        # vmin = df_with_mean.columns[arg.mean].values.min()
-        # vmax = df_with_mean.columns[arg.mean].values.max()
-        # print(vmin, vmax)
-        # norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
-        #   
-        # # creating ScalarMappable
-        # sm = plt.cm.ScalarMappable(cmap=cmapname, norm=norm)
-        # sm.set_array([])
-        #   
-        # plt.colorbar(sm, ticks=np.linspace(vmin, vmax, 4), format='%.2e')
-
 def plot_best_worst_gens(populations, column, filename, labels=['min', 'median', 'max']):
     # minned = populations.loc[populations.groupby(['generation'])[args.mean].idxmin()]
     best_per_gen = populations.groupby(['generation'])[column].min()
     median_per_gen = populations.groupby(['generation'])[column].median()
     worst_per_gen = populations.groupby(['generation'])[column].max()
 
-    plot = Plotter(title=f'Convergence', yscale='log', xlabel='Generations', ylabel=f'Meta-objective ({column})')
+    plot = Plotter(title=f'Convergence', yscale='log', xlabel='Generations', ylabel=column)
     plot.plot(range(len(best_per_gen)), best_per_gen, label=labels[0])
     plot.plot(range(len(median_per_gen)), median_per_gen, label=labels[1])
     plot.plot(range(len(worst_per_gen)), worst_per_gen, label=labels[2])
@@ -373,6 +132,256 @@ def plot_best_worst_gens(populations, column, filename, labels=['min', 'median',
 
     # populations_best_score_ever_index = populations[args.mean].argmin()
     # print(populations.iloc[populations_best_score_ever_index])
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('config', help='config file to parse and process.')
+    ap.add_argument('-n', default=1, type=int, help='Number of best simulations to run')
+    ap.add_argument('--nproc', type=int, help='Number of processes to use to run simulations')
+    ap.add_argument('-m', '--mean', choices=['geometric', 'arithmetic', 'rms'], default='rms', help='Mode of averaging scores')
+    ap.add_argument('--csv', help='CSV file to process')
+    ap.add_argument('--combine-port-breakthroughs', type=int, help='Combine breakthroughs of individual ports for this unit op.')
+    ap.add_argument('--hist', default=20, help='Number of bins in histogram plot')
+
+    args = ap.parse_args()
+
+    config = ConfigHandler()
+    config.read(args.config)
+    config.load()
+    config.construct_simulation()
+
+    postdir = Path('post') 
+    postdir.mkdir(exist_ok=True)
+
+    nproc = min(args.nproc or config.nproc, os.cpu_count())
+
+    opts_csv = config.get('post.inputs.opts')
+    if opts_csv: 
+        df_opt = pd.read_csv(opts_csv)
+        df_opt = calculate_mean(df_opt, args.mean, config.objective_names)
+        df_opt = df_opt.sort_values(by=[args.mean])
+        df_opt.to_csv(postdir / f"opts_{args.mean}.csv")
+
+        if config.get('post.response_surface.opts'):
+            plot_response_surface_per_gen(config, df_opt, postdir / "objectives_parameters_opts")
+
+        if config.get('post.opts_metascore_histogram'):
+            with Plotter(title=args.mean+' mean') as hist_plot: 
+                hist_plot.hist(df_opt[args.mean], args.hist)
+                hist_plot.save(postdir / f'histogram_{args.mean}_mean', dpi=300)
+
+            with Plotter(title=args.mean+' mean', yscale='log') as scatter_plot: 
+                scatter_plot.scatter(sorted(df_opt.index), df_opt[args.mean])
+                scatter_plot.save(postdir / f'scatter_{args.mean}_mean', dpi=300)
+
+        columns_par_mean = list(df_opt.columns[0:config.n_par])
+        columns_par_mean.append(df_opt.columns[-1])
+
+        print("Best opts solution: ")
+        best_opt = df_opt[columns_par_mean].iloc[0:args.n]
+        df_opt_pars = df_opt[df_opt.columns[0:config.n_par]]
+        print(best_opt)
+
+        # TODO: Implement drawing bounds of parameters
+        if config.get('post.parameters_violin'):
+            parameter_violin(df_opt_pars, args, config, postdir, name='opts_parameter_ranges')
+
+        violin_percentile = config.get('post.parameters_violin_percentile') or 0
+        if violin_percentile < 100 and violin_percentile > 0:
+            nrows = int(violin_percentile / 100 * df_opt_pars.shape[0])
+            parameter_violin(df_opt_pars.head(nrows), args, config, postdir, f'opts_parameter_ranges_{violin_percentile}')
+
+        with mp.Pool(nproc) as pool:
+            out = pool.map( 
+                partial(new_run_sim_iter, 
+                    sim=config.simulation, 
+                    parameters=config.parameters, 
+                    name=f'opts_final_{args.mean}', 
+                    tempdir=postdir, 
+                    store=True), 
+                enumerate(best_opt.values))
+
+        performance_comparison_range =  Plotter(title=None, cmap='tab10', xlabel='Time', ylabel='Normalized concentration') 
+        list_integrals_all_sims= []
+
+        ## NOTE: Requires opt run
+        for i,sim in enumerate(out):
+            for obj in config.objectives: 
+                path_split = obj.path.split('.')
+                if path_split[1] == 'post':
+                    CadetSimulation.__dict__[path_split[3]](sim, int(path_split[2].replace('unit_', '')))
+
+            if config.get('post.performance_comparison.combined'): 
+                ## OBJ_REF ALL IN ONE
+                with Plotter(title=None, cmap='tab20', xlabel='Time', ylabel='Normalized concentration') as obj_ref_plot: 
+                    for obj in config.objectives:
+                        obj.plot(sim, obj_ref_plot.ax)
+
+                    ## Inset
+                    # inset_ax = obj_ref_plot.fig.add_axes([0,0,1,1])
+                    # ip = InsetPosition(obj_ref_plot.ax, [0.05,0.8,0.25,0.15])
+                    # inset_ax.set_axes_locator(ip)
+                    # # inset_ax.axis('off')
+                    # inset_ax.get_xaxis().set_visible(False)
+                    # inset_ax.get_yaxis().set_visible(False)
+                    # inset_ax.bar(range(config.n_par), best[best.columns[0:config.n_par]].iloc[i].values)
+                    # inset_ax.set(yscale='log')
+
+                    # obj_ref_plot.ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=2)
+                    obj_ref_plot.ax.legend(loc='best')
+                    # obj_ref_plot.ax.legend(loc='center left', bbox_to_anchor=(1.0 , 0.5), ncol=1)
+
+                    obj_ref_plot.save(f"{str(postdir)}/objectives_reference_{args.mean}_final_{i:03d}", dpi=300)
+
+            if config.get('post.performance_comparison.individual'): 
+                ## OBJ_REF INDIVIDUAL
+                for obj in config.objectives:
+                    with Plotter(title=f'{obj.name}', cmap='tab20', xlabel='Time', ylabel='') as obj_ref_plot: 
+                        obj.plot(sim, obj_ref_plot.ax)
+                        obj_ref_plot.ax.legend(loc='best')
+                        obj_ref_plot.save(f"{str(postdir)}/objectives_reference_{obj.name}_{args.mean}_final_{i:03d}", dpi=300)
+
+            if config.get('post.performance_comparison.opts_range'): 
+                list_integrals_all_sims.append(list(map(lambda obj: obj.integral(sim) ,config.objectives)))
+
+        ## NOTE: Requires opts run
+        if config.get('post.performance_comparison.opts_range'): 
+            idx_max_integrals = np.argmax(list_integrals_all_sims, axis=0).flatten()
+            idx_min_integrals = np.argmin(list_integrals_all_sims, axis=0).flatten()
+
+            for i, obj in enumerate(config.objectives):
+                t, split_y_max = obj.xy(out[idx_max_integrals[i]])
+                t, split_y_min = obj.xy(out[idx_min_integrals[i]])
+
+                label_prefix = f'{obj.name}'
+                for j in range(obj.n_obj): 
+                    label = label_prefix if obj.n_obj == 1 else f'{label_prefix}[{j}]'
+                    performance_comparison_range.ax.fill_between(t, split_y_max[j], split_y_min[j], interpolate=True)
+
+            performance_comparison_range.save(f"{str(postdir)}/objectives_reference_Nopts_{args.mean}_final", dpi=300)
+
+        performance_comparison_range.close()
+
+        # for i,sim in enumerate(out): 
+        #     for obj in config.objectives:
+        #         obj.to_csv(sim, f'{postdir.as_posix()}/final_{i}.csv')
+
+        # # When using 2D GRM, use this to output the combined chromatogram at
+        # # the end of the unit without relying on an OUTLET unit op.
+        # if args.combine_port_breakthroughs is not None:
+        #     t0 = config.objectives[0].x0
+        #     for i,sim in enumerate(out): 
+        #         sim = CadetSimulation(sim.root)
+        #         arr = sim.combine_port_breakthroughs(args.combine_port_breakthroughs)
+        #         np.savetxt(postdir / f'combined_breakthrough_opt_{i}.csv', np.stack([t0, arr], axis=1))
+
+        if config.get('post.corner.opts'): 
+            corner_plot_par = corner.corner(
+                    np.log10(df_opt[config.parameter_names]),
+                    labels=config.parameter_names,
+                    show_titles=True
+                    )
+            corner_plot_par.savefig(postdir / 'corner_opt_par.pdf')
+
+            corner_plot_obj = corner.corner(
+                    np.log10(df_opt[config.objective_names]),
+                    labels=config.objective_names,
+                    show_titles=True
+                    )
+            corner_plot_obj.savefig(postdir / 'corner_opt_obj.pdf')
+
+    ##########################################
+    # POP
+    ##########################################
+    pops = config.get('post.inputs.populations') or 'populations'
+    if pops: 
+        print("Reading pickled populations file...")
+        populations = pd.read_pickle(pops)
+        populations = populations.apply(pd.to_numeric)
+        populations = calculate_mean(populations, args.mean, config.objective_names)
+
+        # for i in range(populations['generation'].max()): 
+        #     cur_gen = populations[populations['generation'] == i+1].to_numpy()
+        #     np.savetxt(f'pop_gen_{i}.csv', cur_gen, delimiter=',')
+
+        if config.get('post.convergence.metascore'):
+            plot_best_worst_gens(populations, args.mean, postdir / f"best_{args.mean}_mean_per_gen", labels=['best', 'median', 'worst'])
+
+        if config.get('post.convergence.parameters'):
+            for column in list(populations.columns[1:config.n_par+1]): 
+                plot_best_worst_gens(populations, column, postdir / f"param_range_{column}_per_gen")
+
+        print("Best populations solution: ")
+        df_pop = populations.iloc[:,1:].sort_values(by=[args.mean]).drop_duplicates()
+        best_pop = df_pop.iloc[0:args.n]
+        best_pop.to_csv(postdir / f"pop_{args.mean}.csv")
+        # df_pop_pars = df_pop[df_pop.columns[0:config.n_par]]
+        best_pop_pars = best_pop[best_pop.columns[0:config.n_par]]
+        print(best_pop)
+
+        with mp.Pool(nproc) as pool:
+            out = pool.map( 
+                partial(new_run_sim_iter, 
+                    sim=config.simulation, 
+                    parameters=config.parameters, 
+                    name=f'pops_final_{args.mean}', 
+                    tempdir=postdir, 
+                    store=True), 
+                enumerate(best_pop.values))
+
+        if config.get('post.corner.populations'): 
+            corner_plot_par = corner.corner(
+                    np.log10(populations[config.parameter_names]),
+                    labels=config.parameter_names,
+                    show_titles=True
+                    )
+            corner_plot_par.savefig(postdir / 'corner_pop_par.pdf')
+
+            corner_plot_obj = corner.corner(
+                    np.log10(populations[config.objective_names]),
+                    labels=config.objective_names,
+                    show_titles=True
+                    )
+            corner.corner(
+                    np.log10(df_opt[config.objective_names]),
+                    labels=config.objective_names,
+                    show_titles=True,
+                    fig=corner_plot_obj, 
+                    color='red'
+                    )
+            corner.corner(
+                    np.log10(best_pop[config.objective_names]),
+                    labels=config.objective_names,
+                    show_titles=True,
+                    fig=corner_plot_obj, 
+                    color='blue'
+                    )
+            corner_plot_obj.savefig(postdir / 'corner_pop_obj.pdf')
+
+        last_gen = populations[populations['generation'] == populations['generation'].max()]
+        if config.get('post.response_surface.last_gen'):
+            plot_response_surface_per_gen(config, last_gen, postdir / "objectives_parameters_last_gen")
+
+        if config.get('post.response_surface.all_combined'):
+            plot_response_surface_per_gen(config, populations, postdir / "objectives_parameters", True)
+
+        if config.get('post.response_surface.all_split'):
+            # Plot the objectives_parameters plot individually
+            for i_obj, obj in enumerate(config.objective_names): 
+                for i_par, par in enumerate(config.parameter_names): 
+                    plot = Plotter(title=f"{par} vs {obj}", xlabel=f"{par}", ylabel=f"{obj}", xscale='log', yscale='log')
+
+                    x = populations[par]
+                    y = populations[obj]
+
+                    plot.scatter(x,y, )
+
+                    plot.save(postdir / f"objectives_parameters_{obj}_{par}", dpi=300)
+                    plot.close()
+
+        # TODO: Implement drawing bounds of parameters
+        if config.get('post.parameters_violin'):
+            parameter_violin(best_pop_pars, args, config, postdir, name='pops_parameter_ranges')
 
 if __name__=="__main__":
     main()
