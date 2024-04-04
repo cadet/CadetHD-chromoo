@@ -56,6 +56,7 @@ def main():
         df_opt = pd.read_csv(opts_csv)
         df_opt = calculate_mean(df_opt, args.mean, config.objective_names)
         df_opt = df_opt.sort_values(by=[args.mean])
+        df_opt.to_csv(postdir / f"opts_{args.mean}.csv")
 
         if config.get('post.response_surface.opts'):
             plot_obj_par_gens(config, df_opt, postdir / "objectives_parameters_opts")
