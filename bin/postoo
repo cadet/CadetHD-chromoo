@@ -74,18 +74,18 @@ def main():
         columns_par_mean.append(df_opt.columns[-1])
 
         print("Best opts solution: ")
-        best = df_opt[columns_par_mean].iloc[0:args.n]
-        df_pars_reversed = df_opt[df_opt.columns[0:config.n_par]].iloc[::-1]
-        print(best)
+        best_opt = df_opt[columns_par_mean].iloc[0:args.n]
+        df_opt_pars_reversed = df_opt[df_opt.columns[0:config.n_par]].iloc[::-1]
+        print(best_opt)
 
         # TODO: Implement drawing bounds of parameters
         if config.get('post.parameters_violin'):
-            parameter_violin(df_pars_reversed, args, config, postdir)
+            parameter_violin(df_opt_pars_reversed, args, config, postdir)
 
         violin_percentile = config.get('post.parameters_violin_percentile') or 0
         if violin_percentile < 100 and violin_percentile > 0:
-            nrows = int(violin_percentile / 100 * df_pars_reversed.shape[0])
-            parameter_violin(df_pars_reversed.head(nrows), args, config, postdir, f'parameters_violin_{violin_percentile}')
+            nrows = int(violin_percentile / 100 * df_opt_pars_reversed.shape[0])
+            parameter_violin(df_opt_pars_reversed.head(nrows), args, config, postdir, f'parameters_violin_{violin_percentile}')
 
         with mp.Pool(nproc) as pool:
             out = pool.map( 
@@ -95,7 +95,7 @@ def main():
                     name=f'opts_final_{args.mean}', 
                     tempdir=postdir, 
                     store=True), 
-                enumerate(best.values))
+                enumerate(best_opt.values))
 
         performance_comparison_range =  Plotter(title=None, cmap='tab10', xlabel='Time', ylabel='Normalized concentration') 
         list_integrals_all_sims= []
@@ -204,8 +204,8 @@ def main():
 
         print("Best populations solution: ")
         df = populations.iloc[:,1:].sort_values(by=[args.mean]).drop_duplicates()
-        best = df.iloc[0:args.n]
-        print(best)
+        best_opt = df.iloc[0:args.n]
+        print(best_opt)
 
         if config.get('post.corner.populations'): 
             corner_plot_par = corner.corner(
