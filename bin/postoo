@@ -184,15 +184,15 @@ def main():
 
         # TODO: Implement drawing bounds of parameters
         if config.get('post.parameters_violin'):
-            parameter_violin(df_opt_pars, args, config, postdir, name='opts_parameter_ranges')
+            parameter_violin(df_opt_pars, args, config, postdir, name=f'parameter_ranges_opts_{args.mean}_all')
 
         violin_percentile = config.get('post.parameters_violin_percentile') or 0
         if violin_percentile < 100 and violin_percentile > 0:
             nrows = int(violin_percentile / 100 * df_opt_pars.shape[0])
-            parameter_violin(df_opt_pars.head(nrows), args, config, postdir, f'opts_parameter_ranges_{violin_percentile}')
+            parameter_violin(df_opt_pars.head(nrows), args, config, postdir, f'parameter_ranges_opts_{args.mean}_{violin_percentile}%')
 
         with mp.Pool(nproc) as pool:
-            out = pool.map( 
+            opt_sims = pool.map( 
                 partial(new_run_sim_iter, 
                     sim=config.simulation, 
                     parameters=config.parameters, 
@@ -205,10 +205,11 @@ def main():
         list_integrals_all_sims= []
 
         ## NOTE: Requires opt run
-        for i,sim in enumerate(out):
+        for i,sim in enumerate(opt_sims):
             for obj in config.objectives: 
                 path_split = obj.path.split('.')
                 if path_split[1] == 'post':
+                    ## Runs post_mass_*()
                     CadetSimulation.__dict__[path_split[3]](sim, int(path_split[2].replace('unit_', '')))
 
             if config.get('post.performance_comparison.combined'): 
@@ -250,8 +251,8 @@ def main():
             idx_min_integrals = np.argmin(list_integrals_all_sims, axis=0).flatten()
 
             for i, obj in enumerate(config.objectives):
-                t, split_y_max = obj.xy(out[idx_max_integrals[i]])
-                t, split_y_min = obj.xy(out[idx_min_integrals[i]])
+                t, split_y_max = obj.xy(opt_sims[idx_max_integrals[i]])
+                t, split_y_min = obj.xy(opt_sims[idx_min_integrals[i]])
 
                 label_prefix = f'{obj.name}'
                 for j in range(obj.n_obj): 
@@ -262,15 +263,15 @@ def main():
 
         performance_comparison_range.close()
 
-        # for i,sim in enumerate(out): 
+        # for i,sim in enumerate(opt_sims): 
         #     for obj in config.objectives:
-        #         obj.to_csv(sim, f'{postdir.as_posix()}/final_{i}.csv')
+        #         obj.to_csv(sim, f'{postdir.as_posix()}/opts_{i}.csv')
 
         # # When using 2D GRM, use this to output the combined chromatogram at
         # # the end of the unit without relying on an OUTLET unit op.
         # if args.combine_port_breakthroughs is not None:
         #     t0 = config.objectives[0].x0
-        #     for i,sim in enumerate(out): 
+        #     for i,sim in enumerate(opt_sims): 
         #         sim = CadetSimulation(sim.root)
         #         arr = sim.combine_port_breakthroughs(args.combine_port_breakthroughs)
         #         np.savetxt(postdir / f'combined_breakthrough_opt_{i}.csv', np.stack([t0, arr], axis=1))
@@ -320,7 +321,7 @@ def main():
         print(best_pop)
 
         with mp.Pool(nproc) as pool:
-            out = pool.map( 
+            pop_sims = pool.map( 
                 partial(new_run_sim_iter, 
                     sim=config.simulation, 
                     parameters=config.parameters, 
@@ -328,6 +329,19 @@ def main():
                     tempdir=postdir, 
                     store=True), 
                 enumerate(best_pop.values))
+
+        for i,sim in enumerate(pop_sims):
+            for obj in config.objectives: 
+                path_split = obj.path.split('.')
+                if path_split[1] == 'post':
+                    ## Runs post_mass_*()
+                    CadetSimulation.__dict__[path_split[3]](sim, int(path_split[2].replace('unit_', '')))
+
+            for obj in config.objectives:
+                obj.to_csv(sim, f'{postdir.as_posix()}/pops_{i}.csv')
+
+        for obj in config.objectives:
+            obj.ref_to_csv(f'{postdir.as_posix()}/refs.csv')
 
         if config.get('post.corner.populations'): 
             corner_plot_par = corner.corner(
@@ -381,7 +395,7 @@ def main():
 
         # TODO: Implement drawing bounds of parameters
         if config.get('post.parameters_violin'):
-            parameter_violin(best_pop_pars, args, config, postdir, name='pops_parameter_ranges')
+            parameter_violin(best_pop_pars, args, config, postdir, name=f'parameter_ranges_pops_{args.mean}_{args.n}')
 
 if __name__=="__main__":
     main()

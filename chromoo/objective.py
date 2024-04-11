@@ -210,17 +210,36 @@ class Objective:
         plot.save(fname, dpi=300)
         plot.close()
 
-    def to_csv(self, sim, fname="objective.csv"): 
+    def to_csv(self, sim, fname=None): 
 
         t0 = self.x0
         y0 = self.y0
         y = self.process(sim)
 
-        split_y0 = self.split(y0)
         split_y  = self.split(y)
 
-        fname = Path(fname)
+        if fname is None:
+            fname = self.name
+        else:
+            fname = Path(fname).with_stem( f"{Path(fname).stem}_{self.name}" )
 
-        for i in range(self.n_obj): 
-            np.savetxt(f'{fname.parent}/{fname.stem}_obj_{i}{fname.suffix}', np.stack([t0, split_y[i]],axis=1), delimiter=',')
-            np.savetxt(f'{fname.parent}/{fname.stem}_ref_{i}{fname.suffix}', np.stack([t0, split_y0[i]],axis=1), delimiter=',')
+        fname = Path(fname).with_suffix('.csv')
+
+        np.savetxt(fname, np.stack([t0, *[split_y[i] for i in range(self.n_obj)] ],axis=1), delimiter=',')
+            # np.savetxt(f'{fname.parent}/{fname.stem}_ref_{i}{fname.suffix}', np.stack([t0, split_y0[i]],axis=1), delimiter=',')
+        
+    def ref_to_csv(self, fname=None): 
+
+        t0 = self.x0
+        y0 = self.y0
+
+        split_y0 = self.split(y0)
+
+        if fname is None:
+            fname = f"{self.name}_ref"
+        else:
+            fname = Path(fname).with_stem( f"{Path(fname).stem}_{self.name}_ref")
+
+        fname = Path(fname).with_suffix('.csv')
+
+        np.savetxt(fname, np.stack([t0, *[split_y0[i] for i in range(self.n_obj)] ],axis=1), delimiter=',')
