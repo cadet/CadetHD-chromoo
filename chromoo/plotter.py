@@ -17,7 +17,11 @@ class Plotter():
     n_total_curves=1
     ) -> None:
 
-        plt.style.use('science')
+        # try: 
+        #     import scienceplots
+        #     plt.style.use('science')
+        # except ImportError:
+        #     pass
 
         # plt.style.use('science')
         self.fig, self.ax = plt.subplots()
@@ -35,6 +39,7 @@ class Plotter():
         else: 
             COLORS = [_cmap(1.*i/(n_total_curves-1)) for i in range(n_total_curves)]
 
+        self.colors = COLORS
         self.cycler = cycler('color', COLORS)
         self.ax.set_prop_cycle(self.cycler)
 
@@ -47,8 +52,8 @@ class Plotter():
     def plot(self, x, y, label=None, ls='solid', lw=1, marker=None, zorder=None) -> None:
         self.ax.plot(x, y, label=label, linestyle=ls, linewidth=lw, marker=marker, zorder=zorder)
 
-    def scatter(self, x, y, label=None, ls='solid', lw=1, marker=None, s=1) -> None:
-        self.ax.scatter(x, y, s=s, label=label, linestyle=ls, linewidth=lw, marker=marker)
+    def scatter(self, x, y, **kwargs) -> None:
+        self.ax.scatter(x, y, **kwargs)
 
     def hist(self, x, bins=10):
         self.ax.hist(x, bins=bins)
@@ -106,9 +111,9 @@ class Subplotter():
         ax.set(xlabel=xlabel)
         ax.set(ylabel=ylabel)
 
-    def scatter(self, x, y, irow, icol, title=None, xlabel=None, ylabel=None, ls='solid', lw=0.1, marker=None, s=None, fontsize=None, c=None) -> None:
+    def scatter(self, x, y, irow, icol, title=None, xlabel=None, ylabel=None, fontsize=None, **kwargs) -> None:
         ax = self.axes[irow, icol]
-        ax.scatter(x, y, ls=ls, lw=lw, marker=marker, s=s, c=c)
+        ax.scatter(x, y, **kwargs)
         ax.set(xscale=self.xscale)
         ax.set(yscale=self.yscale)
         ax.set_title(title, fontsize=fontsize)
