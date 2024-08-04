@@ -8,5 +8,8 @@
 *solution*
 *.npy
 populations
+.envrc
+.python-version
 
 _build/pip_packages
+__pycache__/
