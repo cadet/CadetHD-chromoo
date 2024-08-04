@@ -576,7 +576,6 @@ def new_run_sim_iter(index_x, sim, parameters, name:Optional[str]=None, tempdir:
 def run_iter(index_x, sim, parameters, objectives, name:Optional[str]=None, tempdir:Path=Path('temp'), store:bool=False):
     simulation = CadetSimulation(sim.root)
     index, x = index_x
-    print(index, x)
     simulation.run_with_parameters(x, parameters, f"{name}_{index}", tempdir, store)
     obj_paths = list(set(obj.path for obj in objectives))
     for obj_path in obj_paths:

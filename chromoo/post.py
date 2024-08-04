@@ -31,7 +31,6 @@ def violin(dataframe, percentile:int=100, postdir=Path('post'), name='violin'):
     # npoints = len(best_pars_reversed)
     cmapname = 'tab10'
     npoints = 1
-    print(dataframe.shape)
     n_par = dataframe.columns.size
 
     nrows = int(percentile / 100 * dataframe.shape[0])

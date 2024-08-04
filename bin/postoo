@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+
+""" General postprocesssing script. 
+Dumps images into <postdir>.
+"""
+
+from chromoo import ConfigHandler
+from pathlib import Path
+from rich import print
+
+import argparse
+import chromoo.post as post
+import os
+
+config = ConfigHandler()
+config.read('./chromoo.yaml')
+config.load()
+config.construct_simulation()
+
+postdir = Path('post') 
+postdir.mkdir(exist_ok=True)
+
+# nproc = min(args.nproc or config.nproc, os.cpu_count())
+
+def parse_args():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('config', nargs='?', default='chromoo.yaml', help='config file')
+    ap.add_argument('-n', '--nsims', type=int, default=1, help='number of (top) opt simulations to run')
+    ap.add_argument('-np', '--nproc', type=int, default=os.cpu_count(), help='number of processes for simulation runs')
+    ap.add_argument('-m', '--mean', choices=['rms', 'geometric'], default='rms', help='type of mean used to generate metascore')
+    ap.add_argument('-d', '--dir', default='post', help='directory to dump data into')
+
+    return ap.parse_args()
+
+def main():
+    args = parse_args()
+    print(args)
+
+    opts = post.load_dataframe_sort('opts.csv', config.objective_names, sort_by=args.mean)
+    pops = post.load_dataframe_sort('populations', config.objective_names)
+
+    post.convergence(pops, args.mean, postdir)
+    for par in config.parameter_names:
+        post.convergence(pops, par, postdir=postdir, name=f"convergence_{par}")
+
+    post.violin(opts[opts.columns[0:config.n_par]], postdir=postdir, percentile=100)
+    post.violin(opts[[args.mean]], postdir=postdir, name=f'violin_{args.mean}')
+
+    sims_opts = post.run_sims_parallel(opts.iloc[0:args.nsims], config, args.nproc, postdir=postdir, suffix='opts')
+    post.performance_range(sims_opts, config, postdir=postdir)
+    post.performance_combined(sims_opts, config, postdir=postdir, suffix=None)
+    post.write_objectives(sims_opts, config, postdir=postdir)
+
+    post.response_surface(pops, config.objective_names, config.parameter_names, postdir=postdir)
+
+    # post.performance_split(sims_opts[0], config, postdir=postdir)
+    # post.response_surface_split(pops, config, postdir=postdir)
+
+if __name__=="__main__":
+    main()
