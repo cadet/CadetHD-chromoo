@@ -198,6 +198,33 @@ def run_sims_parallel(dataframe, config, nproc=os.cpu_count(), postdir=Path('pos
 
     return sims
 
+def performance_range_split(sims, config, postdir=Path('post'), suffix=None):
+        list_integrals_all_sims= []
+
+        for i,sim in enumerate(sims):
+            list_integrals_all_sims.append(list(map(lambda obj: obj.integral(sim) ,config.objectives)))
+
+        idx_max_integrals = np.argmax(list_integrals_all_sims, axis=0).flatten()
+        idx_min_integrals = np.argmin(list_integrals_all_sims, axis=0).flatten()
+
+        for i, obj in enumerate(config.objectives):
+            t, split_y_max = obj.xy(sims[idx_max_integrals[i]])
+            t, split_y_min = obj.xy(sims[idx_min_integrals[i]])
+
+            performance_comparison_range =  Plotter(title=None, cmap='tab10', xlabel='Time', ylabel='concentration') 
+
+            label_prefix = f'{obj.name}'
+            for j in range(obj.n_obj): 
+                label = label_prefix if obj.n_obj == 1 else f'{label_prefix}[{j}]'
+                performance_comparison_range.ax.fill_between(t, split_y_max[j], split_y_min[j], interpolate=True, alpha=0.5)
+
+            performance_comparison_range.ax.plot(obj.x0, obj.y0, ls='dashdot', label=[f'{obj.name}[{j}] ref' for j in range(obj.n_obj)])
+
+
+            plt.legend()
+            performance_comparison_range.save(f"{str(postdir)}/performance_range_{obj.name}", dpi=300)
+            performance_comparison_range.close()
+
 def performance_range(sims, config, postdir=Path('post'), suffix=None):
         performance_comparison_range =  Plotter(title=None, cmap='tab10', xlabel='Time', ylabel='concentration') 
         list_integrals_all_sims= []
@@ -221,20 +248,21 @@ def performance_range(sims, config, postdir=Path('post'), suffix=None):
         performance_comparison_range.save(f"{str(postdir)}/performance_range", dpi=300)
         performance_comparison_range.close()
 
-def performance_combined(sims, config, index=0, postdir=Path('post'), suffix=None):
-    for sim in sims:
+def performance_combined(sims, config, postdir=Path('post'), suffix=None):
+    for index,sim in enumerate(sims):
         with Plotter(title=None, cmap='tab20', xlabel='Time', ylabel='Normalized concentration') as obj_ref_plot: 
             for obj in config.objectives:
                 obj.plot(sim, obj_ref_plot.ax)
             obj_ref_plot.ax.legend(loc='best')
             obj_ref_plot.save(f"{str(postdir)}/performance_combined_{index:03d}_{suffix}", dpi=300)
 
-def performance_split(sim, config, index=0, postdir=Path('post'), suffix=None):
-    for obj in config.objectives:
-        with Plotter(title=f'{obj.name}', cmap='tab20', xlabel='Time', ylabel='') as obj_ref_plot: 
-            obj.plot(sim, obj_ref_plot.ax)
-            obj_ref_plot.ax.legend(loc='best')
-            obj_ref_plot.save(f"{str(postdir)}/performance_{index:03d}_{obj.name}_{suffix}", dpi=300)
+def performance_split(sims, config, postdir=Path('post'), suffix=None):
+    for index,sim in enumerate(sims):
+        for obj in config.objectives:
+            with Plotter(title=f'{obj.name}', cmap='tab20', xlabel='Time', ylabel='') as obj_ref_plot: 
+                obj.plot(sim, obj_ref_plot.ax)
+                obj_ref_plot.ax.legend(loc='best')
+                obj_ref_plot.save(f"{str(postdir)}/performance_{index:03d}_{obj.name}_{suffix}", dpi=300)
 
 def write_objectives(sims, config, postdir=Path('post'), suffix=None):
     for index, sim in enumerate(sims):

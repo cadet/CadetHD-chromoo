@@ -55,14 +55,16 @@ def main():
     post.violin(opts[opts.columns[0:config.n_par]], postdir=postdir, percentile=100)
     post.violin(opts[['rms', 'geometric']], postdir=postdir, name=f'violin_scores')
 
-    sims_opts = post.run_sims_parallel(opts.iloc[0:args.nsims], config, args.nproc, postdir=postdir, suffix='opts')
-    post.performance_range(sims_opts, config, postdir=postdir)
-    post.performance_combined(sims_opts, config, postdir=postdir, suffix=None)
+    opts_nsims = opts.head(args.nsims) if args.nsims != -1 else opts
+    sims_opts = post.run_sims_parallel(opts_nsims, config, args.nproc, postdir=postdir, suffix='opts')
+    post.performance_range_split(sims_opts, config, postdir=postdir)
+    post.performance_split(sims_opts, config, postdir=postdir)
     post.write_objectives(sims_opts, config, postdir=postdir)
 
     post.response_surface(pops, config, postdir=postdir, opts=opts)
 
-    # post.performance_split(sims_opts[0], config, postdir=postdir)
+    # post.performance_range(sims_opts, config, postdir=postdir)
+    # post.performance_combined(sims_opts, config, postdir=postdir, suffix=None)
     # post.response_surface_split(pops, config, postdir=postdir)
 
 if __name__=="__main__":
