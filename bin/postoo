@@ -12,14 +12,6 @@ import argparse
 import chromoo.post as post
 import os
 
-config = ConfigHandler()
-config.read('./chromoo.yaml')
-config.load()
-config.construct_simulation()
-
-postdir = Path('post') 
-postdir.mkdir(exist_ok=True)
-
 # nproc = min(args.nproc or config.nproc, os.cpu_count())
 
 def parse_args():
@@ -35,6 +27,17 @@ def parse_args():
 def main():
     args = parse_args()
     print(args)
+
+    if not Path(args.config).exists():
+        raise ValueError(f"Config file {args.config} not found!")
+
+    config = ConfigHandler()
+    config.read(args.config)
+    config.load()
+    config.construct_simulation()
+
+    postdir = Path('post') 
+    postdir.mkdir(exist_ok=True)
 
     opts = post.load_dataframe_sort('opts.csv', config.objective_names, sort_by=args.mean)
     pops = post.load_dataframe_sort('populations', config.objective_names)
