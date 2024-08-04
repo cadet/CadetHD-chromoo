@@ -53,11 +53,11 @@ def violin(dataframe, percentile:int=100, postdir=Path('post'), name='violin'):
         vplot.ax.minorticks_off()
         vplot.save(postdir / name , dpi=300)
 
-def response_surface(populations, objective_names:list, parameter_names:list, postdir=Path('post'), filename=f"response_surface_2D"):
+def response_surface(populations, config, postdir=Path('post'), filename=f"response_surface_2D", opts=None):
 
     plot = Subplotter(
-        nrows=len(objective_names),
-        ncols=len(parameter_names),
+        nrows=len(config.objective_names),
+        ncols=len(config.parameter_names),
         title='',
         xscale='log',
         yscale='log'
@@ -71,8 +71,8 @@ def response_surface(populations, objective_names:list, parameter_names:list, po
 
     # https://stackoverflow.com/questions/30108372/how-to-make-matplotlib-scatterplots-transparent-as-a-group
 
-    for i_obj, obj in enumerate(objective_names): 
-        for i_par, par in enumerate(parameter_names): 
+    for i_obj, obj in enumerate(config.objective_names): 
+        for i_par, par in enumerate(config.parameter_names): 
 
             x = populations[par]
             y = populations[obj]
@@ -80,28 +80,31 @@ def response_surface(populations, objective_names:list, parameter_names:list, po
             plot.scatter( 
                 x,y, 
                 i_obj, i_par, 
-                xlabel=f'{parameter_names[i_par]}',
-                ylabel=f'{objective_names[i_obj]}',
-                fontsize=7,
-                s=8,
-                c='gray',
-                lw=0,
-                alpha=0.5,
+                xlabel=f'{config.parameter_names[i_par]}',
+                ylabel=f'{config.objective_names[i_obj]}',
+                fontsize=7, s=8, c='gray', lw=0, alpha=0.5,
                 # title=f'{parameter_names[i_par]} v {objective_names[i_obj]}',
             )
 
-            plot.scatter( 
-                populations[populations['generation']==nmax][par],
-                populations[populations['generation']==nmax][obj], 
-                i_obj, i_par, 
-                xlabel=f'{parameter_names[i_par]}',
-                ylabel=f'{objective_names[i_obj]}',
-                fontsize=7,
-                s=8,
-                lw=0,
-                c='red',
-                # title=f'{parameter_names[i_par]} v {objective_names[i_obj]}',
-            )
+            if opts is not None:
+                plot.scatter( 
+                    opts[par], opts[obj],
+                    i_obj, i_par, 
+                    xlabel=f'{config.parameter_names[i_par]}',
+                    ylabel=f'{config.objective_names[i_obj]}',
+                    fontsize=7, s=8, lw=0, c='red'
+                    # title=f'{parameter_names[i_par]} v {objective_names[i_obj]}',
+                )
+            else:
+                plot.scatter( 
+                    populations[populations['generation']==nmax][par],
+                    populations[populations['generation']==nmax][obj], 
+                    i_obj, i_par, 
+                    xlabel=f'{config.parameter_names[i_par]}',
+                    ylabel=f'{config.objective_names[i_obj]}',
+                    fontsize=7, s=8, lw=0, c='red',
+                    # title=f'{parameter_names[i_par]} v {objective_names[i_obj]}',
+                )
 
     plot.save(postdir / filename, dpi=300)
     plot.close()

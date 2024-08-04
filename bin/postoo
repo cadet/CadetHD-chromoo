@@ -54,7 +54,7 @@ def main():
     post.performance_combined(sims_opts, config, postdir=postdir, suffix=None)
     post.write_objectives(sims_opts, config, postdir=postdir)
 
-    post.response_surface(pops, config.objective_names, config.parameter_names, postdir=postdir)
+    post.response_surface(pops, config, postdir=postdir, opts=opts)
 
     # post.performance_split(sims_opts[0], config, postdir=postdir)
     # post.response_surface_split(pops, config, postdir=postdir)
