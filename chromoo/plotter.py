@@ -84,6 +84,8 @@ class Subplotter():
     xscale='linear', 
     yscale='linear',
     figsize=None,
+    cmap='tab10',
+    n_total_curves=1
     ) -> None:
 
         if not figsize: 
@@ -97,6 +99,17 @@ class Subplotter():
         self.fig, self.axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=self.figsize, constrained_layout=True, sharex=True, sharey=True, squeeze=False)
         self.fig.suptitle(title)
 
+        _cmap = plt.cm.get_cmap(cmap)
+        if 'colors' in _cmap.__dict__: 
+            COLORS = _cmap.colors
+        elif n_total_curves == 1: 
+            COLORS = [_cmap(1.0)]
+        else: 
+            COLORS = [_cmap(1.*i/(n_total_curves-1)) for i in range(n_total_curves)]
+
+        self.colors = COLORS
+        self.cycler = cycler('color', COLORS)
+
     def __enter__(self): 
         return self
 
@@ -105,6 +118,7 @@ class Subplotter():
 
     def plot(self, x, y, irow, icol, xlabel=None, ylabel=None, ls='solid', lw=1, marker=None) -> None:
         ax = self.axes[irow, icol]
+        ax.set_prop_cycle(self.cycler)
         ax.plot(x, y, ls=ls, lw=lw, marker=marker)
         ax.set(xscale=self.xscale)
         ax.set(yscale=self.yscale)
