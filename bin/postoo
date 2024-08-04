@@ -11,6 +11,7 @@ from rich import print
 import argparse
 import chromoo.post as post
 import os
+import shutil
 
 # nproc = min(args.nproc or config.nproc, os.cpu_count())
 
@@ -21,12 +22,17 @@ def parse_args():
     ap.add_argument('-np', '--nproc', type=int, default=os.cpu_count(), help='number of processes for simulation runs')
     ap.add_argument('-m', '--mean', choices=['rms', 'geometric'], default='rms', help='type of mean used to generate metascore')
     ap.add_argument('-d', '--dir', default='post', help='directory to dump data into')
+    ap.add_argument('-c', '--copy', action='store_true', help='copy script to current dir')
 
     return ap.parse_args()
 
 def main():
     args = parse_args()
     print(args)
+
+    if args.copy:
+        shutil.copy(Path(__file__).resolve(), Path.cwd())
+        return
 
     if not Path(args.config).exists():
         raise ValueError(f"Config file {args.config} not found!")
