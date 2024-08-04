@@ -44,7 +44,7 @@ def main():
         post.convergence(pops, par, postdir=postdir, name=f"convergence_{par}")
 
     post.violin(opts[opts.columns[0:config.n_par]], postdir=postdir, percentile=100)
-    post.violin(opts[[args.mean]], postdir=postdir, name=f'violin_{args.mean}')
+    post.violin(opts[['rms', 'geometric']], postdir=postdir, name=f'violin_scores')
 
     sims_opts = post.run_sims_parallel(opts.iloc[0:args.nsims], config, args.nproc, postdir=postdir, suffix='opts')
     post.performance_range(sims_opts, config, postdir=postdir)
