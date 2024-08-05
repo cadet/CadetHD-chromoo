@@ -199,54 +199,41 @@ def run_sims_parallel(dataframe, config, nproc=os.cpu_count(), postdir=Path('pos
     return sims
 
 def performance_range_split(sims, config, postdir=Path('post'), suffix=None):
-        list_integrals_all_sims= []
+    for i, obj in enumerate(config.objectives):
+        split_ys = [obj.xy(sim)[1] for sim in sims]
+        split_ymin = np.min(split_ys, axis=0)
+        split_ymax = np.max(split_ys, axis=0)
+        t = obj.x0
 
-        for i,sim in enumerate(sims):
-            list_integrals_all_sims.append(list(map(lambda obj: obj.integral(sim) ,config.objectives)))
+        performance_comparison_range =  Plotter(title=None, cmap='tab10', xlabel='Time', ylabel='concentration') 
+        performance_comparison_range.ax.plot(obj.x0, obj.y0, ls='solid', label=[f'{obj.name}[{j}] ref' for j in range(obj.n_obj)])
 
-        idx_max_integrals = np.argmax(list_integrals_all_sims, axis=0).flatten()
-        idx_min_integrals = np.argmin(list_integrals_all_sims, axis=0).flatten()
+        for j in range(obj.n_obj): 
+            label = f'{obj.name}' if obj.n_obj == 1 else f'{obj.name}[{j}] pareto'
+            performance_comparison_range.ax.fill_between(t, split_ymax[j], split_ymin[j], interpolate=True, alpha=0.5, label=label)
 
-        for i, obj in enumerate(config.objectives):
-            t, split_y_max = obj.xy(sims[idx_max_integrals[i]])
-            t, split_y_min = obj.xy(sims[idx_min_integrals[i]])
-
-            performance_comparison_range =  Plotter(title=None, cmap='tab10', xlabel='Time', ylabel='concentration') 
-
-            label_prefix = f'{obj.name}'
-            for j in range(obj.n_obj): 
-                label = label_prefix if obj.n_obj == 1 else f'{label_prefix}[{j}]'
-                performance_comparison_range.ax.fill_between(t, split_y_max[j], split_y_min[j], interpolate=True, alpha=0.5)
-
-            performance_comparison_range.ax.plot(obj.x0, obj.y0, ls='dashdot', label=[f'{obj.name}[{j}] ref' for j in range(obj.n_obj)])
-
-
-            plt.legend()
-            performance_comparison_range.save(f"{str(postdir)}/performance_range_{obj.name}", dpi=300)
-            performance_comparison_range.close()
+        plt.legend()
+        performance_comparison_range.save(f"{str(postdir)}/performance_range_{obj.name}", dpi=300)
+        performance_comparison_range.close()
 
 def performance_range(sims, config, postdir=Path('post'), suffix=None):
-        performance_comparison_range =  Plotter(title=None, cmap='tab10', xlabel='Time', ylabel='concentration') 
-        list_integrals_all_sims= []
+    performance_comparison_range =  Plotter(title=None, cmap='tab10', xlabel='Time', ylabel='concentration') 
 
-        for i,sim in enumerate(sims):
-            list_integrals_all_sims.append(list(map(lambda obj: obj.integral(sim) ,config.objectives)))
+    for i, obj in enumerate(config.objectives):
+        split_ys = [obj.xy(sim)[1] for sim in sims]
+        split_ymin = np.min(split_ys, axis=0)
+        split_ymax = np.max(split_ys, axis=0)
+        t = obj.x0
 
-        idx_max_integrals = np.argmax(list_integrals_all_sims, axis=0).flatten()
-        idx_min_integrals = np.argmin(list_integrals_all_sims, axis=0).flatten()
+        label_prefix = f'{obj.name}'
+        for j in range(obj.n_obj): 
+            label = label_prefix if obj.n_obj == 1 else f'{label_prefix}[{j}]'
+            performance_comparison_range.ax.fill_between(t, split_ymax[j], split_ymin[j], interpolate=True, alpha=0.5)
+        performance_comparison_range.ax.plot(obj.x0, obj.y0, ls='solid', label=[f'{obj.name}[{j}] ref' for j in range(obj.n_obj)])
 
-        for i, obj in enumerate(config.objectives):
-            t, split_y_max = obj.xy(sims[idx_max_integrals[i]])
-            t, split_y_min = obj.xy(sims[idx_min_integrals[i]])
-
-            label_prefix = f'{obj.name}'
-            for j in range(obj.n_obj): 
-                label = label_prefix if obj.n_obj == 1 else f'{label_prefix}[{j}]'
-                performance_comparison_range.ax.fill_between(t, split_y_max[j], split_y_min[j], interpolate=True)
-            # TODO: Add reference curve
-
-        performance_comparison_range.save(f"{str(postdir)}/performance_range", dpi=300)
-        performance_comparison_range.close()
+    plt.legend()
+    performance_comparison_range.save(f"{str(postdir)}/performance_range", dpi=300)
+    performance_comparison_range.close()
 
 def performance_combined(sims, config, postdir=Path('post'), suffix=None):
     for index,sim in enumerate(sims):
