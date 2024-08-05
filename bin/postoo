@@ -13,12 +13,10 @@ import chromoo.post as post
 import os
 import shutil
 
-# nproc = min(args.nproc or config.nproc, os.cpu_count())
-
 def parse_args():
     ap = argparse.ArgumentParser()
     ap.add_argument('config', nargs='?', default='chromoo.yaml', help='config file')
-    ap.add_argument('-n', '--nsims', type=int, default=1, help='number of (top) opt simulations to run')
+    ap.add_argument('-n', '--nsims', type=int, default=-1, help='number of (top) opt simulations to run')
     ap.add_argument('-np', '--nproc', type=int, default=os.cpu_count(), help='number of processes for simulation runs')
     ap.add_argument('-m', '--mean', choices=['rms', 'geometric'], default='rms', help='type of mean used to generate metascore')
     ap.add_argument('-d', '--dir', default='post', help='directory to dump data into')
@@ -58,12 +56,12 @@ def main():
     opts_nsims = opts.head(args.nsims) if args.nsims != -1 else opts
     sims_opts = post.run_sims_parallel(opts_nsims, config, args.nproc, postdir=postdir, suffix='opts')
     post.performance_range_split(sims_opts, config, postdir=postdir)
-    post.performance_split(sims_opts, config, postdir=postdir)
-    post.write_objectives(sims_opts, config, postdir=postdir)
+    post.performance_split([sims_opts[0]], config, postdir=postdir)
+    # post.write_objectives(sims_opts, config, postdir=postdir)
 
     post.response_surface(pops, config, postdir=postdir, opts=opts)
 
-    # post.performance_range(sims_opts, config, postdir=postdir)
+    post.performance_range(sims_opts, config, postdir=postdir)
     # post.performance_combined(sims_opts, config, postdir=postdir, suffix=None)
     # post.response_surface_split(pops, config, postdir=postdir)
 
