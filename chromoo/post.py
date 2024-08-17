@@ -170,8 +170,7 @@ def load_dataframe_sort(filename, columns_to_mean, sort_by=None):
 
 memory = Memory('./cache', verbose=0)
 run_iter_cached = memory.cache(run_iter)
-
-def run_sims_parallel(dataframe, config, nproc=os.cpu_count(), postdir=Path('post'), suffix=None):
+def run_sims_parallel(dataframe, config, nproc=os.cpu_count(), postdir=Path('post'), suffix=None, store=False):
     sims = Parallel(n_jobs=nproc)(
         delayed( 
             partial(run_iter_cached, 
@@ -180,7 +179,7 @@ def run_sims_parallel(dataframe, config, nproc=os.cpu_count(), postdir=Path('pos
                     objectives=config.objectives,
                     name=f'sim_{suffix}', 
                     tempdir=postdir, 
-                    store=True)
+                    store=store)
         )
         (x) for x in enumerate(dataframe[dataframe.columns[0:config.n_par]].values)
     )
