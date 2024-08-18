@@ -145,6 +145,18 @@ class Objective:
 
         return split_y
 
+    def sum(self, sim):
+        """
+        Sum up all subobjectives
+        """
+        if self.n_obj == 1:
+            return self.process(sim)
+        return np.sum(self.process(sim), axis=1) 
+
+    def sumref(self):
+        if self.n_obj == 1:
+            return self.y0
+        return np.sum(self.y0, axis=1)
 
     def plot(self, sim, ax, plot_ref=True): 
         t0 = self.x0

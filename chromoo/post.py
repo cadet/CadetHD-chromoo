@@ -234,6 +234,23 @@ def performance_range(sims, config, postdir=Path('post'), suffix=None):
     performance_comparison_range.save(f"{str(postdir)}/performance_range", dpi=300)
     performance_comparison_range.close()
 
+def performance_summed(sims, config, postdir=Path('post'), suffix=None):
+    """
+    Calculate sum of masses and plot wrt reference data
+    """
+
+    for obj in config.objectives:
+        ys = [obj.sum(sim) for sim in sims]
+        y0 = obj.sumref()
+        x0 = obj.x0
+        y_min = np.min(ys, axis=0)
+        y_max = np.max(ys, axis=0)
+        perf_cmp_sum_obj = Plotter(title=f'PC sum, {obj.name}')
+        perf_cmp_sum_obj.ax.fill_between(x0, y_max, y_min, interpolate=True, alpha=0.5, label='range')
+        perf_cmp_sum_obj.ax.plot(x0, y0, label='ref')
+        plt.legend(loc='best')
+        perf_cmp_sum_obj.save(f"{str(postdir)}/performance_summed_{obj.name}_{suffix}", dpi=300)
+
 def performance_combined(sims, config, postdir=Path('post'), suffix=None):
     for index,sim in enumerate(sims):
         with Plotter(title=None, cmap='tab20', xlabel='Time', ylabel='Normalized concentration') as obj_ref_plot: 
