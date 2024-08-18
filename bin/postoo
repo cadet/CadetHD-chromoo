@@ -46,6 +46,8 @@ def main():
     opts = post.load_dataframe_sort('opts.csv', config.objective_names, sort_by=args.mean)
     pops = post.load_dataframe_sort('populations', config.objective_names)
 
+    opts.to_csv(postdir / f"opts_{args.mean}.csv")
+
     post.convergence(pops, args.mean, postdir)
     for par in config.parameter_names:
         post.convergence(pops, par, postdir=postdir, name=f"convergence_{par}")
@@ -57,6 +59,7 @@ def main():
     sims_opts = post.run_sims_parallel(opts_nsims, config, args.nproc, postdir=postdir, suffix='opts')
     post.performance_range_split(sims_opts, config, postdir=postdir)
     post.performance_split([sims_opts[0]], config, postdir=postdir)
+    post.performance_summed(sims_opts, config, postdir=postdir)
     # post.write_objectives(sims_opts, config, postdir=postdir)
 
     post.response_surface(pops, config, postdir=postdir, opts=opts)

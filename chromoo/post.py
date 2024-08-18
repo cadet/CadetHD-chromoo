@@ -165,7 +165,6 @@ def load_dataframe_sort(filename, columns_to_mean, sort_by=None):
     if sort_by:
         df = df.sort_values(by=[sort_by])
 
-    # df.to_csv(postdir / f"opts_{args.mean}.csv")
     return df
 
 memory = Memory('./cache', verbose=0)
