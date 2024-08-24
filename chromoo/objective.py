@@ -29,6 +29,7 @@ class Objective:
     score: str = 'sse'                                  # score type
     x0: np.ndarray = field(default_factory=lambda : np.array([]))
     y0: np.ndarray = field(default_factory=lambda : np.array([]))
+    ignore_reference: bool = False
 
     def __post_init__(self): 
         """ 
@@ -37,6 +38,9 @@ class Objective:
         which has a shape of (nts, ncol, nrad, ncomp). In that case, reshape
         the array to the given shape.
         """
+        if self.ignore_reference:
+            return
+
         if self.times: 
             x0 = readArray(self.times)
             y0 = readArray(self.filename)

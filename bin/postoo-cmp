@@ -1,0 +1,70 @@
+#!/usr/bin/env python3
+
+from chromoo import ConfigHandler
+from chromoo.objective import Objective
+from chromoo.plotter import Plotter
+from pathlib import Path
+from rich import print
+import pandas as pd
+
+import argparse
+import chromoo.post as post
+import os
+import shutil
+
+import scienceplots
+from matplotlib import pyplot as plt
+
+plt.style.use('science')
+
+def parse_args():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('dirs', nargs='*', help='directories to compare')
+    ap.add_argument('-l', '--labels', nargs='*', help='labels')
+    ap.add_argument('-o', '--output', default=f'cmp_violin_scores', help='output filename')
+
+    return ap.parse_args()
+    
+def generic_violin(list2d, labels, postdir=Path('post'), name='generic_violin', title='', xtick_rot=0, ylabel=None):
+    cmapname = 'tab10'
+    npoints = 1
+    n_par = len(list2d)
+    with Plotter(title, cmap=cmapname, n_total_curves=npoints, yscale='log', ylabel=ylabel) as vplot: 
+        violin_parts = vplot.ax.violinplot(dataset = list2d, positions=range(n_par))
+        for pc in violin_parts['bodies']:
+            pc.set_facecolor(vplot.colors[0])
+            pc.set_edgecolor('black')
+            pc.set_alpha(1.0)
+        for partname in ('cbars','cmins','cmaxes'):
+            vp = violin_parts[partname]
+            vp.set_edgecolor('black')
+            vp.set_linewidth(1)
+        vplot.ax.set_xticks(range(n_par))
+        vplot.ax.set_xticklabels(labels, rotation=xtick_rot)
+        vplot.save(postdir / name , dpi=300)
+        print(f"plotting to {postdir}/{name}")
+
+def main():
+    args = parse_args()
+    if not args.labels:
+        args.labels = [ Path(dir).name for dir in args.dirs ]
+
+    list_scores = []
+    list_objectives = []
+    labels_objectives = []
+
+    for dir in args.dirs:
+        config = ConfigHandler()
+        config.read(f"{dir}/chromoo.yaml")
+        objective_names = [oname for obj in config.get('objectives') for oname in Objective(**obj, ignore_reference=True).names ]
+        opts = post.load_dataframe_sort(f'{dir}/opts.csv', objective_names, sort_by='rms')
+        list_scores.append(opts['rms'].to_numpy())
+        list_objectives.extend(opts[objective_names].to_numpy().T)
+        labels_objectives.extend(objective_names)
+
+    generic_violin(list_scores, args.labels, name=args.output, postdir=Path('.'), ylabel='Meta-residual')
+    generic_violin(list_objectives, labels_objectives, name=f"{args.output}_obj", postdir=Path('.'), xtick_rot=90)
+
+
+if __name__=="__main__":
+    main()
