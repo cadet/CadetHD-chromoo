@@ -83,29 +83,18 @@ termination:
 
 # TODO
 - [ONGO] Move to numpy arrays
-- [CRIT] Hypervolume indicator as a convergence criterion
+- [TASK] Hypervolume indicator as a convergence criterion
 - [DONE] Replace readArray, readChromatogram with np.genfromtxt or loadtxt
 - [DONE] Implement Objective vs Objective 2D plots
-- [TASK] Adjust Verbose Display according to algorithm used
-- [TASK] Random seeds
-- [TASK] Make sure tests delete temp files
-- [TASK] Write unit tests for all classes
-- [TASK] Write a configHandler method to output a dummy config.
-- [CRIT] For the split-chromatogram problem, we know that the axial dispersion in once radial shell won't affect the chromatogram in another, so it does have a constraint. Is there a way to constrain the parameters that way? Or does it just mean we solve the system serially? 
-- [TASK] Unified interface/method for deep getting and setting from/to a Dict or dict
-- [TASK] Fix typings for configHandler attributes
 - [DONE] Pickle pop xs and fs for use with chromoo-post
-- [TASK] Own pareto front
-- [TASK] chromoo-post: plots
-    - [DONE] objectives vs objectives: corner
-    - [DONE] ALL parameters_objectives plots (as subplots and separate)
-    - [TASK] Best per generation (opts)
-    - [TASK] Best per generation (pops)
-    - [TASK] Best ever
-- [TASK] Consider weighting objectives: Look at weighted least squares
+- [TASK] Write out opts per generation
+- [TASK] Write a configHandler method to output a dummy config.
+- [TASK] Unified interface/method for deep getting and setting from/to a Dict or dict
+- [TASK] Consider weighting objectives: Look at weighted least squares.
+    - [NOTE] Normalizing equalizes weights, treating relative error on each curve.
 - [TASK] Consider multi-started/restarted systems
 - [TASK] Check out numpickle: https://gwang-jin-kim.medium.com/faster-loading-and-saving-of-pandas-data-frames-using-numpickle-numpy-and-pickle-d15870519529
-- Performance of np.take() with numbajit vs boolean indexing: https://stackoverflow.com/questions/46041811/performance-of-various-numpy-fancy-indexing-methods-also-with-numba
-- Improved plotting for large number of subplots in post: https://stackoverflow.com/questions/13046127/matplotlib-very-slow-is-it-normal/13060980#13060980
+- [TASK] Performance of np.take() with numbajit vs boolean indexing: https://stackoverflow.com/questions/46041811/performance-of-various-numpy-fancy-indexing-methods-also-with-numba
+- [TASK] Improved plotting for large number of subplots in post: https://stackoverflow.com/questions/13046127/matplotlib-very-slow-is-it-normal/13060980#13060980
 - [CRIT] Check for behavior when take=[2,[0,1,2...]]. i.e., when indices is a list. Does verify fail? What happens?
-- [TASK] Look into all the uses of .squeeze() and simplify everything. We probably use it to squeeze out the ncomp dimension which we don't need and is always 1.
+- [TASK] Use tabplot for plots
