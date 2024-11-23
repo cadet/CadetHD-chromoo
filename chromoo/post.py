@@ -23,9 +23,11 @@ mpl.use('Agg')
 pd.set_option('display.float_format', lambda x: '%e' % x)
 pd.set_option('display.max_columns', None)
 
+
+
 def violin(dataframe, percentile:int=100, postdir=Path('post'), name='violin'): 
     """
-    Generate violin plots of all optimal parameters, joined by lines
+    Generate violin plots of all columns
     """
     # cmapname = 'YlOrRd'
     # npoints = len(best_pars_reversed)
@@ -35,6 +37,7 @@ def violin(dataframe, percentile:int=100, postdir=Path('post'), name='violin'):
 
     nrows = int(percentile / 100 * dataframe.shape[0])
     dataframe = dataframe.head(nrows)
+    print(dataframe)
 
     with Plotter(f'Parameter values (n={nrows}, {percentile}%)', cmap=cmapname, n_total_curves=npoints, yscale='log') as vplot: 
         violin_parts = vplot.ax.violinplot(dataset = list(dataframe.to_numpy().T), positions=range(n_par))
@@ -52,6 +55,7 @@ def violin(dataframe, percentile:int=100, postdir=Path('post'), name='violin'):
         vplot.ax.set_xticklabels(dataframe.columns, rotation=45, ha='right')
         vplot.ax.minorticks_off()
         vplot.save(postdir / name , dpi=300)
+        print(f"plotting to {postdir}/{name}")
 
 def response_surface(populations, config, postdir=Path('post'), filename=f"response_surface_2D", opts=None):
 
