@@ -1,6 +1,8 @@
 # chromoo
 
-`chromoo` a chromatography multi-objective optimization tool built on `Cadet-Core` and `pymoo==0.5`.
+[![DOI](https://zenodo.org/badge/611842983.svg)](https://doi.org/10.5281/zenodo.14876412)
+
+`chromoo` is a chromatography multi-objective optimization tool built on `Cadet-Core` and `pymoo==0.5`.
 
 # Installation
 
