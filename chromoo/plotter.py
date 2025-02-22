@@ -3,6 +3,9 @@ from matplotlib import gridspec
 import matplotlib
 from cycler import cycler
 
+# import scienceplots
+# plt.style.use('science')
+
 matplotlib.use('Agg')
 
 class Plotter():
@@ -96,7 +99,7 @@ class Subplotter():
 
         self.nrows = nrows
         self.ncols = ncols
-        self.fig, self.axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=self.figsize, constrained_layout=True, sharex=True, sharey=True, squeeze=False)
+        self.fig, self.axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=self.figsize, constrained_layout=True, sharey=True, squeeze=False)
         self.fig.suptitle(title)
 
         _cmap = plt.cm.get_cmap(cmap)
