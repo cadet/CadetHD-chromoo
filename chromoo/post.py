@@ -81,10 +81,12 @@ def response_surface(populations, config, postdir=Path('post'), filename=f"respo
             x = populations[par]
             y = populations[obj]
 
+            np.savetxt(f'{postdir}/rs_{par}_{obj}.csv', np.stack([x, y], axis=1), delimiter=',')
+
             plot.scatter( 
                 x,y, 
                 i_obj, i_par, 
-                xlabel=f'{config.parameter_names[i_par]}',
+                xlabel=f'{config.parameter_names[i_par].replace("[0]", "").replace("D_{f}", "k_{f}")}',
                 ylabel=f'{config.objective_names[i_obj]}',
                 fontsize=7, s=8, c='gray', lw=0, alpha=0.5,
                 # title=f'{parameter_names[i_par]} v {objective_names[i_obj]}',
@@ -94,11 +96,12 @@ def response_surface(populations, config, postdir=Path('post'), filename=f"respo
                 plot.scatter( 
                     opts[par], opts[obj],
                     i_obj, i_par, 
-                    xlabel=f'{config.parameter_names[i_par]}',
+                    xlabel=f'{config.parameter_names[i_par].replace("[0]", "").replace("D_{f}", "k_{f}")}',
                     ylabel=f'{config.objective_names[i_obj]}',
                     fontsize=7, s=8, lw=0, c='red'
                     # title=f'{parameter_names[i_par]} v {objective_names[i_obj]}',
                 )
+                np.savetxt(f'{postdir}/rs_{par}_{obj}_opts.csv', np.stack([opts[par], opts[obj]], axis=1), delimiter=',')
             else:
                 plot.scatter( 
                     populations[populations['generation']==nmax][par],
@@ -207,12 +210,23 @@ def performance_range_split(sims, config, postdir=Path('post'), suffix=None):
         split_ymax = np.max(split_ys, axis=0)
         t = obj.x0
 
-        performance_comparison_range =  Plotter(title=None, cmap='tab10', xlabel='Time', ylabel='concentration') 
-        performance_comparison_range.ax.plot(obj.x0, obj.y0, ls='solid', label=[f'{obj.name}[{j}] ref' for j in range(obj.n_obj)])
+        ## Remove latex math delimiters, we add them ourselves
+        label_template = obj.name.replace('$', '')
 
+        performance_comparison_range =  Plotter(title=None, cmap='tab10', xlabel='Time (s)')  
+        performance_comparison_range.ax.plot(obj.x0, obj.y0, ls='solid', label=[f'$\\overline{{ {label_template}^{j} }}$' for j in range(obj.n_obj)])
+
+        arrmin = np.array(t)
+        arrmax = np.array(t)
         for j in range(obj.n_obj): 
-            label = f'{obj.name}' if obj.n_obj == 1 else f'{obj.name}[{j}] pareto'
+            # <S> denotes span of S
+            label = f'{obj.name}' if obj.n_obj == 1 else f'$<{label_template}^{j}>$'
             performance_comparison_range.ax.fill_between(t, split_ymax[j], split_ymin[j], interpolate=True, alpha=0.5, label=label)
+            arrmin = np.append(arrmin, split_ymin[j])
+            arrmax = np.append(arrmax, split_ymax[j])
+
+        np.savetxt(f"{str(postdir)}/performance_range_{obj.name}_min.csv", np.reshape(arrmin, (-1, len(t))).T, delimiter=',')
+        np.savetxt(f"{str(postdir)}/performance_range_{obj.name}_max.csv", np.reshape(arrmax, (-1, len(t))).T, delimiter=',')
 
         plt.legend()
         performance_comparison_range.save(f"{str(postdir)}/performance_range_{obj.name}", dpi=300)
@@ -266,6 +280,9 @@ def performance_split(sims, config, postdir=Path('post'), suffix=None):
     for index,sim in enumerate(sims):
         for obj in config.objectives:
             with Plotter(title=f'{obj.name}', cmap='tab20', xlabel='Time', ylabel='') as obj_ref_plot: 
+                if index == 0: 
+                    obj.ref_to_csv(f"{str(postdir)}/performance_{index:03d}_{obj.name}_{suffix}.csv")
+                obj.to_csv(sim, f"{str(postdir)}/performance_{index:03d}_{obj.name}_{suffix}.csv")
                 obj.plot(sim, obj_ref_plot.ax)
                 obj_ref_plot.ax.legend(loc='best')
                 obj_ref_plot.save(f"{str(postdir)}/performance_{index:03d}_{obj.name}_{suffix}", dpi=300)
