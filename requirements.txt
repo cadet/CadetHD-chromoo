@@ -1,3 +1,4 @@
+# Python3.10
 numpy<2.0
 matplotlib>=3.4
 addict==2.3
@@ -5,7 +6,11 @@ cadet-python==0.11
 pymoo==0.5
 rich>10.15
 ruamel.yaml==0.17
-SALib
-pandas
-GitPython
-corner
+SALib==1.5.0
+pandas==2.2.2
+GitPython==3.1.43
+corner==2.2.2
+joblib==1.4.2
+plumbum==1.9.0
+pyfzf==0.3.1
+deepdiff==8.2.0
