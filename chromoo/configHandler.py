@@ -102,8 +102,7 @@ class ConfigHandler:
         self.objective_names = []
 
         for p in self.parameters:
-            for i in range(p.length):
-                self.parameter_names.append(f"{p.name}[{i}]")
+            self.parameter_names.extend(p.names)
 
         for o in self.objectives:
             self.objective_names.extend(o.names)

@@ -21,3 +21,12 @@ class Parameter():
         assert(self.type in ['scalar', 'vector', 'element'])
         if self.type == 'element': 
             assert(len(self.index) == self.length)
+
+    @property
+    def names(self):
+        if self.type == 'vector' and self.length != 1: 
+            return [ f"{self.name}[{num}]" for num in range(self.length) ]
+        elif self.type == 'element' and self.length != 1:
+            return [ f"{self.name}[{num}]" for num in self.index ]
+        else: 
+            return [ self.name ]

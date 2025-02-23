@@ -2,6 +2,7 @@
 
 from chromoo import ConfigHandler
 from chromoo.objective import Objective
+from chromoo.parameter import Parameter
 from chromoo.plotter import Plotter
 from pathlib import Path
 from rich import print
@@ -51,19 +52,25 @@ def main():
 
     list_scores = []
     list_objectives = []
+    list_parameters = []
     labels_objectives = []
+    labels_parameters = []
 
     for dir in args.dirs:
         config = ConfigHandler()
         config.read(f"{dir}/chromoo.yaml")
         objective_names = [oname for obj in config.get('objectives') for oname in Objective(**obj, ignore_reference=True).names ]
-        opts = post.load_dataframe_sort(f'{dir}/opts.csv', objective_names, sort_by='rms')
+        parameter_names = [pname for par in config.get('parameters') for pname in Parameter(**par).names]
+        opts = post.load_dataframe_sort(f'{dir}/opts.csv', objective_names, sort_by='rms', rename_columns=parameter_names + objective_names)
         list_scores.append(opts['rms'].to_numpy())
         list_objectives.extend(opts[objective_names].to_numpy().T)
+        list_parameters.extend(opts[parameter_names].to_numpy().T)
         labels_objectives.extend(objective_names)
+        labels_parameters.extend(parameter_names)
 
-    generic_violin(list_scores, args.labels, name=args.output, postdir=Path('.'), ylabel='Meta-residual')
-    generic_violin(list_objectives, labels_objectives, name=f"{args.output}_obj", postdir=Path('.'), xtick_rot=90)
+    # generic_violin(list_scores, args.labels, name=args.output, postdir=Path('.'), ylabel='Meta-residual')
+    # generic_violin(list_objectives, labels_objectives, name=f"{args.output}_obj", postdir=Path('.'), xtick_rot=90)
+    generic_violin(list_parameters, labels_parameters, name=f"{args.output}_par", postdir=Path('.'), xtick_rot=90)
 
 
 if __name__=="__main__":

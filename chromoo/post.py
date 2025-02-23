@@ -158,12 +158,16 @@ def convergence(populations, column, postdir=Path('post'), name='convergence'):
     # populations_best_score_ever_index = populations[args.mean].argmin()
     # print(populations.iloc[populations_best_score_ever_index])
 
-def load_dataframe_sort(filename, columns_to_mean, sort_by=None):
+def load_dataframe_sort(filename, columns_to_mean, sort_by=None, rename_columns=None):
     if Path(filename).suffix == '.csv':
         df = pd.read_csv(filename)
     else:
         df = pd.read_pickle(filename)
         df = df.apply(pd.to_numeric)
+
+    ## Adding renames to account for minor backward compat issues with D_f[0] vs D_f in parameter names
+    if(rename_columns):
+        df.columns = rename_columns
 
     df['geometric'] = stats.gmean(df[columns_to_mean], axis=1)
     df['arithmetic'] = df[columns_to_mean].mean(axis=1)
