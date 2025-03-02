@@ -299,3 +299,10 @@ def write_objectives(sims, config, postdir=Path('post'), suffix=None):
     # TODO: Add headers to csv
     for obj in config.objectives:
         obj.ref_to_csv(f'{postdir.as_posix()}/ref.csv')
+
+def line_plot(dataframe, outfilename:str, **kwargs):
+    fig, ax = plt.subplots()
+    ax.plot(dataframe.to_numpy().T, **kwargs)
+    # ax.set_yscale('log')
+    fig.savefig(outfilename)
+

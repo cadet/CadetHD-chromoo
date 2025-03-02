@@ -13,6 +13,8 @@ import chromoo.post as post
 import os
 import shutil
 
+# from scipy.stats import gaussian_kde
+
 def parse_args():
     ap = argparse.ArgumentParser()
     ap.add_argument('config', nargs='?', default='chromoo.yaml', help='config file')
@@ -53,21 +55,35 @@ def main():
     for par in config.parameter_names:
         post.convergence(pops, par, postdir=postdir, name=f"convergence_{par}")
 
-    post.violin(opts[opts.columns[0:config.n_par]], postdir=postdir, percentile=100)
-    post.violin(opts[['rms', 'geometric']], postdir=postdir, name=f'violin_scores')
+    for obj in config.objective_names:
+        post.convergence(pops, obj, postdir=postdir, name=f"convergence_{obj}")
 
+    post.violin(opts[opts.columns[0:config.n_par]], postdir=postdir, percentile=100)
+    # post.violin(opts[['rms', 'geometric']], postdir=postdir, name=f'violin_scores')
+
+    pops_nsims = pops.head(args.nsims) if args.nsims != -1 else pops
     opts_nsims = opts.head(args.nsims) if args.nsims != -1 else opts
+
     sims_opts = post.run_sims_parallel(opts_nsims, config, args.nproc, postdir=postdir, suffix='opts')
     post.performance_range_split(sims_opts, config, postdir=postdir)
     post.performance_split([sims_opts[0]], config, postdir=postdir)
+
     # post.performance_summed(sims_opts, config, postdir=postdir)
     # post.write_objectives(sims_opts, config, postdir=postdir)
 
+    # post.performance_combined(sims_opts, config, postdir=postdir, suffix=None)
+    # post.performance_range(sims_opts, config, postdir=postdir)
+
+    # post.response_surface_split(pops, config, postdir=postdir)
     # post.response_surface(pops, config, postdir=postdir, opts=opts)
 
-    # post.performance_range(sims_opts, config, postdir=postdir)
-    # post.performance_combined(sims_opts, config, postdir=postdir, suffix=None)
-    # post.response_surface_split(pops, config, postdir=postdir)
+    opts_nsims_parameters = opts_nsims[config.parameter_names[:10]]
+    post.line_plot(opts_nsims_parameters, f'{postdir}/line.pdf', marker='o', ls='dashed')
+
+    pops_nsims_parameters = pops.sort_values(by=['rms'])[config.parameter_names[:10]][:5]
+    post.line_plot(pops_nsims_parameters, f'{postdir}/line_pops.pdf', marker='o', ls='dashed')
+
+    # TODO: gaussian_process_regression for parameters
 
 if __name__=="__main__":
     main()
